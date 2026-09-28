@@ -113,9 +113,9 @@ current container or house.
 ### Requirement: Location path
 Every item and container screen SHALL show its full location path starting with
 the house, with levels separated by ">". Each level MUST be tappable and open
-that level. When the path doesn't fit on one line, middle levels MUST collapse
-into "…", keeping the house and the last two levels visible. Tapping "…" MUST
-show the full path.
+that level. When the path doesn't fit on one line, the levels before the last two MUST
+collapse into a single "…", house included, because the house is already shown
+by its colour band. Tapping "…" MUST show the full path.
 
 #### Scenario: Jumping up the hierarchy
 - **AS A** user viewing "Apartment > Office > Box A > Cables bag"
@@ -125,8 +125,8 @@ show the full path.
 #### Scenario: Deep path on a small screen
 - **AS A** user viewing an item eight levels deep
 - **WHEN** the path doesn't fit
-- **THEN** it shows the house, "…", and the last two levels
-- **AND** tapping "…" reveals every level
+- **THEN** it shows "… > Box A > Cables bag"
+- **AND** tapping "…" reveals every level, starting with the house
 
 ### Requirement: Container value
 A container's value SHALL be the sum of quantity times unit price of every item
@@ -167,8 +167,8 @@ a place is identified; names and icons remain visible.
 
 ### Requirement: House indicator
 When two or more houses exist, a band in the current house's colour SHALL be
-shown behind the status bar on every screen, and the first segment of every
-location path MUST be a pill with the house's name in its colour. With a single
+shown behind the status bar on every screen, and whenever a location path shows
+its house segment, that segment MUST be a pill with the house's name in its colour. With a single
 house the band MUST be hidden, unless a setting forces it on. The setting can
 also force it off.
 
