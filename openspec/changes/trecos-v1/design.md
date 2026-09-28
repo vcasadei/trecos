@@ -306,10 +306,14 @@ places.
   needed, runs under `sops exec-env` with the keystore decoded into
   `/dev/shm`.
 - **Who can read it**: only the developer (holder of the age key and admin
-  of both repositories). GitHub Environments with required reviewers aren't
-  available to private repositories on the Free plan, so repository secrets
-  are a documented exception to the secrets policy (rule 3) until the
-  repository is public.
+  of both repositories). The app repository becomes **public** (decided
+  2026-09-28) before the first release, since sideloaders download from its
+  GitHub Releases. From then on the four secrets live in a `release`
+  Environment that only `v*` tags can deploy to, with the developer as
+  required reviewer, and GitHub secret scanning and push protection are on -
+  all free for public repositories. Until then they are repository secrets,
+  a documented exception to the secrets policy (rule 3).
+  `vcasadei/trecos-signing` stays private for good.
 - **Rotation**: on compromise only. Android 9+ (the minimum) supports APK
   Signature Scheme v3 key rotation (`apksigner rotate`), so a leaked key can
   be replaced without breaking updates. The age key rotates with
@@ -404,8 +408,3 @@ people will have installed from the internal and closed test tracks.
 - The full keyword lists for category suggestions (the structure is fixed in D7).
 - Play's current closed-testing requirement (number of testers and days),
   to check before 0.7.
-- Whether `vcasadei/trecos` becomes public before 0.2. Sideloaders can only
-  download GitHub Releases from a private repository as collaborators. A
-  public repository would also enable, for free, GitHub Environments with
-  required reviewers (lifting the D22 exception), secret scanning and push
-  protection.
