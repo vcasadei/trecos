@@ -13,10 +13,20 @@ when a row still says `TBD`.
 
 | Environment | Store | How code reads it |
 |---|---|---|
-| Local development | TBD - e.g. 1Password (`op run`), Doppler, Infisical, SOPS-encrypted file | TBD |
-| CI (GitHub Actions) | GitHub Environments secrets; cloud access through OIDC | `${{ secrets.NAME }}` scoped to an environment |
-| Staging | TBD - e.g. HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, GCP Secret Manager | TBD |
-| Production | TBD | TBD |
+| Local development | SOPS + age: `release-signing.sops.yaml` in the private repo `vcasadei/trecos-signing`, a copy in Google Drive; the age key in `~/.config/sops/age/keys.txt` with an offline backup, never next to either copy | Debug builds need no secret. A local release build, if ever needed: `sops exec-env` with the keystore decoded into `/dev/shm` |
+| CI (GitHub Actions) | GitHub Actions **repository** secrets (`TRECOS_KEYSTORE_*`, `TRECOS_KEY_*`, and from 0.7 `TRECOS_UPLOAD_*`), set from the SOPS file through stdin | `${{ secrets.NAME }}` as environment variables in the release workflow only |
+| Staging | Not applicable - Trecos has no server | - |
+| Production | Not applicable - no server; the app's database key is generated on each device (design D16) | - |
+
+Every secret, its rotation and its recovery are in design D22 of the
+`trecos-v1` change. The whole setup costs nothing.
+
+## Exceptions
+
+- **Rule 3, GitHub Environments.** Environment secrets and required
+  reviewers aren't available to private repositories on GitHub Free, so the
+  release secrets are repository secrets. Only the release workflow reads
+  them. Lift this exception when the repository becomes public.
 
 ## Rules
 

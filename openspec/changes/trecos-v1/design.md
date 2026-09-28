@@ -10,7 +10,11 @@ project's conventions. Constraints that shape every decision:
   phones; cold start of 1-1.5 s on older devices is acceptable.
 - **Offline-first**: every feature works without internet; Google Drive is the
   only (optional) remote, and there is **no Trecos server**.
-- One **Google Play** build that may use Google Play services.
+- One build that may use Google Play services. Until 1.0 it ships as a
+  signed **APK on GitHub Releases** for sideloading; 1.0 goes to **Google
+  Play**, signed with the same key (D22).
+- **No spending** beyond the one-time Google Play registration (US$25): every
+  service and tool must have a free tier that covers the project.
 - Development happens on a **headless x86 Ubuntu** machine; UI must be
   verifiable without a physical screen.
 - License: **PolyForm Noncommercial 1.0.0** for Trecos's own code.
@@ -58,7 +62,8 @@ with `sqlcipher_export` (D16).
 - *Why always SQLCipher*: one SQLite engine means the same full-text search
   and collation behaviour whether or not encryption is on, and turning
   encryption on does not swap the storage engine.
-- *Cost*: about 3 MB per CPU architecture (Play splits per architecture).
+- *Cost*: about 3 MB per CPU architecture. Play splits per architecture;
+  GitHub Releases carries one APK per ABI plus a universal one (D20).
 - *Alternative*: the platform SQLite for unencrypted users and SQLCipher only
   when encrypted. Smaller for most users, but two engines to test, and the
   switch becomes an engine migration.
@@ -254,8 +259,14 @@ There's no remote configuration (there is no server), so flags are build-time
   measures cold start and list scrolling. It runs on an emulator with KVM,
   which needs the user in the `kvm` group on the headless machine.
 - **CI**: GitHub Actions for build, lint, unit tests and screenshot
-  verification on every push; a release workflow signs with an upload key
-  stored in GitHub Actions secrets, with Play App Signing on Google's side.
+  verification on every push.
+- **Releases**: a workflow triggered by a `v*` tag builds the release APKs
+  (one per ABI, `arm64-v8a`, `armeabi-v7a` and `x86_64`, plus a universal
+  one), signs them with the release key (D22), checks them with
+  `apksigner verify --print-certs`, and publishes them on GitHub Releases
+  with a `SHA256SUMS` file and the signing certificate's SHA-256 fingerprint
+  in the release notes, so a sideloader can check what they install. From
+  0.7 it also builds the App Bundle for Play.
 
 ### D21. Dependencies (approved at proposal time unless marked)
 AndroidX (Compose, Material 3, Navigation, WorkManager, DataStore, AppCompat,
@@ -263,15 +274,65 @@ Biometric, Activity, Room, Benchmark/ProfileInstaller), SQLCipher, Coil,
 kotlinx.serialization, ZXing core, the Google code scanner, Google Identity,
 Play Billing, In-App Review, Material Symbols, and JUnit, Robolectric and
 Roborazzi for tests. AboutLibraries (D18) and `androidx.print` (D9) were
-approved after the proposal, on 2026-09-28. Deliberately avoided: Hilt/Koin (D2), OkHttp and
+approved after the proposal, on 2026-09-28, as were SOPS and age, the
+developer tools that encrypt the release key (D22). Deliberately avoided: Hilt/Koin (D2), OkHttp and
 Retrofit, the Google Drive client library (D14), and Firebase.
+
+### D22. Release signing key: SOPS and age, zero cost
+Sideloaded APKs have no Play App Signing behind them: the key that signs
+0.2 must sign every later release, or installed copies can't update. The key
+is therefore generated once, never kept in plaintext, and held in three
+places.
+- **Secret**: `release-signing.sops.yaml`, a SOPS file encrypted to one age
+  recipient, holding `keystore_base64` (the PKCS12 keystore), `store_password`,
+  `key_alias` and `key_password`. Passwords are random (`openssl rand`).
+- **Copies of the encrypted file**: the private repository
+  `vcasadei/trecos-signing` (with its `.sops.yaml`), and a Google Drive
+  folder. Both hold ciphertext only; the Drive folder is shared with no one
+  who shouldn't be able to sign releases.
+- **Decryption key**: the age identity lives at
+  `~/.config/sops/age/keys.txt` (mode 600) on the development machine, with
+  an offline backup (printed and on a USB drive). It is **never** stored next
+  to the encrypted file - not in either repository and not in the Drive
+  folder - since together they are the plaintext key.
+- **CI**: the release workflow reads four GitHub Actions repository secrets,
+  `TRECOS_KEYSTORE_BASE64`, `TRECOS_KEYSTORE_PASSWORD`, `TRECOS_KEY_ALIAS`
+  and `TRECOS_KEY_PASSWORD`, set from the decrypted file through stdin
+  (`sops -d --extract ... | gh secret set ...`). It decodes the keystore into
+  `$RUNNER_TEMP` and Gradle's `signingConfig` reads only environment
+  variables. The age key never goes to CI.
+- **Local builds** are debug builds with the SDK's debug keystore, so no
+  release secret is ever needed on disk. A local release build, if ever
+  needed, runs under `sops exec-env` with the keystore decoded into
+  `/dev/shm`.
+- **Who can read it**: only the developer (holder of the age key and admin
+  of both repositories). GitHub Environments with required reviewers aren't
+  available to private repositories on the Free plan, so repository secrets
+  are a documented exception to the secrets policy (rule 3) until the
+  repository is public.
+- **Rotation**: on compromise only. Android 9+ (the minimum) supports APK
+  Signature Scheme v3 key rotation (`apksigner rotate`), so a leaked key can
+  be replaced without breaking updates. The age key rotates with
+  `sops updatekeys`.
+- **Moving to Play (0.7)**: enrol in Play App Signing by uploading this key
+  with Google's PEPK tool, rather than letting Play generate one, so a
+  sideloaded install updates from Play without reinstalling. A separate
+  upload key is then created the same way, stored as `upload_*` fields in
+  the same file and as the `TRECOS_UPLOAD_*` repository secrets. App
+  Bundles are uploaded to Play by hand, so CI needs no Play API credential.
+- *Alternatives*: Bitwarden Secrets Manager or Infisical (free tiers, but an
+  account and a third-party service holding the key); GitHub secrets alone
+  (write-only - the key could never be recovered from them).
 
 ## Security & Observability
 
 - **Secrets**: the app has no API secrets. The Google OAuth client is
-  identified by package name and signing certificate. The upload signing key
-  and its passwords exist only in GitHub Actions secrets and the developer's
-  local keystore (git-ignored); none are in the repository, tests or fixtures.
+  identified by package name and signing certificate. The release signing
+  key follows D22: encrypted with SOPS and age, read by CI from GitHub
+  Actions repository secrets, and never in this repository, tests or
+  fixtures in plaintext. Keystores, `keystore.properties` and
+  `local.properties` are git-ignored, and a gitleaks pre-commit hook and CI
+  scan catch anything that slips through.
 - **Encryption key**: generated on the device; held wrapped by the Android
   Keystore and in Drive `appDataFolder` (D16); never logged or exported.
 - **Personal data in logs**: there is no telemetry. Release builds strip
@@ -330,6 +391,12 @@ people will have installed from the internal and closed test tracks.
   and shows its status in Settings > Sync.
 - [The KVM group is not set up on the dev machine] → screenshot tests run
   without an emulator; only benchmarks need KVM.
+- [Losing the release signing key strands every sideloaded install] → two
+  encrypted copies and an offline age key backup (D22); a restore from each
+  copy is tested when the key is created.
+- [Sideloaders can't verify what they install] → every release publishes
+  `SHA256SUMS` and the certificate fingerprint (D20); the user docs explain
+  how to check them.
 
 ## Open Questions
 
@@ -337,3 +404,8 @@ people will have installed from the internal and closed test tracks.
 - The full keyword lists for category suggestions (the structure is fixed in D7).
 - Play's current closed-testing requirement (number of testers and days),
   to check before 0.7.
+- Whether `vcasadei/trecos` becomes public before 0.2. Sideloaders can only
+  download GitHub Releases from a private repository as collaborators. A
+  public repository would also enable, for free, GitHub Environments with
+  required reviewers (lifting the D22 exception), secret scanning and push
+  protection.

@@ -11,7 +11,7 @@ run at the end of **every** release group before it is tagged.
 - [ ] 1.1 Rename the GitHub repository `cubby` to `trecos` (`gh repo rename trecos`) and point the remote at it (`git remote set-url origin git@github.com:vcasadei/trecos.git`); verify with `gh repo view vcasadei/trecos` and `git push`
 - [ ] 1.2 Install JDK 17, Android SDK command-line tools, platform and build tools on the headless machine; verify with `java -version` and `sdkmanager --list_installed`
 - [ ] 1.3 Write `docs/dev/setup-headless-linux.md` (JDK, SDK, `kvm` group, emulator without a window); verify by following it in a fresh shell
-- [ ] 1.4 Create the Gradle project: `app` module (`app.trecos`, minSdk 28, current Play target SDK), `baselineprofile` module, a version catalog with only the approved dependencies, R8 full mode; verify with `./gradlew assembleDebug`
+- [ ] 1.4 Create the Gradle project: `app` module (`app.trecos`, minSdk 28, current Play target SDK), `baselineprofile` module, a version catalog with only the approved dependencies, R8 full mode, and Android ignores in `.gitignore` outside the `openspec-casadei: secrets` block (`build/`, `.gradle/`, `.idea/`, `local.properties`, `keystore.properties`); verify with `./gradlew assembleDebug` and that `git status` shows no build output or `local.properties`
 - [ ] 1.5 Add `LICENSE` (PolyForm Noncommercial 1.0.0, plus a note that third-party components keep their own licenses), `COMMERCIAL.md`, `CLA.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, a `PRIVACY.md` draft and `CHANGELOG.md`; verify that each is linked from the README
 - [ ] 1.6 Create the docs tree (`docs/product` vision/glossary/roadmap, `docs/architecture/overview.md`, `docs/decisions/` with one ADR per explore decision, `docs/dev/`, `docs/user/en` and `docs/user/pt-BR`), move `explore.md` to `docs/product/original-draft.md`, and rewrite the README as Trecos; verify that no document still says "Cubby" except the original draft (`grep -ri cubby --exclude-dir=.git`)
 - [ ] 1.7 Add a GitHub Actions CI workflow (build, lint, unit tests, screenshot verification) on push and pull request; verify a green run on `project-setup`
@@ -46,8 +46,11 @@ run at the end of **every** release group before it is tagged.
 - [ ] 2.16 Show icons for places without photos; test for scenario "Container without photos"
 - [ ] 2.17 Implement condensed and detailed list views with an app-wide persisted toggle, hiding empty fields; tests for scenarios "Switching to detailed view" and "Item without price"
 - [ ] 2.18 Test scenario "Using the app in airplane mode" for everything shipped so far
-- [ ] 2.19 Create the Play Console app `app.trecos`, set up Play App Signing and a release workflow using the upload key from GitHub secrets, and publish 0.2 to internal testing; verify that it installs from the internal track
-- [ ] 2.20 Write `docs/architecture/data-model.md` and `docs/user/{en,pt-BR}/getting-started.md`, and add the 0.2 entry to `CHANGELOG.md`
+- [ ] 2.19 Install SOPS and age, generate the age identity at `~/.config/sops/age/keys.txt` (mode 600), and back it up offline (printed and on a USB drive), never next to the encrypted file; verify with `sops --version`, `age --version` and a decrypt using only the backup copy
+- [ ] 2.20 Generate the release keystore (PKCS12, RSA 4096, 30-year validity) and random passwords in `/dev/shm`, encrypt them into `release-signing.sops.yaml` (`keystore_base64`, `store_password`, `key_alias`, `key_password`), commit it with `.sops.yaml` to the private repository `vcasadei/trecos-signing`, copy it to the Google Drive folder, then shred the plaintext; verify that `sops -d` works from both copies and that no plaintext keystore is left (`find / -xdev -name '*.p12' -o -name '*.jks' 2>/dev/null`)
+- [ ] 2.21 Set the repository secrets `TRECOS_KEYSTORE_BASE64`, `TRECOS_KEYSTORE_PASSWORD`, `TRECOS_KEY_ALIAS` and `TRECOS_KEY_PASSWORD` from the decrypted file through stdin (`sops -d --extract '["store_password"]' release-signing.sops.yaml | gh secret set TRECOS_KEYSTORE_PASSWORD`), make the release `signingConfig` read only those environment variables, and document them with placeholder values in `docs/dev/release.md`; verify with `gh secret list` and that `git check-ignore -v keystore.properties release.p12` reports both ignored
+- [ ] 2.22 Add the release workflow (on a `v*` tag: decode the keystore into `$RUNNER_TEMP`, build per-ABI and universal APKs, `apksigner verify --print-certs`, publish to GitHub Releases with `SHA256SUMS` and the certificate fingerprint in the notes) and release 0.2; verify that the published APK installs on the emulator with `adb install`, that its certificate fingerprint matches the notes, and that `sha256sum -c SHA256SUMS` passes
+- [ ] 2.23 Write `docs/architecture/data-model.md`, `docs/user/{en,pt-BR}/getting-started.md` (including how to sideload and check the fingerprint), and the key-recovery procedure in `docs/dev/release.md` (restore the age key from its backup, decrypt from either copy), and add the 0.2 entry to `CHANGELOG.md`
 
 ## 3. Database migrations
 
@@ -115,8 +118,9 @@ run at the end of **every** release group before it is tagged.
 - [ ] 8.4 Integrate the Google code scanner (QR only, trimmed, exact case-sensitive text, a message when the scanner module can't be downloaded offline); tests with a fake scanner for scenarios "Label from another program" and "Scanning offline"
 - [ ] 8.5 Implement lookup after scanning (one match, several houses, unknown code with create-and-place, trashed code); tests for scenarios "One match", "Several houses", "Unknown code" and "Scanning a trashed box"
 - [ ] 8.6 Add scanning to the item form and to Search; tests for scenarios "Scanning into an empty form", "Scanning when a name exists" and "Cancelling a scan"
-- [ ] 8.7 Check Play's current closed-testing requirement, recruit testers and move to the closed track; record the process in `docs/dev/release.md`
-- [ ] 8.8 Write the user docs and FAQ answers 2 and 4 on QR labels (both languages), and add the 0.7 entry to `CHANGELOG.md`
+- [ ] 8.7 Register the Google Play developer account (US$25, the project's only cost) and create the app `app.trecos`; enrol in Play App Signing by uploading the existing release key with PEPK (not a Play-generated key), create the upload key the same way as 2.20 and store it as `upload_*` fields in `release-signing.sops.yaml` and as the repository secrets `TRECOS_UPLOAD_KEYSTORE_BASE64`, `TRECOS_UPLOAD_KEYSTORE_PASSWORD`, `TRECOS_UPLOAD_KEY_ALIAS` and `TRECOS_UPLOAD_KEY_PASSWORD`, and make the release workflow also build the App Bundle; verify that a sideloaded 0.6 install updates to the Play build without reinstalling
+- [ ] 8.8 Check Play's current closed-testing requirement, recruit testers and move to the closed track; record the process in `docs/dev/release.md`
+- [ ] 8.9 Write the user docs and FAQ answers 2 and 4 on QR labels (both languages), and add the 0.7 entry to `CHANGELOG.md`
 
 ## 9. Release 0.8 — Custom fields and settings
 
@@ -195,3 +199,4 @@ run at the end of **every** release group before it is tagged.
 - [ ] 15.5 Screenshot tests match the recorded baselines: `./gradlew verifyRoborazziDebug`
 - [ ] 15.6 The coverage threshold is maintained or raised: `./gradlew jacocoCoverageVerification`
 - [ ] 15.7 OpenSpec artifacts remain valid: `openspec validate trecos-v1 --strict`
+- [ ] 15.8 No secrets in the branch: `pre-commit run gitleaks --all-files`
