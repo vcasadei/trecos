@@ -132,9 +132,9 @@ original is never kept.
 - **Generation** uses ZXing core to render a bitmap for display, sharing and
   printing.
 - **Printing** uses the system print framework through `androidx.print`
-  `PrintHelper`. **This AndroidX library is pending approval**; the
-  alternative is the framework `PrintManager` with a hand-written
-  `PrintDocumentAdapter`, which needs no dependency but more code.
+  `PrintHelper` (approved 2026-09-28). The alternative was the framework
+  `PrintManager` with a hand-written `PrintDocumentAdapter`, which needs no
+  dependency but more code.
 
 ### D10. Navigation bar and theming are custom
 The bottom bar (Search | Home | Settings) is one custom composable that draws
@@ -232,9 +232,8 @@ Trecos password. The profile (name, e-mail) is optional plain data.
 - **FAQ**: sourced from `docs/user/{en,pt-BR}/faq.md` and bundled as string
   resources.
 - **Open-source licenses**: generated from Gradle metadata by
-  **AboutLibraries, which is pending approval**. The alternative is Google's
-  `oss-licenses-plugin`, which is proprietary, uses an older View-based UI,
-  and needs no approval beyond the Play libraries already accepted.
+  **AboutLibraries** (approved 2026-09-28). The alternative was Google's
+  `oss-licenses-plugin`, which is proprietary and uses an older View-based UI.
 
 ### D19. Feature flags
 There's no remote configuration (there is no server), so flags are build-time
@@ -263,8 +262,8 @@ AndroidX (Compose, Material 3, Navigation, WorkManager, DataStore, AppCompat,
 Biometric, Activity, Room, Benchmark/ProfileInstaller), SQLCipher, Coil,
 kotlinx.serialization, ZXing core, the Google code scanner, Google Identity,
 Play Billing, In-App Review, Material Symbols, and JUnit, Robolectric and
-Roborazzi for tests. **Pending approval: AboutLibraries (D18) and
-`androidx.print` (D9).** Deliberately avoided: Hilt/Koin (D2), OkHttp and
+Roborazzi for tests. AboutLibraries (D18) and `androidx.print` (D9) were
+approved after the proposal, on 2026-09-28. Deliberately avoided: Hilt/Koin (D2), OkHttp and
 Retrofit, the Google Drive client library (D14), and Firebase.
 
 ## Security & Observability
