@@ -104,8 +104,7 @@ None. The project has no existing specs.
   dependencies are permissive (Apache 2.0, MIT, BSD), with no copyleft. The
   Google Play libraries are proprietary but freely distributable. Attribution
   is met by the in-app licenses screen.
-- **New third-party dependencies (approved by the user on 2026-09-28, except
-  AboutLibraries, which is pending approval)**:
+- **New third-party dependencies (all approved by the user on 2026-09-28)**:
   - Jetpack Compose, Material 3, Navigation, WorkManager, DataStore, AppCompat
     (per-app language), Biometric, Activity (photo picker) — AndroidX, Google.
   - Room with SQLite full-text search — AndroidX, Google.
@@ -119,5 +118,6 @@ None. The project has no existing specs.
   - Google Play In-App Review — the single rating prompt.
   - Material Symbols — bundled icons for categories, houses and containers.
   - AboutLibraries — the in-app open-source licenses screen.
+  - androidx.print — printing QR labels through the system print dialog.
   - Test and build only: JUnit, Robolectric, Roborazzi (screenshot tests),
     Baseline Profiles / Macrobenchmark.
