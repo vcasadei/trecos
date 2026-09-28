@@ -20,6 +20,9 @@ see `tasks.md` for the grouping. There are no breaking changes: nothing exists y
   `app.trecos`); license under **PolyForm Noncommercial 1.0.0** with a
   commercial-license path and a CLA; create the documentation structure
   (product, architecture, decisions, dev, bilingual user docs).
+- **Distribution**: until 1.0, every release is a signed APK on GitHub
+  Releases for sideloading; 1.0 goes to Google Play, signed with the same key
+  so sideloaded installs keep updating.
 - **Places**: multiple **houses** (a special top-level entity with name,
   optional address, description, photos, icon and color); **containers** nested
   to any depth; recursive value totals with manual override; pastel colors
@@ -97,8 +100,20 @@ None. The project has no existing specs.
   Google Drive. Photo location metadata is removed. No location is collected.
   A privacy policy (`PRIVACY.md`) is required for the Play Store.
 - **External services**: Google Drive (optional sync), Google Play services
-  (QR scanning, sign-in, billing, reviews), Google Play Store distribution.
-  No analytics or crash-reporting SDK: crashes are read from Play Console only.
+  (QR scanning, sign-in, billing, reviews), GitHub Releases (sideloaded APKs
+  until 1.0) and Google Play Store distribution from the 0.7 closed test on.
+  No analytics or crash-reporting SDK: crashes are read from Play Console once
+  the app is on Play.
+- **Cost**: the project spends nothing except the one-time Google Play
+  developer registration (US$25), paid when the closed test starts (0.7).
+  Every other service and tool used is free.
+- **Secrets**: one new secret, the **release signing key**: a keystore plus
+  its store password, key alias and key password. It signs every sideloaded
+  APK and, uploaded to Play App Signing, the Play build, so losing it strands
+  every sideloaded install. It is kept encrypted with SOPS and age, and CI
+  reads it from GitHub Actions secrets (design D22). No other secrets: the
+  Google OAuth client has none, and the database encryption key is generated
+  per device as user data, not a project secret.
 - **Licensing**: PolyForm Noncommercial covers Trecos's own code only; bundled
   third-party components keep their own licenses. All open-source
   dependencies are permissive (Apache 2.0, MIT, BSD), with no copyleft. The
@@ -121,3 +136,5 @@ None. The project has no existing specs.
   - androidx.print — printing QR labels through the system print dialog.
   - Test and build only: JUnit, Robolectric, Roborazzi (screenshot tests),
     Baseline Profiles / Macrobenchmark.
+- **New developer tools (approved by the user on 2026-09-28)**: SOPS and age,
+  to encrypt the release signing key. Neither ships in the app.
