@@ -53,6 +53,15 @@ Lowest ratio in the palette: **4.63:1**.
 
 ## Bottom bar
 
+The bar floats with a neon outline instead of a shadow: a 1.5 dp line plus an
+8 dp blurred glow at 55% opacity, following the bar and its bump. The glow is
+decorative (no text sits on it), so it has no contrast requirement.
+
+| Theme | Glow colour |
+|---|---|
+| White | `#3F55B0` (the accent blue; cyan washes out on off-white) |
+| Dark | `#00E5FF` (electric cyan) |
+
 | Tab | White | Dark |
 |---|---|---|
 | Search | ![Search, White](../../app/src/test/screenshots/TrecosBottomBar_White_Search.png) | ![Search, Dark](../../app/src/test/screenshots/TrecosBottomBar_Dark_Search.png) |
