@@ -12,7 +12,7 @@ and Macrobenchmark; set it up with [setup-headless-linux.md](setup-headless-linu
 | Robolectric tests (UI, resources, manifest) | `app/src/test` (`@RunWith(RobolectricTestRunner::class)`) | JVM | `./gradlew testDebugUnitTest` |
 | Screenshot tests (Roborazzi) | `app/src/test`, baselines in `app/src/test/screenshots/` | JVM | `./gradlew verifyRoborazziDebug` |
 | Baseline Profile generation | `baselineprofile/` (`BaselineProfileGenerator`) | Emulator or rooted device | `./gradlew :app:generateBaselineProfile` |
-| Startup benchmark | `baselineprofile/` (`StartupBenchmark`) | Emulator or device | `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest` |
+| Startup benchmark | `baselineprofile/` (`StartupBenchmark`) | Device (emulator with a flag, below) | `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest` |
 
 ## Screenshot tests
 
@@ -41,9 +41,21 @@ Regenerate it when a release changes startup or a main screen.
 ## Startup benchmark
 
 `StartupBenchmark` cold-starts the app 10 times without a profile and with the
-Baseline Profile, and reports `timeToInitialDisplayMs`. Emulator numbers are
-only for comparing builds; the release gate (median of 1.5 s or less) is
-measured on the 2 GB Android 9 reference phone.
+Baseline Profile, and reports `timeToInitialDisplayMs` in
+`baselineprofile/build/outputs/connected_android_test_additional_output/`.
+
+Macrobenchmark refuses to run on an emulator unless told to, because emulator
+numbers don't represent real phones. To compare builds on the headless
+machine anyway:
+
+```sh
+./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR
+```
+
+The release gate (median of 1.5 s or less) is measured on the 2 GB Android 9
+reference phone, without that flag. For reference, 0.1 on the API 36 emulator:
+894 ms with the Baseline Profile, 939 ms without.
 
 ## Coverage
 
