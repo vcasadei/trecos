@@ -28,6 +28,14 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
+}
+
+roborazzi {
+    outputDir.set(file("src/test/screenshots"))
 }
 
 kotlin {
@@ -43,4 +51,14 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.profileinstaller)
     baselineProfile(project(":baselineprofile"))
+
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.roborazzi.junit.rule)
+    debugImplementation(platform(libs.androidx.compose.bom))
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
