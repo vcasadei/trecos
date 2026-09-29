@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+: keep the database and key files out of cloud backup and
+     device-to-device transfer. A restored Keystore-wrapped key can't be
+     unwrapped; Drive sync and export are the supported backups. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="database" path="." />
+        <exclude domain="file" path="keys/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="database" path="." />
+        <exclude domain="file" path="keys/" />
+    </device-transfer>
+</data-extraction-rules>
