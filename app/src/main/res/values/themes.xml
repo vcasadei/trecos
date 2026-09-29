@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Window colours shown before Compose draws; they match ColorTokens. -->
-    <style name="Theme.Trecos" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.Trecos" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@color/window_background</item>
     </style>
 </resources>

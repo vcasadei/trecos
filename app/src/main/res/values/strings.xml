@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Trecos</string>
+
+    <string name="tab_search">Search</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_settings">Settings</string>
+    <string name="action_back">Back</string>
+
+    <!-- Language names are shown in their own language, so they are not translated. -->
+    <string name="language_english" translatable="false">English</string>
+    <string name="language_portuguese_brazil" translatable="false">Português (Brasil)</string>
 </resources>

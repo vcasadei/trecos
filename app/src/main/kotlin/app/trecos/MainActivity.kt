@@ -1,7 +1,7 @@
 package app.trecos
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +15,7 @@ import app.trecos.ui.theme.TrecosTheme
 /**
  * The single activity that hosts every Trecos screen in Compose.
  */
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     /**
      * Sets up edge-to-edge drawing and the themed Compose content.
