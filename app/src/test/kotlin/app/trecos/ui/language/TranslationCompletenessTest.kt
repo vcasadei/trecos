@@ -30,7 +30,7 @@ class TranslationCompletenessTest {
     @Test
     fun portugueseHasEveryTranslatableString() {
         val english = names("src/main/res/values/strings.xml", translatableOnly = true)
-        val portuguese = names("src/main/res/values-pt-rBR/strings.xml", translatableOnly = false)
+        val portuguese = names("src/main/res/values-pt/strings.xml", translatableOnly = false)
         assertEquals(english, portuguese)
     }
 }

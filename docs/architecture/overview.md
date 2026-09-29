@@ -56,7 +56,8 @@ MainActivity (AppCompatActivity, edge to edge)
 - **Motion**: `Motion.Standard` (150/200/250 ms) or `Motion.Instant` when the
   system animator scale is 0 ("Remove animations").
 - **Languages**: strings in `res/values` (English, the default) and
-  `res/values-pt-rBR`; the choice persists on Android 9-12 through AppCompat's
+  `res/values-pt`, which serves Portuguese (Brazil) to every Portuguese phone,
+  Portugal included; the choice persists on Android 9-12 through AppCompat's
   `autoStoreLocales` service.
 
 ## Current state

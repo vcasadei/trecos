@@ -60,13 +60,19 @@ device wallpaper.
 ### Requirement: Languages
 The app SHALL be fully available in English and Portuguese (Brazil), with an
 in-app language setting that works on every supported Android version. On first
-launch the app MUST use the device language when it is one of these two, and
-English otherwise.
+launch the app MUST use the device language when it is one of these two, MUST
+use Portuguese (Brazil) when the device is set to any other Portuguese variant
+(such as Portugal), and MUST use English otherwise.
 
 #### Scenario: First launch on a Portuguese phone
 - **AS A** new user whose phone is set to Portuguese (Brazil)
 - **WHEN** I open Trecos for the first time
 - **THEN** every screen, built-in category and FAQ entry is shown in Portuguese
+
+#### Scenario: Portuguese (Portugal) phone
+- **AS A** new user whose phone is set to Portuguese (Portugal)
+- **WHEN** I open Trecos for the first time
+- **THEN** the app is shown in Portuguese (Brazil)
 
 #### Scenario: Unsupported device language
 - **AS A** new user whose phone is set to German

@@ -10,7 +10,7 @@ The developer and first users are Brazilian; English widens the audience.
 
 ## Decision
 
-Launch in **English and Portuguese (Brazil)**. All app text lives in translatable resources from 0.1. An in-app language picker covers Android 9-12. Built-in categories and the FAQ are translated; user-created categories are not. Currency is a separate setting (0009).
+Launch in **English and Portuguese (Brazil)**. All app text lives in translatable resources from 0.1. An in-app language picker covers Android 9-12. Built-in categories and the FAQ are translated; user-created categories are not. Currency is a separate setting (0009). A phone in any other Portuguese variant, such as Portugal, gets Portuguese (Brazil) rather than English (decided 2026-09-29).
 
 ## Consequences
 
