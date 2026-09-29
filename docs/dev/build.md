@@ -49,4 +49,6 @@ benchmarks: [testing.md](testing.md).
 `.github/workflows/ci.yml` runs on every push and pull request, on
 `ubuntu-24.04`: build, lint, unit tests, coverage, screenshot verification,
 release build and the release log check. `.github/workflows/secret-scan.yml`
-scans the whole history with gitleaks.
+scans the whole history with gitleaks. `.github/workflows/dependency-graph.yml`
+submits the resolved Gradle dependencies to GitHub on every push to `master`,
+so Dependabot alerts cover transitive libraries too.

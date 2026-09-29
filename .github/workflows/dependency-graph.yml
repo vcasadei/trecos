@@ -1,0 +1,30 @@
+# Submits the full Gradle dependency tree, including transitive dependencies,
+# to GitHub's dependency graph so Dependabot alerts cover every library.
+# GitHub can't read Gradle version catalogs on its own. Alerts track the
+# default branch, so this runs on pushes to master.
+name: Dependency graph
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  submit:
+    name: Submit Gradle dependencies
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/dependency-submission@v6
