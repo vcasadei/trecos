@@ -1,5 +1,5 @@
-# Builds the app and runs lint, unit tests and screenshot verification on
-# every push and pull request. The same commands run locally; see
+# Builds the app and runs lint, unit tests, screenshot verification and the
+# release log check on every push and pull request. The same commands run locally; see
 # docs/dev/setup-headless-linux.md.
 name: CI
 
@@ -43,6 +43,12 @@ jobs:
 
       - name: Screenshot verification
         run: ./gradlew verifyRoborazziDebug
+
+      - name: Release build
+        run: ./gradlew assembleRelease
+
+      - name: No debug logs in release
+        run: scripts/check-release-logs.sh
 
       - name: Upload reports
         if: failure()
