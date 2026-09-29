@@ -46,6 +46,12 @@ object ColorTokens {
     /** Accent used on the Dark theme, lighter so it reads on black. */
     val AccentOnDark = Color(0xFFB9C4F2)
 
+    /** Neon outline of floating bars in the White theme. */
+    val WhiteGlow = Color(0xFF3F55B0)
+
+    /** Neon outline of floating bars in the Dark theme. */
+    val DarkGlow = Color(0xFF00E5FF)
+
     /** Error colour in the White theme. */
     val WhiteError = Color(0xFFB3261E)
 

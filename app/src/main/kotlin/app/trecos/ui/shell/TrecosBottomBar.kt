@@ -1,5 +1,6 @@
 package app.trecos.ui.shell
 
+import android.graphics.BlurMaskFilter
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -22,16 +23,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,6 +49,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import app.trecos.ui.theme.ColorTokens
+import app.trecos.ui.theme.LocalDarkTheme
 import app.trecos.ui.theme.LocalMotion
 
 private val BarHeight = 64.dp
@@ -49,6 +58,9 @@ private val Rise = 28.dp
 private val BumpRadius = 34.dp
 private val DiscRadius = 28.dp
 private val BumpCenterBelowTop = 6.dp
+private val LineWidth = 1.5.dp
+private val GlowWidth = 8.dp
+private const val GlowAlpha = 0.55f
 
 /** Test tag of the raised circle that marks the selected tab. */
 const val TAB_INDICATOR_TAG = "tab_indicator"
@@ -74,6 +86,7 @@ fun tabTag(tab: TrecosTab): String = "tab_${tab.name}"
 fun TrecosBottomBar(selected: TrecosTab, onSelect: (TrecosTab) -> Unit, modifier: Modifier = Modifier) {
     val motion = LocalMotion.current
     val colors = MaterialTheme.colorScheme
+    val dark = LocalDarkTheme.current
     val position by animateFloatAsState(
         targetValue = selected.ordinal.toFloat(),
         animationSpec = motion.spec(motion.mediumMs),
@@ -93,8 +106,7 @@ fun TrecosBottomBar(selected: TrecosTab, onSelect: (TrecosTab) -> Unit, modifier
             Modifier
                 .fillMaxWidth()
                 .height(Rise + BarHeight)
-                .shadow(8.dp, shape)
-                .background(colors.surface, shape),
+                .neonBar(shape, fill = colors.surface, glow = if (dark) ColorTokens.DarkGlow else ColorTokens.WhiteGlow),
         )
         Box(
             modifier = Modifier
@@ -135,6 +147,32 @@ fun TrecosBottomBar(selected: TrecosTab, onSelect: (TrecosTab) -> Unit, modifier
                 }
             }
         }
+    }
+}
+
+/**
+ * Fills [shape] and outlines it with a neon line and a soft glow around it,
+ * which sets the floating bar apart from the background in both themes.
+ *
+ * @param shape the bar's outline, including the bump.
+ * @param fill the bar's colour.
+ * @param glow the colour of the line and its glow.
+ * @return this modifier, drawing the glow, the fill and the line behind the content.
+ */
+private fun Modifier.neonBar(shape: Shape, fill: Color, glow: Color): Modifier = drawWithCache {
+    val path = (shape.createOutline(size, layoutDirection, this) as Outline.Generic).path
+    val glowPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        style = android.graphics.Paint.Style.STROKE
+        strokeWidth = GlowWidth.toPx()
+        color = glow.copy(alpha = GlowAlpha).toArgb()
+        maskFilter = BlurMaskFilter(GlowWidth.toPx(), BlurMaskFilter.Blur.NORMAL)
+    }
+    val androidPath = path.asAndroidPath()
+    val line = Stroke(width = LineWidth.toPx())
+    onDrawBehind {
+        drawIntoCanvas { it.nativeCanvas.drawPath(androidPath, glowPaint) }
+        drawPath(path, fill)
+        drawPath(path, glow, style = line)
     }
 }
 
