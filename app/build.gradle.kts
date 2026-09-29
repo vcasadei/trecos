@@ -1,4 +1,5 @@
 plugins {
+    jacoco
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.baselineprofile)
@@ -18,6 +19,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -40,6 +44,47 @@ android {
 
 roborazzi {
     outputDir.set(file("src/test/screenshots"))
+}
+
+// Coverage counts non-UI code only: screens are covered by screenshot tests instead.
+val coverageExcludes = listOf(
+    "app/trecos/ui/**",
+    "app/trecos/MainActivity*",
+    "**/ComposableSingletons*",
+    "**/R.class",
+    "**/R$*.class",
+    "**/BuildConfig.*",
+    "**/Manifest*.*",
+)
+
+tasks.withType<Test>().configureEach {
+    extensions.configure<JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
+    description = "Fails when line coverage of non-UI code drops below 80%."
+    group = "verification"
+    dependsOn("testDebugUnitTest")
+    executionData.setFrom(
+        layout.buildDirectory.file("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"),
+    )
+    classDirectories.setFrom(
+        layout.buildDirectory.dir("intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes")
+            .map { dir -> fileTree(dir) { exclude(coverageExcludes) } },
+    )
+    sourceDirectories.setFrom("src/main/kotlin")
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
 }
 
 kotlin {

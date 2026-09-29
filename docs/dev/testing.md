@@ -45,6 +45,18 @@ Baseline Profile, and reports `timeToInitialDisplayMs`. Emulator numbers are
 only for comparing builds; the release gate (median of 1.5 s or less) is
 measured on the 2 GB Android 9 reference phone.
 
+## Coverage
+
+| Rule | Value |
+|---|---|
+| Counter | Lines |
+| Minimum | 80% |
+| Measured | Non-UI code only: `app/trecos/ui/**`, `MainActivity`, generated Compose and resource classes are excluded, since screenshot tests cover the UI |
+| Command | `./gradlew jacocoCoverageVerification` (runs the unit tests first) |
+| Report data | `app/build/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec` |
+
+The threshold may only be raised.
+
 ## Release checks
 
 | Check | Command |

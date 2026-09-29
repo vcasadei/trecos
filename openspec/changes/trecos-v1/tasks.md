@@ -23,7 +23,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 1.13 Define motion tokens (150–250 ms, instant with "Remove animations"); verify with a test that transitions are instant when the animator scale is 0
 - [x] 1.14 Set up Macrobenchmark and Baseline Profile generation; verify that `./gradlew :app:generateBaselineProfile` produces a profile on the KVM emulator (the current Baseline Profile plugin registers the task on the app module, not on `:baselineprofile`), and document it in `docs/dev/testing.md`
 - [x] 1.15 Configure the release build to strip debug and verbose logs, and disable Auto Backup for the database and key files (`dataExtractionRules`); verify with a unit test on the merged manifest and a check that release bytecode has no `Log.d` calls
-- [ ] 1.16 Set a coverage threshold with AGP's built-in JaCoCo (80% lines for non-UI packages) and a verification task; verify that `./gradlew jacocoCoverageVerification` passes on the empty codebase
+- [x] 1.16 Set a coverage threshold with AGP's built-in JaCoCo (80% lines for non-UI packages) and a verification task; verify that `./gradlew jacocoCoverageVerification` passes on the empty codebase
 - [ ] 1.17 Write `docs/architecture/overview.md`, `docs/dev/build.md` and `docs/dev/testing.md`, and add the 0.1 entry to `CHANGELOG.md`; verify that every command in them runs as written
 
 ## 2. Release 0.2 — Places and items
