@@ -16,7 +16,8 @@ enum class AppLanguage(val tag: String) {
     companion object {
         /**
          * Picks the app language for a list of preferred locales: the first
-         * one Trecos supports, or English when none is supported.
+         * one Trecos supports, or English when none is supported. Every
+         * Portuguese locale (Brazil, Portugal and others) gets Portuguese (Brazil).
          *
          * @param locales the preferred locales, most preferred first.
          * @return the language to show.
@@ -50,11 +51,12 @@ enum class AppLanguage(val tag: String) {
          * Maps one locale to a supported language.
          *
          * @param locale a locale from the device or the app setting.
-         * @return the matching language, or `null` if Trecos doesn't support it.
+         * @return the matching language, or `null` if Trecos doesn't support it;
+         *   any Portuguese locale maps to [PortugueseBrazil].
          */
         private fun fromLocale(locale: Locale): AppLanguage? = when {
             locale.language == "en" -> English
-            locale.language == "pt" && locale.country == "BR" -> PortugueseBrazil
+            locale.language == "pt" -> PortugueseBrazil
             else -> null
         }
     }

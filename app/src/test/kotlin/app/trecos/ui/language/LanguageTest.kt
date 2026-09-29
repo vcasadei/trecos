@@ -43,6 +43,17 @@ class LanguageTest {
     }
 
     @Test
+    @Config(qualifiers = "pt-rPT")
+    fun firstLaunchOnAPortugalPortuguesePhone() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity {
+                assertEquals(AppLanguage.PortugueseBrazil, AppLanguage.current())
+                assertEquals("Início", it.getString(R.string.tab_home))
+            }
+        }
+    }
+
+    @Test
     @Config(qualifiers = "de-rDE")
     fun unsupportedDeviceLanguage() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -85,7 +96,8 @@ class LanguageTest {
         val brazil = java.util.Locale.forLanguageTag("pt-BR")
         val portugal = java.util.Locale.forLanguageTag("pt-PT")
         assertEquals(AppLanguage.PortugueseBrazil, AppLanguage.resolve(listOf(german, brazil)))
-        assertEquals(AppLanguage.English, AppLanguage.resolve(listOf(german, portugal)))
+        assertEquals(AppLanguage.PortugueseBrazil, AppLanguage.resolve(listOf(german, portugal)))
+        assertEquals(AppLanguage.English, AppLanguage.resolve(listOf(german)))
         assertEquals(AppLanguage.English, AppLanguage.resolve(emptyList()))
     }
 }
