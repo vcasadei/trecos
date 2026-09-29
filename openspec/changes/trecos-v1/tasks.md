@@ -20,7 +20,7 @@ run at the end of **every** release group before it is tagged.
 - [ ] 1.10 Build the custom bottom bar (Search | Home | Settings, text-only unselected tabs, sliding raised circle); tests for scenarios "Switching tabs" and "Reduced motion", plus screenshots of each tab in both themes
 - [ ] 1.11 Wire navigation with a back arrow on non-root screens; test for scenario "Back from a tab root"
 - [ ] 1.12 Build the shared text components (line limits, ellipsis, long-word wrapping) and the breadcrumb component with middle collapse, plus stress fixtures (200-character names, 40-character serials, 8-level paths, Portuguese strings); tests for scenarios "Very long name" and "Long unbroken serial number", and a component test for "… > Box A > Cables bag"
-- [ ] 1.13 Define motion tokens (150–250 ms, instant with "Remove animations"); verify with a test that transitions are instant when the animator scale is 0
+- [x] 1.13 Define motion tokens (150–250 ms, instant with "Remove animations"); verify with a test that transitions are instant when the animator scale is 0
 - [ ] 1.14 Set up Macrobenchmark and Baseline Profile generation; verify that `./gradlew :baselineprofile:generateBaselineProfile` produces a profile on the KVM emulator, and document it in `docs/dev/testing.md`
 - [ ] 1.15 Configure the release build to strip debug and verbose logs, and disable Auto Backup for the database and key files (`dataExtractionRules`); verify with a unit test on the merged manifest and a check that release bytecode has no `Log.d` calls
 - [ ] 1.16 Set a coverage threshold with AGP's built-in JaCoCo (80% lines for non-UI packages) and a verification task; verify that `./gradlew jacocoCoverageVerification` passes on the empty codebase

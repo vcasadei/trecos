@@ -10,7 +10,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 val LocalDarkTheme = staticCompositionLocalOf { false }
 
 /**
- * Applies the Trecos theme to [content].
+ * Applies the Trecos theme and motion to [content].
  *
  * @param mode the theme chosen in Settings.
  * @param systemInDarkTheme whether the phone is in night mode; read from the system by default.
@@ -23,7 +23,7 @@ fun TrecosTheme(
     content: @Composable () -> Unit,
 ) {
     val dark = mode.isDark(systemInDarkTheme)
-    CompositionLocalProvider(LocalDarkTheme provides dark) {
+    CompositionLocalProvider(LocalDarkTheme provides dark, LocalMotion provides rememberSystemMotion()) {
         MaterialTheme(
             colorScheme = if (dark) ColorTokens.DarkScheme else ColorTokens.WhiteScheme,
             content = content,
