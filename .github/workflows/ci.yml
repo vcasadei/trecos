@@ -1,0 +1,55 @@
+# Builds the app and runs lint, unit tests and screenshot verification on
+# every push and pull request. The same commands run locally; see
+# docs/dev/setup-headless-linux.md.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Build
+        run: ./gradlew assembleDebug
+
+      - name: Lint
+        run: ./gradlew lintDebug
+
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest
+
+      - name: Screenshot verification
+        run: ./gradlew verifyRoborazziDebug
+
+      - name: Upload reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports
+          path: |
+            app/build/reports/
+            app/build/outputs/roborazzi/
+          retention-days: 7
