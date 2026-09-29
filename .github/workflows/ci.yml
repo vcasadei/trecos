@@ -41,6 +41,9 @@ jobs:
       - name: Unit tests
         run: ./gradlew testDebugUnitTest
 
+      - name: Coverage threshold
+        run: ./gradlew jacocoCoverageVerification
+
       - name: Screenshot verification
         run: ./gradlew verifyRoborazziDebug
 
