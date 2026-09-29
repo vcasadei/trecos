@@ -8,7 +8,7 @@ run at the end of **every** release group before it is tagged.
 
 ## 1. Release 0.1 — Foundation
 
-- [ ] 1.1 Rename the GitHub repository `cubby` to `trecos` (`gh repo rename trecos`) and point the remote at it (`git remote set-url origin git@github.com:vcasadei/trecos.git`); verify with `gh repo view vcasadei/trecos` and `git push`
+- [x] 1.1 Rename the GitHub repository `cubby` to `trecos` (`gh repo rename trecos`) and point the remote at it (`git remote set-url origin git@github.com:vcasadei/trecos.git`); verify with `gh repo view vcasadei/trecos` and `git push`
 - [ ] 1.2 Install JDK 17, Android SDK command-line tools, platform and build tools on the headless machine; verify with `java -version` and `sdkmanager --list_installed`
 - [ ] 1.3 Write `docs/dev/setup-headless-linux.md` (JDK, SDK, `kvm` group, emulator without a window); verify by following it in a fresh shell
 - [ ] 1.4 Create the Gradle project: `app` module (`app.trecos`, minSdk 28, current Play target SDK), `baselineprofile` module, a version catalog with only the approved dependencies, R8 full mode, and Android ignores in `.gitignore` outside the `openspec-casadei: secrets` block (`build/`, `.gradle/`, `.idea/`, `local.properties`, `keystore.properties`); verify with `./gradlew assembleDebug` and that `git status` shows no build output or `local.properties`
