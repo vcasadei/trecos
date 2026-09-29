@@ -22,3 +22,12 @@ id_ed25519*
 .netrc
 .pgpass
 # END openspec-casadei: secrets
+
+# Android and Gradle
+build/
+.gradle/
+.kotlin/
+.idea/
+*.iml
+local.properties
+keystore.properties

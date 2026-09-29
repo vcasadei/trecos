@@ -12,7 +12,7 @@ Tested on Ubuntu 24.04 LTS, x86_64.
 |---|---|---|---|
 | OpenJDK | 17 (headless) | `/usr/lib/jvm/java-17-openjdk-amd64` | yes |
 | Android command-line tools | `commandlinetools-linux-15859902` | `~/Android/Sdk/cmdline-tools/latest` | no |
-| Platform | `platforms;android-36` (Play target SDK) | `~/Android/Sdk/platforms` | no |
+| Platforms | `platforms;android-37.0` (`compileSdk`, required by current AndroidX) and `platforms;android-36` (`targetSdk`, the Play requirement) | `~/Android/Sdk/platforms` | no |
 | Build tools | `build-tools;36.1.0` | `~/Android/Sdk/build-tools` | no |
 | Platform tools (`adb`) | latest | `~/Android/Sdk/platform-tools` | no |
 | Emulator + system image | `emulator`, `system-images;android-36;google_apis;x86_64` | `~/Android/Sdk` | no |
@@ -57,7 +57,7 @@ export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
 
 ```sh
 yes | sdkmanager --licenses
-sdkmanager "platforms;android-36" "build-tools;36.1.0" "platform-tools"
+sdkmanager "platforms;android-37.0" "platforms;android-36" "build-tools;36.1.0" "platform-tools"
 sdkmanager --list_installed
 ```
 
