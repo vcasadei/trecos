@@ -12,7 +12,7 @@ and Macrobenchmark; set it up with [setup-headless-linux.md](setup-headless-linu
 | Robolectric tests (UI, resources, manifest) | `app/src/test` (`@RunWith(RobolectricTestRunner::class)`) | JVM | `./gradlew testDebugUnitTest` |
 | Screenshot tests (Roborazzi) | `app/src/test`, baselines in `app/src/test/screenshots/` | JVM | `./gradlew verifyRoborazziDebug` |
 | Baseline Profile generation | `baselineprofile/` (`BaselineProfileGenerator`) | Emulator or rooted device | `./gradlew :app:generateBaselineProfile` |
-| Startup benchmark | `baselineprofile/` (`StartupBenchmark`) | Emulator or device | `./gradlew :baselineprofile:connectedNonMinifiedReleaseAndroidTest` |
+| Startup benchmark | `baselineprofile/` (`StartupBenchmark`) | Emulator or device | `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest` |
 
 ## Screenshot tests
 
