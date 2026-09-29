@@ -4,6 +4,7 @@
 |---|---|---|
 | [product/](product/) | [Vision](product/vision.md), [glossary](product/glossary.md), [roadmap](product/roadmap.md), [original draft](product/original-draft.md) | English |
 | [architecture/](architecture/) | [Overview](architecture/overview.md); data model, sync protocol, encryption and photos pages arrive with their releases | English |
+| [design/](design/) | [Visual review](design/visual-review.md): themes, palette with contrast ratios, bottom bar, text safety | English |
 | [decisions/](decisions/) | [Architecture decision records](decisions/README.md) | English |
 | [dev/](dev/) | [Headless Linux setup](dev/setup-headless-linux.md); build, testing and release guides | English |
 | [user/en/](user/en/) | User guide | English |
