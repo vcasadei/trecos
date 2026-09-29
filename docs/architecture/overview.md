@@ -28,7 +28,39 @@ alternatives considered, is `openspec/changes/trecos-v1/design.md` (D1-D22).
 | Backup | `.zip` export/import in the sync format | D15 |
 | Security | Optional app lock; optional encryption with the key in Drive | D16, D17 |
 
+## Packages
+
+| Package | Contents | Since |
+|---|---|---|
+| `app.trecos` | `MainActivity`, the single activity | 0.1 |
+| `app.trecos.ui.theme` | `ThemeMode`, colour tokens, the 12-colour `PaletteColor`, `Motion` tokens, `TrecosTheme` | 0.1 |
+| `app.trecos.ui.language` | `AppLanguage`: English and Portuguese (Brazil), switched with AppCompat per-app locales | 0.1 |
+| `app.trecos.ui.shell` | `TrecosApp` (navigation graph), `TrecosBottomBar`, `TrecosTopBar`, `TrecosTab` | 0.1 |
+| `app.trecos.ui.text` | `SafeText` and the collapsing `Breadcrumb` | 0.1 |
+
+## How the shell fits together
+
+```
+MainActivity (AppCompatActivity, edge to edge)
+└── TrecosTheme            colour scheme + LocalDarkTheme + LocalMotion
+    └── TrecosApp          NavHost: search | home (start) | settings
+        ├── tab roots      TrecosTopBar without a back arrow
+        └── TrecosBottomBar  selected tab follows the back stack
+```
+
+- **Navigation**: Home is the start destination. Switching tabs pops back to
+  Home and saves each tab's state, so system back on the Search or Settings
+  root returns to Home, and back on Home leaves the app.
+- **Theme**: colours come only from `ColorTokens`; there is no dynamic colour.
+  Dark is pure black. Palette tints and bands are contrast-tested (at least 4.5:1).
+- **Motion**: `Motion.Standard` (150/200/250 ms) or `Motion.Instant` when the
+  system animator scale is 0 ("Remove animations").
+- **Languages**: strings in `res/values` (English, the default) and
+  `res/values-pt-rBR`; the choice persists on Android 9-12 through AppCompat's
+  `autoStoreLocales` service.
+
 ## Current state
 
-Release 0.1 in progress: the Gradle project and an empty Compose activity.
-This page grows with each release.
+Release 0.1 (foundation): the shell, themes, palette, languages, text safety,
+motion, Baseline Profile generation and release hardening. There is no data
+yet; places and items arrive in 0.2.
