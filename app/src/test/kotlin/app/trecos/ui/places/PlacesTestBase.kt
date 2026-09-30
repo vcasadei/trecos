@@ -111,6 +111,8 @@ abstract class PlacesTestBase {
     protected fun click(tag: String) {
         val node = tag(tag)
         runCatching { node.performScrollTo() }
+        // Lazy lists scroll with an animation: tapping before it settles can hit the row that was there.
+        rule.waitForIdle()
         node.performClick()
         rule.waitForIdle()
     }
