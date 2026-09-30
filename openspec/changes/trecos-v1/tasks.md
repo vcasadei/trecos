@@ -191,7 +191,7 @@ run at the end of **every** release group before it is tagged.
 - [ ] 14.8 Run the performance pass on a 2 GB Android 9 reference phone (Baseline Profile, a median cold start of 1.5 s or less, janky frames under 5% on 1,000 items) and gate the release on it; tests for scenarios "Cold start benchmark" and "Regression blocks a release"
 - [ ] 14.9 Publish the site at trecos.app on GitHub Pages (enforced HTTPS, privacy policy, commercial-license page, links to external donations) and set up forwarding of hello@trecos.app on Porkbun together with the user; verify the site loads over HTTPS and a test e-mail arrives
 - [ ] 14.10 Prepare the Play listing ("Trecos: Home Inventory", English and Portuguese texts and screenshots, data safety form, privacy policy URL) and publish 1.0 to production; verify that the listing is live
-- [ ] 14.11 Complete the user guide in both languages, update `docs/product/roadmap.md` (1.1 OCR to multi-user), and add the 1.0 entry to `CHANGELOG.md`
+- [x] 14.11 Complete the user guide in both languages, update `docs/product/roadmap.md` (1.1 OCR to multi-user), and add the 1.0 entry to `CHANGELOG.md`
 
 ## 15. Quality Gates
 

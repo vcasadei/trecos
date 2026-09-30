@@ -462,4 +462,5 @@
     <string name="about_website">Website</string>
     <string name="about_privacy">Privacy policy</string>
     <string name="about_licenses">Open-source licenses</string>
+    <string name="setting_faq_hint">Answers to the most common questions</string>
 </resources>

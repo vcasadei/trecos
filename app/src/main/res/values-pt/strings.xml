@@ -473,4 +473,5 @@
     <string name="about_website">Site</string>
     <string name="about_privacy">Política de privacidade</string>
     <string name="about_licenses">Licenças de código aberto</string>
+    <string name="setting_faq_hint">Respostas para as dúvidas mais comuns</string>
 </resources>

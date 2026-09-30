@@ -331,7 +331,7 @@ fun SettingsScreen(nav: SettingsNavigation) {
                 LinkRow("trash", R.string.setting_open_trash, house?.name ?: stringResource(R.string.no_house_yet), house?.let { { nav.openTrash(it.id) } })
             }
             item { Section(R.string.settings_help) }
-            item { LinkRow("faq", R.string.setting_faq, stringResource(R.string.faq_title), nav.openFaq) }
+            item { LinkRow("faq", R.string.setting_faq, stringResource(R.string.setting_faq_hint), nav.openFaq) }
             item {
                 val contact = app.trecos.ui.help.rememberContact()
                 LinkRow("contact", R.string.setting_contact, app.trecos.help.Contact.ADDRESS, contact)
