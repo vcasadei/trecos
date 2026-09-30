@@ -167,6 +167,22 @@ abstract class PlacesTestBase {
     }
 
     /**
+     * Taps until [done] holds, at most three times. For taps whose effect is
+     * checked in stored data: CI's test runner very rarely drops a tap.
+     *
+     * @param tag the test tag.
+     * @param done whether the tap took effect.
+     */
+    protected fun clickUntil(tag: String, done: () -> Boolean) {
+        repeat(3) {
+            if (done()) return
+            click(tag)
+            if (runCatching { eventually(5_000) { done() } }.isSuccess) return
+        }
+        throw AssertionError("Tapping $tag had no effect")
+    }
+
+    /**
      * Waits until [condition] holds, running the main looper on every check.
      * Coroutines that continue on the main dispatcher (a ViewModel finishing a
      * preference or database write) only run when the paused Robolectric looper

@@ -6,6 +6,18 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.11.0] - Unreleased
+
+### Added
+
+- Google Drive sync, behind the `FEATURE_DRIVE_SYNC` build flag (off by default). The data lives in a visible Trecos folder in your own Drive, and the app has access only to files it created.
+- Connecting offers to restore your houses on a new phone, or to merge with (or replace by) the Drive data on a phone that has its own.
+- Three-way merge per field. Only the same detail changed on two devices, or an edit against a delete, asks you; the conflict screen offers Keep mine / Keep theirs, and Settings shows a badge while conflicts wait.
+- Automatic sync every day (or every 5, 15 or 30 days, or never), only with a network, retried on failure, plus Sync now. Photos wait for Wi-Fi by default and are uploaded once each.
+- Sync status with plain-language errors, the sync history (time, Google user, device, changes), and an editable device name.
+- Detection of a deleted or altered Drive folder, with an offer to upload your data again, and a refusal to merge data from a newer app version.
+- Import's "Replace everything" warns that, with sync on, other devices receive the data.
+
 ## [0.10.0] - Unreleased
 
 ### Added

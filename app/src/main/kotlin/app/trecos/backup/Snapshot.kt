@@ -69,6 +69,47 @@ data class HouseSnapshot(
             )
         }
     }
+
+    /**
+     * Inserts every row of this house, parents before children. Call inside a transaction.
+     *
+     * @param db the database.
+     */
+    suspend fun insertInto(db: TrecosDatabase) = with(db.snapshots()) {
+        insertHouses(listOf(house))
+        insertContainers(containers)
+        insertItems(items)
+        insertCategories(categories)
+        insertItemCategories(itemCategories)
+        insertTags(tags)
+        insertItemTags(itemTags)
+        insertLearned(learned)
+        insertTrash(trash)
+        insertPhotos(photos)
+        insertFieldDefs(fieldDefs)
+        insertFieldValues(fieldValues)
+    }
+}
+
+/**
+ * Deletes a house and every row in it. Call inside a transaction.
+ *
+ * @param db the database.
+ * @param houseId the house.
+ */
+suspend fun deleteHouseRows(db: TrecosDatabase, houseId: String) = with(db.snapshots()) {
+    deleteFieldValueOf(houseId)
+    deleteFieldDefOf(houseId)
+    deletePhotoOf(houseId)
+    deleteTrashEntryOf(houseId)
+    deleteTokenCategoryCountOf(houseId)
+    deleteItemTagOf(houseId)
+    deleteTagOf(houseId)
+    deleteItemCategoryOf(houseId)
+    deleteCategoryOf(houseId)
+    deleteItemOf(houseId)
+    deleteContainerOf(houseId)
+    deleteHouseRow(houseId)
 }
 
 /** A snapshot file that can't be read. */
@@ -130,6 +171,43 @@ object SnapshotFormat {
         Table("field_value", FieldValue.serializer(), { it.id }, { it.fieldValues }) { b, r -> b.fieldValues += r },
     )
     private val byName = tables.associateBy { it.name }
+
+    /**
+     * The generic view the sync merge works on.
+     *
+     * @param snapshot a house.
+     * @return every row as JSON, keyed by `table/key` (for example `item/<id>`).
+     */
+    fun toRows(snapshot: HouseSnapshot): Map<String, JsonObject> {
+        val rows = LinkedHashMap<String, JsonObject>()
+        tables.forEach { addRows(it, snapshot, rows) }
+        return rows
+    }
+
+    /** Adds one table's rows to [rows]. */
+    private fun <T> addRows(table: Table<T>, snapshot: HouseSnapshot, rows: MutableMap<String, JsonObject>) {
+        table.rows(snapshot).sortedBy(table.key).forEach { row ->
+            rows["${table.name}/${table.key(row)}"] = json.encodeToJsonElement(table.serializer, row).jsonObject
+        }
+    }
+
+    /**
+     * Builds a house back from rows made by [toRows] (and merged).
+     *
+     * @param rows the rows, keyed by `table/key`.
+     * @return the house.
+     * @throws SnapshotFormatException if a row can't be read or there isn't exactly one house.
+     */
+    fun fromRows(rows: Map<String, JsonObject>): HouseSnapshot {
+        val grouped = rows.entries.groupBy({ it.key.substringBefore('/') }, { it.value })
+        grouped.keys.firstOrNull { it !in byName }?.let { throw SnapshotFormatException("Unknown table \"$it\"") }
+        if (grouped["house"]?.size != 1) throw SnapshotFormatException("A snapshot needs exactly one house")
+        val builder = Builder()
+        grouped.forEach { (name, list) -> fillTable(byName.getValue(name), list, builder) }
+        return with(builder) {
+            HouseSnapshot(house!!, containers, items, categories, itemCategories, tags, itemTags, learned, trash, photos, fieldDefs, fieldValues)
+        }
+    }
 
     /**
      * Writes a house.

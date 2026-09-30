@@ -29,9 +29,16 @@ uma linha, selecione as outras e toque no ícone de impressão: todos vão num
 **Backup**: Ajustes > **Sincronização e backup** > **Backup** salva um arquivo
 `.zip` com suas casas e fotos onde você escolher. Importe em qualquer celular,
 adicionando as casas como novas ou substituindo tudo. Não precisa de conta, e o
-arquivo não é criptografado. Veja [Backup](backup.md). A sincronização com o
-seu próprio Google Drive chega numa versão futura; esta resposta vai explicá-la
-quando chegar.
+arquivo não é criptografado. Veja [Backup](backup.md).
+
+**Sincronização**: Ajustes > **Sincronização e backup** > **Sincronização** >
+**Conectar o Google Drive** mantém seus aparelhos iguais por meio de uma pasta
+**Trecos** visível no seu próprio Drive. O Trecos só vê os arquivos que ele
+criou. Sincroniza todo dia por padrão (ou a cada 5, 15 ou 30 dias, ou nunca), e
+você pode tocar em **Sincronizar agora** quando quiser. As fotos esperam o Wi-Fi,
+a menos que você desligue isso. Mudanças em detalhes diferentes se juntam
+sozinhas; se o mesmo detalhe mudou em dois aparelhos, o Trecos pergunta qual
+manter. O Drive guarda as últimas 30 sincronizações de cada aparelho.
 
 ## 6. O que acontece quando excluo algo?
 
@@ -47,3 +54,16 @@ Ajustes > **Segurança** > **Bloqueio do app**. O Trecos usa o bloqueio do próp
 ## 9. Preciso de uma conta?
 
 Não. Tudo, menos a sincronização com o Google Drive, funciona sem conta, nome ou e-mail. A sincronização (quando chegar) usa sua própria conta Google. Nos Ajustes você pode adicionar um nome e e-mail opcionais para identificar seus registros de sincronização; dá para mudar ou apagar a qualquer momento.
+
+## 10. Como recupero meus dados depois de perder ou trocar de celular?
+
+No celular novo, instale o Trecos e:
+
+- **Com sincronização**: Ajustes > **Sincronização e backup** >
+  **Sincronização** > **Conectar o Google Drive** com a mesma conta Google. O
+  Trecos oferece restaurar suas casas do Drive.
+- **Com um arquivo de backup**: Ajustes > **Sincronização e backup** >
+  **Backup** > **Importar um backup** e escolha o seu `trecos-backup-….zip`.
+
+Sem sincronização nem arquivo de backup, os dados de um celular perdido não
+podem ser recuperados.

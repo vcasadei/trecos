@@ -354,4 +354,74 @@
         <item quantity="many">%1$d fotos</item>
         <item quantity="other">%1$d fotos</item>
     </plurals>
+    <!-- Sync (0.11) -->
+    <string name="sync_error_network">Não foi possível acessar o Google Drive. O Trecos vai tentar de novo mais tarde.</string>
+    <string name="sync_error_auth">O Google precisa que você conecte de novo.</string>
+    <string name="sync_error_newer">Outro aparelho usa uma versão mais nova do Trecos. Atualize o app para continuar sincronizando.</string>
+    <string name="sync_error_missing">A pasta Trecos do seu Drive sumiu ou foi alterada fora do app.</string>
+    <string name="sync_error_other">A sincronização não terminou. O Trecos vai tentar de novo mais tarde.</string>
+    <string name="setting_sync">Sincronização</string>
+    <string name="setting_sync_off">Desligada</string>
+    <string name="setting_sync_on">Conectada como %1$s</string>
+    <string name="sync_title">Sincronização</string>
+    <string name="sync_intro">Mantenha seu inventário igual em todos os seus aparelhos por meio de uma pasta Trecos visível no seu próprio Google Drive. O Trecos só vê os arquivos que ele criou.</string>
+    <string name="sync_connect">Conectar o Google Drive</string>
+    <string name="sync_connected_as">Conectado como %1$s</string>
+    <string name="sync_last">Última sincronização: %1$s</string>
+    <string name="sync_never">Ainda não sincronizado</string>
+    <string name="sync_running">Sincronizando…</string>
+    <string name="sync_retry_scheduled">O Trecos vai tentar de novo automaticamente.</string>
+    <string name="sync_now">Sincronizar agora</string>
+    <string name="sync_frequency">Sincronizar automaticamente</string>
+    <string name="frequency_daily">Todo dia</string>
+    <string name="frequency_5">A cada 5 dias</string>
+    <string name="frequency_15">A cada 15 dias</string>
+    <string name="frequency_30">A cada 30 dias</string>
+    <string name="frequency_never">Nunca</string>
+    <string name="sync_photos_wifi">Fotos só no Wi-Fi</string>
+    <string name="sync_photos_wifi_hint">Os dados sincronizam também nos dados móveis; as fotos esperam o Wi-Fi.</string>
+    <string name="sync_device_name">Nome deste aparelho</string>
+    <string name="sync_history">Histórico de sincronização</string>
+    <string name="sync_disconnect">Desconectar</string>
+    <string name="sync_disconnected">A sincronização foi desligada. Tudo continua neste celular.</string>
+    <string name="sync_missing_action">Enviar meus dados de novo</string>
+    <string name="sync_done">Sincronizado.</string>
+    <string name="restore_title">Restaurar do Drive?</string>
+    <string name="restore_body">Seu Drive tem dados do Trecos: %1$s. Restaurar neste celular?</string>
+    <string name="restore_action">Restaurar</string>
+    <string name="restore_not_now">Agora não</string>
+    <string name="merge_title">O Drive tem outras casas</string>
+    <string name="merge_body">Seu Drive tem casas que não estão neste celular: %1$s. Juntar com as casas deste celular ou manter só os dados do Drive? Manter só os dados do Drive apaga as casas deste celular.</string>
+    <string name="merge_action">Juntar</string>
+    <string name="keep_drive_action">Manter só os dados do Drive</string>
+    <string name="conflicts_title">Conflitos</string>
+    <string name="conflicts_none">Nenhum conflito.</string>
+    <string name="conflict_same_field">%1$s: %2$s ou %3$s?</string>
+    <string name="conflict_deleted_here">Apagado ou posto na lixeira neste celular, alterado em %1$s. Apagar ou manter?</string>
+    <string name="conflict_deleted_there">Alterado neste celular, apagado ou posto na lixeira em %1$s. Apagar ou manter?</string>
+    <string name="conflict_keep_mine">Manter o meu</string>
+    <string name="conflict_keep_theirs">Manter o deles</string>
+    <string name="conflict_delete">Apagar</string>
+    <string name="conflict_keep">Manter</string>
+    <string name="conflict_other_device">outro aparelho</string>
+    <string name="value_empty">(vazio)</string>
+    <string name="field_location">Local</string>
+    <string name="field_in_trash">Na lixeira</string>
+    <string name="field_value">Valor</string>
+    <plurals name="sync_conflicts_count">
+        <item quantity="one">%1$d conflito para resolver</item>
+        <item quantity="many">%1$d conflitos para resolver</item>
+        <item quantity="other">%1$d conflitos para resolver</item>
+    </plurals>
+    <plurals name="history_changes">
+        <item quantity="one">%1$d alteração</item>
+        <item quantity="many">%1$d alterações</item>
+        <item quantity="other">%1$d alterações</item>
+    </plurals>
+    <plurals name="history_conflicts">
+        <item quantity="one">%1$d conflito</item>
+        <item quantity="many">%1$d conflitos</item>
+        <item quantity="other">%1$d conflitos</item>
+    </plurals>
+    <string name="import_replace_sync_warning">A sincronização está ligada, então seus outros aparelhos vão receber estes dados na próxima sincronização.</string>
 </resources>

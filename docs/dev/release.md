@@ -65,6 +65,39 @@ the new recipient to `.sops.yaml`.
 On compromise only. Android 9+ supports APK Signature Scheme v3 key rotation
 (`apksigner rotate`), so a leaked key can be replaced without breaking updates.
 
+## Google Drive sign-in (OAuth client)
+
+Sync (release 0.11, `FEATURE_DRIVE_SYNC`) signs in with Google Identity's
+`AuthorizationClient`. Android OAuth clients have **no client secret**: Google
+recognises the app by its package name and signing certificate. Nothing is
+added to the repository.
+
+1. In the [Google Cloud console](https://console.cloud.google.com/), create a
+   project (for example "Trecos") and enable the **Google Drive API**.
+2. **OAuth consent screen**: External, app name "Trecos", support e-mail,
+   developer contact, the privacy policy URL (`PRIVACY.md` on GitHub until the
+   site exists), and the scopes `https://www.googleapis.com/auth/drive.file`
+   and `https://www.googleapis.com/auth/drive.appdata`. Both are non-sensitive
+   scopes, so no Google verification is needed. While in "Testing", add your
+   account as a test user.
+3. **Credentials > Create OAuth client ID > Android**, twice:
+   - package `app.trecos` with the **release** certificate's SHA-1:
+     `keytool -list -v -keystore <release.jks> -alias <alias>` (from the
+     decrypted SOPS file);
+   - package `app.trecos` with the **debug** certificate's SHA-1 of the
+     machine that builds debug APKs:
+     `keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android`,
+     or `./gradlew signingReport`.
+   Once enrolled in Play App Signing (task 8.7), add a third client with the
+   **Play app signing** certificate's SHA-1 from the Play Console.
+4. Verify on a debug build with sync switched on:
+   `./gradlew :app:installDebug -Ptrecos.driveSync=true`. Then go to Settings >
+   Sync & backup > Sync > Connect Google Drive, pick the account and allow
+   access. A "Trecos" folder appears in My Drive, and Sync shows "Last sync".
+
+If Google shows "DEVELOPER_ERROR" or the connect screen closes at once, the
+SHA-1 or the package name of the client doesn't match the installed APK.
+
 ## Publishing a release
 
 `.github/workflows/release.yml` runs when a `v*` tag is pushed:

@@ -1,6 +1,9 @@
 package app.trecos.ui.shell
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -40,6 +43,17 @@ class NavigationTest {
     fun switchingTabsOpensTheTabScreen() {
         appRule.onNodeWithTag(tabTag(TrecosTab.Search)).performClick()
         appRule.onNodeWithTag(rootScreenTag(TrecosTab.Search)).assertIsDisplayed()
+    }
+
+    @Test
+    fun screensBelowATabKeepItSelected() {
+        appRule.onNodeWithTag(tabTag(TrecosTab.Settings)).performClick()
+        appRule.waitUntil(10_000) { appRule.onAllNodesWithTag("setting_currency").fetchSemanticsNodes().isNotEmpty() }
+        appRule.onNodeWithTag("setting_currency").performClick()
+        appRule.waitUntil(10_000) { appRule.onAllNodesWithTag("currency_search").fetchSemanticsNodes().isNotEmpty() }
+
+        appRule.onNodeWithTag(tabTag(TrecosTab.Settings)).assertIsSelected()
+        appRule.onNodeWithTag(tabTag(TrecosTab.Home)).assertIsNotSelected()
     }
 
     @Test

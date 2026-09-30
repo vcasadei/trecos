@@ -29,6 +29,22 @@ your data.
 Trecos requests access only to the Drive files it creates (`drive.file`) and its
 hidden app folder (`drive.appdata`).
 
+### What sync puts in your Drive
+
+When you connect sync, a visible **Trecos** folder in your My Drive holds:
+
+- every house's data, including what is in its trash, as one file per sync;
+- one small file per device, naming its latest sync;
+- your full-size photos, each stored once.
+
+Each sync record also carries your Google account's name and e-mail, the
+device's name (which you can edit) and an app-generated device id. It never
+records a hardware id or your location.
+
+Drive keeps each device's last **30 syncs**; older ones are deleted
+automatically. Disconnecting stops sync and keeps everything on your phone. To
+remove the data from Drive, delete the Trecos folder in Drive.
+
 ## What Trecos does not do
 
 - No location collection.

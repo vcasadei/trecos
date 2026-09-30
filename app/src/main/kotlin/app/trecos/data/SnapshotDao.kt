@@ -183,4 +183,52 @@ interface SnapshotDao {
     /** Deletes every house. */
     @Query("DELETE FROM house")
     suspend fun clearHouses()
+
+    /** @param houseId the house whose custom field values are deleted. */
+    @Query("DELETE FROM field_value WHERE houseId = :houseId")
+    suspend fun deleteFieldValueOf(houseId: String)
+
+    /** @param houseId the house whose custom field definitions are deleted. */
+    @Query("DELETE FROM field_def WHERE houseId = :houseId")
+    suspend fun deleteFieldDefOf(houseId: String)
+
+    /** @param houseId the house whose photo rows are deleted. */
+    @Query("DELETE FROM photo WHERE houseId = :houseId")
+    suspend fun deletePhotoOf(houseId: String)
+
+    /** @param houseId the house whose trash entries are deleted. */
+    @Query("DELETE FROM trash_entry WHERE houseId = :houseId")
+    suspend fun deleteTrashEntryOf(houseId: String)
+
+    /** @param houseId the house whose learned counts are deleted. */
+    @Query("DELETE FROM token_category_count WHERE houseId = :houseId")
+    suspend fun deleteTokenCategoryCountOf(houseId: String)
+
+    /** @param houseId the house whose tag assignments are deleted. */
+    @Query("DELETE FROM item_tag WHERE houseId = :houseId")
+    suspend fun deleteItemTagOf(houseId: String)
+
+    /** @param houseId the house whose tags are deleted. */
+    @Query("DELETE FROM tag WHERE houseId = :houseId")
+    suspend fun deleteTagOf(houseId: String)
+
+    /** @param houseId the house whose category assignments are deleted. */
+    @Query("DELETE FROM item_category WHERE houseId = :houseId")
+    suspend fun deleteItemCategoryOf(houseId: String)
+
+    /** @param houseId the house whose custom categories are deleted. */
+    @Query("DELETE FROM category WHERE houseId = :houseId")
+    suspend fun deleteCategoryOf(houseId: String)
+
+    /** @param houseId the house whose items are deleted. */
+    @Query("DELETE FROM item WHERE houseId = :houseId")
+    suspend fun deleteItemOf(houseId: String)
+
+    /** @param houseId the house whose containers are deleted. */
+    @Query("DELETE FROM container WHERE houseId = :houseId")
+    suspend fun deleteContainerOf(houseId: String)
+
+    /** @param houseId the house row to delete. */
+    @Query("DELETE FROM house WHERE id = :houseId")
+    suspend fun deleteHouseRow(houseId: String)
 }

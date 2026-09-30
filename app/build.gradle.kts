@@ -20,6 +20,10 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Feature flags (design D19): off until their releases are ready. Turn one on
+        // for a local build with -Ptrecos.driveSync=true or -Ptrecos.encryption=true.
+        buildConfigField("boolean", "FEATURE_DRIVE_SYNC", (findProperty("trecos.driveSync") ?: "false").toString())
+        buildConfigField("boolean", "FEATURE_ENCRYPTION", (findProperty("trecos.encryption") ?: "false").toString())
     }
 
     // Release signing reads only these environment variables (design D22); CI sets
@@ -59,6 +63,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     testOptions {
@@ -150,7 +155,10 @@ dependencies {
     implementation(libs.androidx.print)
     implementation(libs.androidx.biometric)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.play.services.auth)
     baselineProfile(project(":baselineprofile"))
+
+    testImplementation(libs.androidx.work.testing)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
