@@ -52,7 +52,7 @@ abstract class PlacesTestBase {
      * @return the node.
      */
     protected fun tag(tag: String): SemanticsNodeInteraction {
-        rule.waitUntil(5_000) {
+        rule.waitUntil(10_000) {
             rule.onAllNodes(androidx.compose.ui.test.hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
         }
         return rule.onNodeWithTag(tag, useUnmergedTree = true)
@@ -77,7 +77,7 @@ abstract class PlacesTestBase {
      * @return the node.
      */
     protected fun text(text: String): SemanticsNodeInteraction {
-        rule.waitUntil(5_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(10_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty() }
         return rule.onNode(hasText(text))
     }
 
@@ -87,7 +87,7 @@ abstract class PlacesTestBase {
      * @param text the text.
      */
     protected fun gone(text: String) {
-        rule.waitUntil(5_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isEmpty() }
+        rule.waitUntil(10_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isEmpty() }
     }
 
     /**

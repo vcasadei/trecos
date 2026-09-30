@@ -40,7 +40,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 2.10 Implement the total value (quantity × unit price, none without a price) and added/changed dates; tests for scenarios "Screws" and "Editing updates the date"
 - [x] 2.11 Build the item form (essentials, "More fields", Save, Save + new keeping the location); verify with a UI test that Save + new keeps the container
 - [x] 2.12 Build the item screen, with price formatting by app language and currency symbol; tests for scenarios "Price formatting in Portuguese" and "Price formatting in English"
-- [ ] 2.13 Show the location path on item and container screens, with tappable levels and the collapse rule; tests for scenarios "Jumping up the hierarchy", "Deep path on a small screen" and "Leaving a container"
+- [x] 2.13 Show the location path on item and container screens, with tappable levels and the collapse rule; tests for scenarios "Jumping up the hierarchy", "Deep path on a small screen" and "Leaving a container"
 - [ ] 2.14 Implement the container value fold (recursive sum, override counting upward, auto/manual label, clear override, unpriced count); unit tests for scenarios "Override counts upward" and "Unpriced items"
 - [ ] 2.15 Implement colours (header tint, row stripe, inheritance) and the house indicator (status bar band with Automatic/Always/Never, house pill); tests for scenarios "Inherited colour", "Own colour wins", "Two houses" and "Single house"
 - [ ] 2.16 Show icons for places without photos; test for scenario "Container without photos"
