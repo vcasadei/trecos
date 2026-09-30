@@ -24,6 +24,15 @@ Toque no código QR de um item ou compartimento e depois em **Imprimir** (ou
 uma linha, selecione as outras e toque no ícone de impressão: todos vão num
 único trabalho de impressão, 12 por página. O que não tem código fica de fora.
 
+## 5. Como funcionam o backup e a sincronização?
+
+**Backup**: Ajustes > **Sincronização e backup** > **Backup** salva um arquivo
+`.zip` com suas casas e fotos onde você escolher. Importe em qualquer celular,
+adicionando as casas como novas ou substituindo tudo. Não precisa de conta, e o
+arquivo não é criptografado. Veja [Backup](backup.md). A sincronização com o
+seu próprio Google Drive chega numa versão futura; esta resposta vai explicá-la
+quando chegar.
+
 ## 6. O que acontece quando excluo algo?
 
 Vai para a lixeira da casa por 30 dias, e você pode tocar em **Desfazer** na
