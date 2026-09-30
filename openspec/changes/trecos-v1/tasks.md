@@ -86,7 +86,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 5.8 Add the daily purge job (older than 30 days, including photo files later); test for scenario "Automatic purge" with a fake clock
 - [x] 5.9 Build the container delete flow ("Move everything to trash" or "Choose what to keep", checkboxes, drilling into sub-containers, several destinations including a new container at the parent level, Finish with confirmation); tests for scenarios "Keeping some things" and "Leaving the keep screen early"
 - [x] 5.10 Implement house deletion (type the name, permanent, suggest export, never the last house); tests for scenarios "Deleting a house" and "Wrong name typed"
-- [ ] 5.11 Update the user docs on moving and deleting and draft FAQ answers 3 and 6 (both languages), and add the 0.4 entry to `CHANGELOG.md`
+- [x] 5.11 Update the user docs on moving and deleting and draft FAQ answers 3 and 6 (both languages), and add the 0.4 entry to `CHANGELOG.md`
 
 ## 6. Release 0.5 — Photos
 
