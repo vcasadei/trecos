@@ -69,6 +69,47 @@ data class HouseSnapshot(
             )
         }
     }
+
+    /**
+     * Inserts every row of this house, parents before children. Call inside a transaction.
+     *
+     * @param db the database.
+     */
+    suspend fun insertInto(db: TrecosDatabase) = with(db.snapshots()) {
+        insertHouses(listOf(house))
+        insertContainers(containers)
+        insertItems(items)
+        insertCategories(categories)
+        insertItemCategories(itemCategories)
+        insertTags(tags)
+        insertItemTags(itemTags)
+        insertLearned(learned)
+        insertTrash(trash)
+        insertPhotos(photos)
+        insertFieldDefs(fieldDefs)
+        insertFieldValues(fieldValues)
+    }
+}
+
+/**
+ * Deletes a house and every row in it. Call inside a transaction.
+ *
+ * @param db the database.
+ * @param houseId the house.
+ */
+suspend fun deleteHouseRows(db: TrecosDatabase, houseId: String) = with(db.snapshots()) {
+    deleteFieldValueOf(houseId)
+    deleteFieldDefOf(houseId)
+    deletePhotoOf(houseId)
+    deleteTrashEntryOf(houseId)
+    deleteTokenCategoryCountOf(houseId)
+    deleteItemTagOf(houseId)
+    deleteTagOf(houseId)
+    deleteItemCategoryOf(houseId)
+    deleteCategoryOf(houseId)
+    deleteItemOf(houseId)
+    deleteContainerOf(houseId)
+    deleteHouseRow(houseId)
 }
 
 /** A snapshot file that can't be read. */

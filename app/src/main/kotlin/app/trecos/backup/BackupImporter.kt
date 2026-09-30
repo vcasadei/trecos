@@ -128,7 +128,7 @@ class BackupImporter(
             clearContainers()
             clearHouses()
         }
-        contents.houses.forEach { insert(it) }
+        contents.houses.forEach { it.insertInto(db) }
     }
 
     /**
@@ -139,7 +139,7 @@ class BackupImporter(
      */
     suspend fun addAsNewHouses(contents: BackupContents): List<String> {
         val renewed = contents.houses.map(::withNewIds)
-        importing(contents) { renewed.forEach { insert(it) } }
+        importing(contents) { renewed.forEach { it.insertInto(db) } }
         return renewed.map { it.house.id }
     }
 
@@ -157,22 +157,6 @@ class BackupImporter(
         } finally {
             contents.discard()
         }
-    }
-
-    /** Inserts one house's rows, parents before children. */
-    private suspend fun insert(s: HouseSnapshot) = with(db.snapshots()) {
-        insertHouses(listOf(s.house))
-        insertContainers(s.containers)
-        insertItems(s.items)
-        insertCategories(s.categories)
-        insertItemCategories(s.itemCategories)
-        insertTags(s.tags)
-        insertItemTags(s.itemTags)
-        insertLearned(s.learned)
-        insertTrash(s.trash)
-        insertPhotos(s.photos)
-        insertFieldDefs(s.fieldDefs)
-        insertFieldValues(s.fieldValues)
     }
 
     /**
