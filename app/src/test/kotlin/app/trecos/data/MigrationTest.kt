@@ -93,8 +93,31 @@ class MigrationTest {
     }
 
     @Test
+    fun version5To6AddsCustomFieldsAndIndexesTheirText() {
+        helper.createDatabase(DB, 5).use { db ->
+            db.execSQL("INSERT INTO house (id, name, icon, createdAt, updatedAt) VALUES ('h1', 'Apartment', 'house', 1, 1)")
+            db.execSQL("INSERT INTO item (id, houseId, name, quantity, description, createdAt, updatedAt) VALUES ('i1', 'h1', '3D printer', 1, 'Ender', 1, 1)")
+        }
+        helper.runMigrationsAndValidate(DB, 6, true).use { db ->
+            fun match(q: String) = db.query("SELECT refId FROM search_index WHERE search_index MATCH '$q'").use { c -> buildList { while (c.moveToNext()) add(c.getString(0)) } }
+            assertEquals(listOf("i1"), match("description:ender*"))
+            db.execSQL("INSERT INTO field_def (id, houseId, itemId, name, type, position, createdAt, updatedAt) VALUES ('f1', 'h1', 'i1', 'Firmware', 'Text', 0, 1, 1)")
+            db.execSQL("INSERT INTO field_def (id, houseId, itemId, name, type, position, createdAt, updatedAt) VALUES ('f2', 'h1', NULL, 'Watts', 'Number', 0, 1, 1)")
+            db.execSQL("INSERT INTO field_value (id, houseId, itemId, fieldId, value, createdAt, updatedAt) VALUES ('v1', 'h1', 'i1', 'f1', 'Klipper', 1, 1)")
+            db.execSQL("INSERT INTO field_value (id, houseId, itemId, fieldId, value, createdAt, updatedAt) VALUES ('v2', 'h1', 'i1', 'f2', '350', 1, 1)")
+            assertEquals(listOf("i1"), match("description:klipper*"))
+            assertEquals(listOf("i1"), match("description:ender*"))
+            assertEquals(emptyList<String>(), match("350*"))
+            db.execSQL("UPDATE field_value SET value = 'Marlin' WHERE id = 'v1'")
+            assertEquals(emptyList<String>(), match("klipper*"))
+            db.execSQL("DELETE FROM field_value WHERE id = 'v1'")
+            assertEquals(emptyList<String>(), match("marlin*"))
+        }
+    }
+
+    @Test
     fun theCurrentVersionIsTheLatestExportedSchema() {
-        assertEquals(5, TrecosDatabase.VERSION)
+        assertEquals(6, TrecosDatabase.VERSION)
     }
 
     private companion object {

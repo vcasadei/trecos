@@ -127,7 +127,7 @@ run at the end of **every** release group before it is tagged.
 
 ## 9. Release 0.8 — Custom fields and settings
 
-- [ ] 9.1 Migration v5 → v6 (expand): add `FieldDef` (house-wide or per item) and `FieldValue`; verify with a migration test
+- [x] 9.1 Migration v5 → v6 (expand): add `FieldDef` (house-wide or per item) and `FieldValue`; verify with a migration test
 - [ ] 9.2 Implement field types (Text, Number with unit label, Date, Yes/No) and validation; tests for scenarios "Number with unit" and "Wrong type"
 - [ ] 9.3 Implement house-wide field definitions in Settings (rename keeps values, delete confirms the count); tests for scenarios "Adding a house-wide field" and "Deleting a used field"
 - [ ] 9.4 Implement per-item fields; test for scenario "One-off field"
