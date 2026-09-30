@@ -7,6 +7,8 @@ import app.trecos.categories.BuiltInCategories
 import app.trecos.categories.Category
 import app.trecos.categories.CategorySuggester
 import app.trecos.data.AppPreferences
+import app.trecos.crypto.DatabaseKeys
+import app.trecos.crypto.EncryptionManager
 import app.trecos.data.TrecosDatabase
 import app.trecos.lock.AppLock
 import app.trecos.lock.DeviceSecurity
@@ -23,21 +25,33 @@ import kotlinx.coroutines.flow.MutableSharedFlow
  * no dependency-injection framework).
  *
  * @param context the application context.
- * @param openDatabase opens the database on first use; tests pass an in-memory one.
+ * @param openDatabase opens the database on first use; tests pass an in-memory one. By default the
+ *   database file opens with its key, after finishing any pending re-encryption.
  * @property clock the current time in epoch milliseconds; tests pass a fixed clock.
  * @property newId generates record ids; random UUIDs by default.
  */
 class AppContainer(
     context: Context,
-    openDatabase: () -> TrecosDatabase = { TrecosDatabase.open(context) },
+    openDatabase: (() -> TrecosDatabase)? = null,
     val clock: () -> Long = System::currentTimeMillis,
     val newId: () -> String = { UUID.randomUUID().toString() },
 ) {
     /** The application context. */
     val appContext: Context = context
 
-    /** The database, opened on first access. */
-    val database: TrecosDatabase by lazy(openDatabase)
+    /** Optional database encryption. */
+    val encryption: EncryptionManager = EncryptionManager(context) { database }
+
+    /**
+     * The database, opened on first access, after finishing any re-encryption
+     * the previous run prepared.
+     */
+    val database: TrecosDatabase by lazy {
+        openDatabase?.invoke() ?: run {
+            encryption.swap.finish()
+            TrecosDatabase.open(context, DatabaseKeys.passphrase(encryption.keys.current()))
+        }
+    }
 
     /** The built-in category tree, read once from the bundled asset. */
     val builtInCategories: List<Category> by lazy {
@@ -95,7 +109,7 @@ class AppContainer(
     val scope: kotlinx.coroutines.CoroutineScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
 
     /** Google Drive sync. */
-    val sync: SyncManager by lazy { SyncManager(appContext, database, photoStore, preferences, resources, clock) }
+    val sync: SyncManager by lazy { SyncManager(appContext, database, photoStore, preferences, resources, clock, encryption) }
 
     /** Device preferences. */
     val preferences: AppPreferences = AppPreferences(

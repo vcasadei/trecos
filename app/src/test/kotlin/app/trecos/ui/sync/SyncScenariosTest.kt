@@ -42,6 +42,7 @@ import app.trecos.sync.AuthOutcome
 import app.trecos.sync.Conflict
 import app.trecos.sync.ConflictKind
 import app.trecos.sync.DriveAuth
+import app.trecos.sync.DriveSession
 import app.trecos.sync.DriveUser
 import app.trecos.sync.StoredConflict
 import app.trecos.sync.SyncEngine
@@ -92,13 +93,14 @@ class SyncScenariosTest : PlacesTestBase() {
     private val auth = FakeAuth()
     private val remote = SyncEngineTest.FakeRemote()
     private val user = DriveUser("Vitor", "v@example.com")
+    private val vault = SyncEngineTest.FakeVault()
 
     @Before
     fun useFakes() {
         initWorkManager()
         app.features = Features(driveSync = true)
         app.sync.auth = auth
-        app.sync.connectTo = { remote to { user } }
+        app.sync.connectTo = { DriveSession(remote, { user }, vault) }
         app.sync.onUnmeteredNetwork = { true }
     }
 
@@ -415,7 +417,7 @@ class SyncScenariosTest : PlacesTestBase() {
             db.houses().insert(House(houseId, name, icon = "house", createdAt = 1, updatedAt = 1))
             db.containers().insert(Container("shelf", houseId, null, "Shelf", icon = "box", createdAt = 1, updatedAt = 1))
             db.items().insert(Item("lamp", houseId, "shelf", "Lamp", createdAt = 1, updatedAt = 1))
-            val engine = SyncEngine(db, PhotoStore(folder.newFolder(), context.contentResolver), SyncStore(folder.newFolder(), "Tablet")) { 5 }
+            val engine = SyncEngine(db, PhotoStore(folder.newFolder(), context.contentResolver), SyncStore(folder.newFolder(), "Tablet"), clock = { 5 })
             engine.sync(remote, user, photosAllowed = true, create = true)
         }
         db.close()

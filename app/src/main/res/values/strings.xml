@@ -413,4 +413,24 @@
         <item quantity="other">%1$d conflicts</item>
     </plurals>
     <string name="import_replace_sync_warning">Sync is on, so your other devices will receive this data at the next sync.</string>
+    <string name="sync_error_key">Your Drive data is encrypted and the key couldn\'t be fetched. Connect Google Drive again.</string>
+    <!-- Encryption (0.12) -->
+    <string name="setting_encryption">Encrypt data</string>
+    <string name="encryption_on">On</string>
+    <string name="encryption_off">Off</string>
+    <string name="encryption_account_only">On for your Google account. Tap to encrypt this phone too.</string>
+    <string name="encryption_needs_account">Encryption keeps its key in your Google account, so you can recover your data on a new phone. Connect Google Drive first.</string>
+    <string name="encryption_enable_title">Encrypt your data?</string>
+    <string name="encryption_enable_body">Your inventory on this phone and its copies in Drive will be encrypted. Photos are not encrypted. Trecos restarts when it\'s done.</string>
+    <string name="encryption_enable_action">Encrypt</string>
+    <string name="encryption_disable_title">Turn encryption off?</string>
+    <string name="encryption_disable_body">Your data on this phone is decrypted, the key is removed from your Drive, and later Drive copies aren\'t encrypted. Trecos restarts when it\'s done.</string>
+    <string name="encryption_disable_action">Turn off</string>
+    <string name="encryption_working">Encrypting… Keep Trecos open.</string>
+    <string name="decryption_working">Decrypting… Keep Trecos open.</string>
+    <string name="encryption_failed">Encryption didn\'t finish. Your data is unchanged and not encrypted.</string>
+    <string name="decryption_failed">Turning encryption off didn\'t finish. Your data is unchanged and still encrypted.</string>
+    <string name="disconnect_blocked">Turn encryption off before disconnecting: the key\'s recovery copy is in this Google account.</string>
+    <string name="export_unencrypted_title">This backup won\'t be encrypted</string>
+    <string name="export_unencrypted_body">Encryption is on, but backup files are never encrypted. Anyone with the file can read it. Continue?</string>
 </resources>

@@ -51,6 +51,18 @@ diferente: é permanente na hora, então exporte um backup antes.
 
 Ajustes > **Segurança** > **Bloqueio do app**. O Trecos usa o bloqueio do próprio celular (digital, rosto, PIN, padrão ou senha), então não há outra senha para lembrar. O celular precisa ter bloqueio de tela. Em **Bloquear depois de**, escolha quando o Trecos pede de novo: imediatamente, depois de 1 minuto (padrão), 5 ou 15 minutos em segundo plano. Se depois você tirar o bloqueio de tela do celular, o Trecos desliga o bloqueio dele e avisa.
 
+## 8. Meus dados são privados?
+
+Sim. O Trecos não tem servidor, anúncios nem rastreamento; seu inventário fica
+no seu celular. Se você ligar a sincronização, ele é copiado só para o **seu
+próprio** Google Drive, numa pasta Trecos que só o Trecos gerencia. Com
+**Criptografar dados** (Ajustes > Segurança), o banco de dados no celular e as
+cópias no Drive ficam criptografados. As fotos não são criptografadas, e os
+arquivos de backup nunca são. A chave fica protegida no celular e guardada na
+pasta oculta do app no seu Drive, para você recuperar os dados num celular novo
+com a mesma conta Google. Se você perder o acesso a essa conta, os dados
+criptografados não podem ser recuperados.
+
 ## 9. Preciso de uma conta?
 
 Não. Tudo, menos a sincronização com o Google Drive, funciona sem conta, nome ou e-mail. A sincronização (quando chegar) usa sua própria conta Google. Nos Ajustes você pode adicionar um nome e e-mail opcionais para identificar seus registros de sincronização; dá para mudar ou apagar a qualquer momento.
