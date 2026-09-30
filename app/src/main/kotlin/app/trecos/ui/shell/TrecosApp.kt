@@ -128,7 +128,11 @@ private object Routes {
 fun TrecosApp(navController: NavHostController = rememberNavController()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val route = backStackEntry?.destination?.route
-    val currentTab = TrecosTab.entries.firstOrNull { rootRoute(it) == route } ?: TrecosTab.Home
+    // Screens below a tab root (such as Settings > Sync) keep their tab highlighted.
+    var lastTab by rememberSaveable { mutableStateOf(TrecosTab.Home) }
+    val rootTab = TrecosTab.entries.firstOrNull { rootRoute(it) == route }
+    if (rootTab != null) SideEffect { lastTab = rootTab }
+    val currentTab = rootTab ?: lastTab
     val shell = appViewModel { ShellViewModel(it) }
     val band by shell.band.collectAsStateWithLifecycle()
     val dark = LocalDarkTheme.current
