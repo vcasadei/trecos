@@ -166,7 +166,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 12.9 Build the sync status and history screens (last success, errors in plain language, retries, entries with time, user, device name and summary, editable device name, app-generated device id); tests for scenarios "Drive unreachable" and "Viewing history"
 - [x] 12.10 Implement restore onto a device (offer restore, merge or keep Drive data), the format-version refusal, and detection of a deleted or altered folder; tests for scenarios "New phone", "Old app, new data" and "Folder deleted"
 - [x] 12.11 Add the replace-with-sync warning to import; test for scenario "Replacing with sync on"
-- [ ] 12.12 Write `docs/architecture/sync-protocol.md`, update `PRIVACY.md` (Drive data, 30-sync retention), write FAQ answers 5 (sync part) and 10 (both languages), and add the 0.11 entry to `CHANGELOG.md`
+- [x] 12.12 Write `docs/architecture/sync-protocol.md`, update `PRIVACY.md` (Drive data, 30-sync retention), write FAQ answers 5 (sync part) and 10 (both languages), and add the 0.11 entry to `CHANGELOG.md`
 
 ## 13. Release 0.12 — Encryption (behind `FEATURE_ENCRYPTION`)
 
