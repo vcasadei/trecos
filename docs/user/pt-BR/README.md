@@ -10,4 +10,5 @@ O guia é escrito conforme cada recurso é lançado:
 | [search.md](search.md) | 0.6 |
 | [qr-labels.md](qr-labels.md) | 0.7 |
 | [custom-fields-and-settings.md](custom-fields-and-settings.md) | 0.8 |
-| [faq.md](faq.md) (também exibido no app) | 1.0 (respostas 2, 3, 4, 6, 7 e 9 prontas) |
+| [backup.md](backup.md) | 0.10 |
+| [faq.md](faq.md) (também exibido no app) | 1.0 (respostas 2 a 7 e 9 prontas) |

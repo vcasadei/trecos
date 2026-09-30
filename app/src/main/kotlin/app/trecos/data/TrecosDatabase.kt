@@ -50,6 +50,9 @@ abstract class TrecosDatabase : RoomDatabase() {
     /** @return photo rows. */
     abstract fun photos(): PhotoDao
 
+    /** @return whole-house reads and writes for backups and sync. */
+    abstract fun snapshots(): SnapshotDao
+
     /** @return custom fields. */
     abstract fun fields(): FieldDao
 

@@ -6,6 +6,18 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.10.0] - Unreleased
+
+### Added
+
+- Export a backup from Settings > Sync & backup: one `trecos-backup-YYYY-MM-DD.zip` with all or chosen houses, every item, container, category, tag, custom field and full-size photo, saved with the system file picker. A failed save removes the incomplete file.
+- Import a backup with a preview, then "Add as new houses" (new identities) or "Replace everything" after confirming. Imports are all or nothing; damaged backups and backups from newer versions change nothing.
+- The snapshot format (JSON Lines, sorted, versioned) that sync will share.
+
+### Fixed
+
+- "More fields" could close again when tapped while an item's edit form was still loading.
+
 ## [0.9.0] - Unreleased
 
 ### Added
