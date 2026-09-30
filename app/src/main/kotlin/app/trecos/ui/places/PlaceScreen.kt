@@ -1,5 +1,6 @@
 package app.trecos.ui.places
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +10,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -40,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.trecos.R
 import app.trecos.data.ListView
 import app.trecos.places.Money
+import app.trecos.places.Selection
 import app.trecos.ui.appViewModel
 import app.trecos.ui.language.AppLanguage
 import app.trecos.ui.shell.TrecosTopBar
@@ -71,6 +76,10 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
     val vm = appViewModel(key = "place/$houseId/$containerId") { PlaceViewModel(it, houseId, containerId) }
     val state by vm.state.collectAsStateWithLifecycle()
     LaunchedEffect(houseId) { vm.rememberHouse() }
+    var loaded by remember { mutableStateOf(false) }
+    LaunchedEffect(state) {
+        if (state != null) loaded = true else if (loaded && containerId != null) nav.back()
+    }
     val current = state ?: return
     val dark = LocalDarkTheme.current
     val language = AppLanguage.current()
@@ -80,10 +89,32 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
     var explanation by rememberSaveable { mutableStateOf<Int?>(null) }
     var fullPathOpen by rememberSaveable { mutableStateOf(false) }
     val listState = rememberLazyListState()
+    val organize = rememberOrganizeController()
+    var selectedItems by rememberSaveable { mutableStateOf(listOf<String>()) }
+    var selectedContainers by rememberSaveable { mutableStateOf(listOf<String>()) }
+    val selecting = selectedItems.isNotEmpty() || selectedContainers.isNotEmpty()
+    fun clearSelection() {
+        selectedItems = emptyList()
+        selectedContainers = emptyList()
+    }
+    val selection = Selection(itemIds = selectedItems, containerIds = selectedContainers)
+    BackHandler(enabled = selecting) { clearSelection() }
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
-            Box {
+            if (selecting) {
+                SelectionBar(
+                    count = selectedItems.size + selectedContainers.size,
+                    onClear = { clearSelection() },
+                    onSelectAll = {
+                        selectedItems = current.items.map { it.id }
+                        selectedContainers = current.containers.map { it.id }
+                    },
+                    onMove = { organize.move(selection, current.house.id) { clearSelection() } },
+                    onCopy = { organize.copy(selection, current.house.id) { clearSelection() } },
+                    onDelete = { organize.delete(selection, null) { clearSelection() } },
+                )
+            } else Box {
                 TrecosTopBar(
                     title = current.container?.name ?: current.house.name,
                     onBack = if (isTabRoot) null else nav.back,
@@ -119,26 +150,42 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                                     },
                                     modifier = Modifier.testTag("menu_tags"),
                                 )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.trash_title)) },
+                                    onClick = {
+                                        menuOpen = false
+                                        nav.openTrash(current.house.id)
+                                    },
+                                    modifier = Modifier.testTag("menu_trash"),
+                                )
                                 val lastHouse = current.houses.size <= 1
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.action_delete)) },
                                     onClick = {
                                         menuOpen = false
-                                        explanation = if (lastHouse) R.string.delete_last_house else R.string.coming_later
+                                        if (lastHouse) explanation = R.string.delete_last_house else nav.deleteHouse(current.house.id)
                                     },
                                     modifier = Modifier.testTag("menu_delete"),
                                 )
                             } else {
-                                listOf(
-                                    R.string.action_move, R.string.action_copy, R.string.action_duplicate,
-                                    R.string.action_delete, R.string.action_search_here, R.string.action_print_qr,
-                                ).forEach { label ->
+                                val container = current.container
+                                val here = Selection(containerIds = listOf(container.id))
+                                val actions = listOf<Pair<Int, () -> Unit>>(
+                                    R.string.action_move to { organize.move(here, current.house.id) },
+                                    R.string.action_copy to { organize.copy(here, current.house.id) },
+                                    R.string.action_duplicate to { organize.duplicate(container.id) { nav.editContainer(it) } },
+                                    R.string.action_delete to { organize.delete(here, container.name) { nav.back() } },
+                                    R.string.action_search_here to { explanation = R.string.coming_later },
+                                    R.string.action_print_qr to { explanation = R.string.coming_later },
+                                )
+                                actions.forEach { (label, action) ->
                                     DropdownMenuItem(
                                         text = { Text(stringResource(label)) },
                                         onClick = {
                                             menuOpen = false
-                                            explanation = R.string.coming_later
+                                            action()
                                         },
+                                        modifier = Modifier.testTag("menu_$label"),
                                     )
                                 }
                             }
@@ -191,13 +238,18 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                 if (current.containers.isNotEmpty()) {
                     item(key = "containers") { SectionTitle(stringResource(R.string.section_containers, current.containers.size)) }
                     items(current.containers, key = { it.id }) { container ->
+                        val toggle = {
+                            selectedContainers = if (container.id in selectedContainers) selectedContainers - container.id else selectedContainers + container.id
+                        }
                         ContainerRow(
                             container = container,
                             colour = PaletteColor.fromKey(current.tree.colorKey(container.id)),
                             value = current.tree.value(container.id),
                             listView = current.listView,
                             currency = current.currency,
-                            onClick = { nav.openContainer(current.house.id, container.id) },
+                            selected = container.id in selectedContainers,
+                            onLongClick = toggle,
+                            onClick = { if (selecting) toggle() else nav.openContainer(current.house.id, container.id) },
                         )
                     }
                 }
@@ -205,13 +257,16 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                     item(key = "items") { SectionTitle(stringResource(R.string.section_items, current.items.size)) }
                     items(current.items, key = { it.id }) { item ->
                         val ids = current.itemCategories[item.id].orEmpty()
+                        val toggle = { selectedItems = if (item.id in selectedItems) selectedItems - item.id else selectedItems + item.id }
                         ItemRow(
                             item = item,
                             listView = current.listView,
                             currency = current.currency,
                             mainIcon = ids.firstOrNull()?.let { current.catalog[it]?.icon } ?: NO_CATEGORY,
                             categoryLabels = ids.mapNotNull { current.catalog.label(it, language) },
-                        ) { nav.openItem(item.id) }
+                            selected = item.id in selectedItems,
+                            onLongClick = toggle,
+                        ) { if (selecting) toggle() else nav.openItem(item.id) }
                     }
                 }
                 if (current.containers.isEmpty() && current.items.isEmpty()) {
@@ -235,6 +290,7 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
         )
     }
 
+    OrganizeDialogs(organize, onChooseWhatToKeep = nav.keep)
     explanation?.let { message ->
         AlertDialog(
             onDismissRequest = { explanation = null },
@@ -336,6 +392,45 @@ private fun PlaceHeader(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.testTag("unpriced_hint"),
             )
+        }
+    }
+}
+
+/**
+ * The top bar in selection mode: clear, the count, and the bulk actions.
+ *
+ * @param count how many rows are selected.
+ * @param onClear leaves selection mode.
+ * @param onSelectAll selects every row on the screen.
+ * @param onMove moves the selection.
+ * @param onCopy copies the selection.
+ * @param onDelete deletes the selection.
+ */
+@Composable
+private fun SelectionBar(count: Int, onClear: () -> Unit, onSelectAll: () -> Unit, onMove: () -> Unit, onCopy: () -> Unit, onDelete: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .statusBarsPadding()
+            .height(56.dp)
+            .padding(horizontal = 4.dp)
+            .testTag("selection_bar"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onClear) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.clear_selection)) }
+        Text(
+            pluralStringResource(R.plurals.selected_count, count, count),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f).testTag("selected_count"),
+        )
+        listOf(
+            Triple(R.drawable.ic_select_all, R.string.select_all, onSelectAll),
+            Triple(R.drawable.ic_move, R.string.action_move, onMove),
+            Triple(R.drawable.ic_copy, R.string.action_copy, onCopy),
+            Triple(R.drawable.ic_delete, R.string.action_delete, onDelete),
+        ).forEach { (icon, label, action) ->
+            IconButton(onClick = action) { Icon(painterResource(icon), contentDescription = stringResource(label)) }
         }
     }
 }

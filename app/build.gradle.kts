@@ -67,7 +67,7 @@ android {
     // Migration tests (Robolectric, so CI needs no emulator) read the exported
     // schemas as assets. Unit tests only see the tested variant's assets, so the
     // schemas go into debug builds; release builds never contain them.
-    sourceSets.getByName("debug").assets.srcDir("$projectDir/schemas")
+    sourceSets.getByName("debug").assets.directories.add("$projectDir/schemas")
 }
 
 room {
@@ -142,6 +142,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.work.runtime)
     baselineProfile(project(":baselineprofile"))
 
     testImplementation(libs.junit)

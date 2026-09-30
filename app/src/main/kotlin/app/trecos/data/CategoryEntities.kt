@@ -109,3 +109,35 @@ data class TokenCategoryCount(
     val categoryId: String,
     val count: Int,
 )
+
+/**
+ * One delete the user can undo or restore from the house's trash. The trashed
+ * item or container and everything inside it share the same `deletedAt`
+ * ([trashedAt]), which tells them apart from things trashed separately.
+ *
+ * @property id random UUID.
+ * @property houseId the house.
+ * @property kind [KIND_ITEM] or [KIND_CONTAINER].
+ * @property targetId the trashed item or container.
+ * @property name its name when trashed, for the trash list.
+ * @property parentId where it was: its container, or `null` for the house's top level.
+ * @property trashedAt when it was trashed, epoch milliseconds.
+ */
+@Entity(tableName = "trash_entry", indices = [Index(value = ["houseId", "trashedAt"])])
+data class TrashEntry(
+    @PrimaryKey val id: String,
+    val houseId: String,
+    val kind: String,
+    val targetId: String,
+    val name: String,
+    val parentId: String?,
+    val trashedAt: Long,
+) {
+    companion object {
+        /** An item was trashed. */
+        const val KIND_ITEM = "item"
+
+        /** A container, with its contents, was trashed. */
+        const val KIND_CONTAINER = "container"
+    }
+}

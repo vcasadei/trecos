@@ -15,10 +15,11 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
     entities = [
         House::class, Container::class, Item::class,
         CustomCategory::class, ItemCategory::class, Tag::class, ItemTag::class, TokenCategoryCount::class,
+        TrashEntry::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
 )
 abstract class TrecosDatabase : RoomDatabase() {
     /** @return houses. */
@@ -39,12 +40,15 @@ abstract class TrecosDatabase : RoomDatabase() {
     /** @return tags. */
     abstract fun tags(): TagDao
 
+    /** @return moving, copying, trash and purge operations. */
+    abstract fun organize(): OrganizeDao
+
     companion object {
         /** The database file name in the app's private storage. */
         const val FILE_NAME = "trecos.db"
 
         /** The schema version of this build; keep in step with [Database.version]. */
-        const val VERSION = 2
+        const val VERSION = 3
 
         /**
          * Opens the database file on the SQLCipher engine, unencrypted, running
