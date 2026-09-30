@@ -315,4 +315,35 @@
     <string name="field_email">E-mail</string>
     <string name="delete_profile">Delete profile</string>
     <string name="delete_profile_confirm">Delete your name and e-mail from this phone?</string>
+    <!-- Backup (0.10) -->
+    <string name="settings_backup">Sync &amp; backup</string>
+    <string name="setting_backup">Backup</string>
+    <string name="setting_backup_hint">Export a backup file or import one</string>
+    <string name="export_title">Export</string>
+    <string name="export_intro">Saves one .zip file with the chosen houses, including every photo. Choose where to save it. The file is not encrypted; keep it somewhere safe.</string>
+    <string name="action_export">Export</string>
+    <string name="export_done">Backup saved.</string>
+    <string name="export_failed">The backup couldn\'t be saved, so the incomplete file was removed. Check the free space and try again.</string>
+    <string name="import_title">Import</string>
+    <string name="import_intro">Open a Trecos backup to see what it holds, then add its houses or replace everything.</string>
+    <string name="action_import">Import a backup</string>
+    <string name="import_preview_title">This backup holds</string>
+    <string name="import_add">Add as new houses</string>
+    <string name="import_replace">Replace everything</string>
+    <string name="import_replace_confirm">Replace everything? All houses, items and photos on this phone are deleted and replaced by the backup. This can\'t be undone.</string>
+    <string name="import_done">Backup imported.</string>
+    <string name="import_invalid">This file isn\'t a Trecos backup, or it is damaged. Nothing was changed.</string>
+    <string name="import_newer">This backup was made by a newer version of Trecos. Update the app to import it. Nothing was changed.</string>
+    <plurals name="preview_containers">
+        <item quantity="one">%1$d container</item>
+        <item quantity="other">%1$d containers</item>
+    </plurals>
+    <plurals name="preview_items">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+    <plurals name="preview_photos">
+        <item quantity="one">%1$d photo</item>
+        <item quantity="other">%1$d photos</item>
+    </plurals>
 </resources>

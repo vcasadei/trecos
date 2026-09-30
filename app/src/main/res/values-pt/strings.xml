@@ -320,4 +320,38 @@
     <string name="field_email">E-mail</string>
     <string name="delete_profile">Apagar perfil</string>
     <string name="delete_profile_confirm">Apagar seu nome e e-mail deste celular?</string>
+    <!-- Backup (0.10) -->
+    <string name="settings_backup">Sincronização e backup</string>
+    <string name="setting_backup">Backup</string>
+    <string name="setting_backup_hint">Exporte ou importe um arquivo de backup</string>
+    <string name="export_title">Exportar</string>
+    <string name="export_intro">Salva um arquivo .zip com as casas escolhidas, incluindo todas as fotos. Escolha onde salvar. O arquivo não é criptografado; guarde-o num lugar seguro.</string>
+    <string name="action_export">Exportar</string>
+    <string name="export_done">Backup salvo.</string>
+    <string name="export_failed">Não foi possível salvar o backup, então o arquivo incompleto foi removido. Verifique o espaço livre e tente de novo.</string>
+    <string name="import_title">Importar</string>
+    <string name="import_intro">Abra um backup do Trecos para ver o que ele contém e, depois, adicione as casas ou substitua tudo.</string>
+    <string name="action_import">Importar um backup</string>
+    <string name="import_preview_title">Este backup contém</string>
+    <string name="import_add">Adicionar como casas novas</string>
+    <string name="import_replace">Substituir tudo</string>
+    <string name="import_replace_confirm">Substituir tudo? Todas as casas, itens e fotos deste celular serão apagados e trocados pelo backup. Não dá para desfazer.</string>
+    <string name="import_done">Backup importado.</string>
+    <string name="import_invalid">Este arquivo não é um backup do Trecos, ou está danificado. Nada foi alterado.</string>
+    <string name="import_newer">Este backup foi feito por uma versão mais nova do Trecos. Atualize o app para importá-lo. Nada foi alterado.</string>
+    <plurals name="preview_containers">
+        <item quantity="one">%1$d compartimento</item>
+        <item quantity="many">%1$d compartimentos</item>
+        <item quantity="other">%1$d compartimentos</item>
+    </plurals>
+    <plurals name="preview_items">
+        <item quantity="one">%1$d item</item>
+        <item quantity="many">%1$d itens</item>
+        <item quantity="other">%1$d itens</item>
+    </plurals>
+    <plurals name="preview_photos">
+        <item quantity="one">%1$d foto</item>
+        <item quantity="many">%1$d fotos</item>
+        <item quantity="other">%1$d fotos</item>
+    </plurals>
 </resources>

@@ -149,8 +149,8 @@ run at the end of **every** release group before it is tagged.
 ## 11. Release 0.10 — Local backup
 
 - [x] 11.1 Implement the JSON Lines snapshot serializer shared with sync (every entity, sorted output, `formatVersion`); verify with round-trip unit tests for every entity type
-- [ ] 11.2 Implement export (all or selected houses, `trecos-backup-YYYY-MM-DD.zip`, full photos, system file picker, cleanup on failure); tests for scenarios "Exporting to Downloads" and "Not enough space"
-- [ ] 11.3 Implement import (preview, Replace with confirmation, Add with new ids, all or nothing, newer format refused); tests for scenarios "Adding houses from another phone", "Corrupt file" and "Backup from a newer app version"
+- [x] 11.2 Implement export (all or selected houses, `trecos-backup-YYYY-MM-DD.zip`, full photos, system file picker, cleanup on failure); tests for scenarios "Exporting to Downloads" and "Not enough space"
+- [x] 11.3 Implement import (preview, Replace with confirmation, Add with new ids, all or nothing, newer format refused); tests for scenarios "Adding houses from another phone", "Corrupt file" and "Backup from a newer app version"
 - [ ] 11.4 Write the backup user docs and FAQ answer 5 (backup part, both languages), and add the 0.10 entry to `CHANGELOG.md`
 
 ## 12. Release 0.11 — Google Drive sync (behind `FEATURE_DRIVE_SYNC`)

@@ -7,6 +7,10 @@ import androidx.room.Query
 /** Reads and writes whole houses, for backups and sync snapshots. Trashed rows are included. */
 @Dao
 interface SnapshotDao {
+    /** @return every house, by name. */
+    @Query("SELECT * FROM house ORDER BY name COLLATE NOCASE")
+    suspend fun houses(): List<House>
+
     /**
      * @param houseId the house.
      * @return its containers, trashed ones too.

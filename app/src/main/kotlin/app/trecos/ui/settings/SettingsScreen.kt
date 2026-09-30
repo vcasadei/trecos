@@ -186,6 +186,7 @@ class SettingsViewModel(private val app: AppContainer) : ViewModel() {
  * @property openTags opens a house's tags.
  * @property openTrash opens a house's trash.
  * @property openProfile opens the optional profile.
+ * @property openBackup opens export and import.
  */
 data class SettingsNavigation(
     val openCurrency: () -> Unit,
@@ -194,11 +195,12 @@ data class SettingsNavigation(
     val openTags: (houseId: String) -> Unit,
     val openTrash: (houseId: String) -> Unit,
     val openProfile: () -> Unit = {},
+    val openBackup: () -> Unit = {},
 )
 
 /**
  * The Settings tab, in the spec's section order. Sections whose features
- * haven't shipped yet (Sync & backup, Help, Support) arrive with them.
+ * haven't shipped yet (sync, Help, Support) arrive with them.
  *
  * @param nav where the rows lead.
  */
@@ -310,6 +312,8 @@ fun SettingsScreen(nav: SettingsNavigation) {
                 val summary = listOfNotNull(profile?.name, profile?.email).joinToString(" · ").ifEmpty { stringResource(R.string.profile_none) }
                 LinkRow("profile", R.string.setting_profile, summary, nav.openProfile)
             }
+            item { Section(R.string.settings_backup) }
+            item { LinkRow("backup", R.string.setting_backup, stringResource(R.string.setting_backup_hint), nav.openBackup) }
             item { Section(R.string.settings_trash) }
             item {
                 LinkRow("trash", R.string.setting_open_trash, house?.name ?: stringResource(R.string.no_house_yet), house?.let { { nav.openTrash(it.id) } })
