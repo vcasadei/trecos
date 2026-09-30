@@ -47,7 +47,7 @@ Os ajustes valem na hora e ficam só neste celular; não são sincronizados.
 |---|---|---|
 | Geral | Idioma: English ou Português (Brasil) | o idioma do celular, se houver suporte; senão, English |
 | Geral | Moeda | a moeda da sua região |
-| Geral | Abrir em: Início ou Busca | Início |
+| Geral | Abrir em: Início ou Buscar | Início |
 | Aparência | Tema: Seguir o sistema, Branco, Escuro | Seguir o sistema |
 | Aparência | Faixa de cor da casa: Automática, Sempre, Nunca | Automática (duas ou mais casas) |
 | Aparência | Visualização da lista: Compacta ou Detalhada | Compacta |
