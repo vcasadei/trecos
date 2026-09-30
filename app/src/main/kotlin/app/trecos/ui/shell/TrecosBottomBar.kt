@@ -58,9 +58,33 @@ private val Rise = 28.dp
 private val BumpRadius = 34.dp
 private val DiscRadius = 28.dp
 private val BumpCenterBelowTop = 6.dp
-private val LineWidth = 1.5.dp
-private val GlowWidth = 8.dp
-private const val GlowAlpha = 0.55f
+
+/**
+ * The bottom bar's neon outline.
+ *
+ * @property color the colour of the line and its glow.
+ * @property lineWidth the crisp line's width.
+ * @property glowWidth the blurred glow's width and blur radius.
+ * @property glowAlpha the glow's opacity, 0 to 1.
+ * @property disc the raised circle's colour, or `null` for the theme's primary colour.
+ * @property onDisc the icon colour on the circle, or `null` for the theme's.
+ */
+data class NeonStyle(
+    val color: Color,
+    val lineWidth: Dp = 1.5.dp,
+    val glowWidth: Dp = 8.dp,
+    val glowAlpha: Float = 0.55f,
+    val disc: Color? = null,
+    val onDisc: Color? = null,
+) {
+    companion object {
+        /**
+         * @param dark whether the Dark theme is showing.
+         * @return the chosen style for the theme.
+         */
+        fun default(dark: Boolean): NeonStyle = NeonStyle(if (dark) ColorTokens.DarkGlow else ColorTokens.WhiteGlow)
+    }
+}
 
 /** Test tag of the raised circle that marks the selected tab. */
 const val TAB_INDICATOR_TAG = "tab_indicator"
@@ -81,12 +105,14 @@ fun tabTag(tab: TrecosTab): String = "tab_${tab.name}"
  * @param selected the tab being shown.
  * @param onSelect called with the tab the user tapped.
  * @param modifier modifier for the bar's outer box.
+ * @param neon the outline style; the theme's default when `null`.
  */
 @Composable
-fun TrecosBottomBar(selected: TrecosTab, onSelect: (TrecosTab) -> Unit, modifier: Modifier = Modifier) {
+fun TrecosBottomBar(selected: TrecosTab, onSelect: (TrecosTab) -> Unit, modifier: Modifier = Modifier, neon: NeonStyle? = null) {
     val motion = LocalMotion.current
     val colors = MaterialTheme.colorScheme
     val dark = LocalDarkTheme.current
+    val style = neon ?: NeonStyle.default(dark)
     val position by animateFloatAsState(
         targetValue = selected.ordinal.toFloat(),
         animationSpec = motion.spec(motion.mediumMs),
@@ -106,17 +132,17 @@ fun TrecosBottomBar(selected: TrecosTab, onSelect: (TrecosTab) -> Unit, modifier
             Modifier
                 .fillMaxWidth()
                 .height(Rise + BarHeight)
-                .neonBar(shape, fill = colors.surface, glow = if (dark) ColorTokens.DarkGlow else ColorTokens.WhiteGlow),
+                .neonBar(shape, fill = colors.surface, neon = style),
         )
         Box(
             modifier = Modifier
                 .offset(x = centerX - DiscRadius, y = Rise + BumpCenterBelowTop - DiscRadius)
                 .size(DiscRadius * 2)
-                .background(colors.primary, CircleShape)
+                .background(style.disc ?: colors.primary, CircleShape)
                 .testTag(TAB_INDICATOR_TAG),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(painterResource(selected.icon), contentDescription = null, tint = colors.onPrimary)
+            Icon(painterResource(selected.icon), contentDescription = null, tint = style.onDisc ?: colors.onPrimary)
         }
         Row(
             Modifier
@@ -156,23 +182,23 @@ fun TrecosBottomBar(selected: TrecosTab, onSelect: (TrecosTab) -> Unit, modifier
  *
  * @param shape the bar's outline, including the bump.
  * @param fill the bar's colour.
- * @param glow the colour of the line and its glow.
+ * @param neon the line and glow.
  * @return this modifier, drawing the glow, the fill and the line behind the content.
  */
-private fun Modifier.neonBar(shape: Shape, fill: Color, glow: Color): Modifier = drawWithCache {
+private fun Modifier.neonBar(shape: Shape, fill: Color, neon: NeonStyle): Modifier = drawWithCache {
     val path = (shape.createOutline(size, layoutDirection, this) as Outline.Generic).path
     val glowPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
         style = android.graphics.Paint.Style.STROKE
-        strokeWidth = GlowWidth.toPx()
-        color = glow.copy(alpha = GlowAlpha).toArgb()
-        maskFilter = BlurMaskFilter(GlowWidth.toPx(), BlurMaskFilter.Blur.NORMAL)
+        strokeWidth = neon.glowWidth.toPx()
+        color = neon.color.copy(alpha = neon.glowAlpha).toArgb()
+        maskFilter = BlurMaskFilter(neon.glowWidth.toPx(), BlurMaskFilter.Blur.NORMAL)
     }
     val androidPath = path.asAndroidPath()
-    val line = Stroke(width = LineWidth.toPx())
+    val line = Stroke(width = neon.lineWidth.toPx())
     onDrawBehind {
         drawIntoCanvas { it.nativeCanvas.drawPath(androidPath, glowPaint) }
         drawPath(path, fill)
-        drawPath(path, glow, style = line)
+        drawPath(path, neon.color, style = line)
     }
 }
 
