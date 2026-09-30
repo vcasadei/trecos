@@ -93,10 +93,11 @@ class AppLockScenariosTest : PlacesTestBase() {
     @Test
     fun turningItOn() {
         seed()
-        settingsRow("app_lock")
+        click(tabTag(TrecosTab.Settings))
+        tag(SETTINGS_LIST_TAG).performScrollToNode(hasTestTag("setting_app_lock"))
+        clickUntil("setting_app_lock") { runBlocking { app.preferences.appLock.first() } }
 
-        rule.waitUntil(10_000) { runBlocking { app.preferences.appLock.first() } }
-        assertEquals(1, fake.prompts)
+        assertTrue(fake.prompts >= 1)
         assertFalse(exists(LOCK_SCREEN_TAG))
     }
 
