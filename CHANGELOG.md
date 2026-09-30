@@ -6,6 +6,23 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - Unreleased
+
+### Added
+
+- Built-in categories: 20 groups and 118 subcategories with icons, in English and Portuguese; they can't be renamed or deleted.
+- Several categories per item, in order; the first is the main one and its icon shows in lists. The detailed view lists them.
+- Category picker with search, "Set as main", and custom categories per house (under a group or as a new group, with an icon).
+- Deleting a custom category removes it from every item; items keep their other categories.
+- Offline category suggestions from the name and description (English and Portuguese keywords, plus words learned in the house), as chips added only when tapped.
+- Tags per house, offered as you type, the same tag whatever the case or accents; rename and delete apply to every item.
+- New houses can copy another house's custom categories and tags.
+- "Save + new" keeps the categories.
+
+### Changed
+
+- Database schema 2, with a tested migration and a safety copy before any migration.
+
 ## [0.2.0] - Unreleased
 
 First release meant for testers, as a sideloadable APK.

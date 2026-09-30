@@ -72,7 +72,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 4.6 Implement tags (per house, completion, case- and accent-insensitive dedupe, rename and delete everywhere); tests for scenarios "Reusing a tag" and "Same tag, different case"
 - [x] 4.7 Offer to copy custom categories and tags when creating a house; test for scenario "Copying from another house" (field definitions are added in 7.6)
 - [x] 4.8 Show categories with suggestion chips on the item form, and make Save + new keep categories; test for scenario "Cataloguing a box of cables"
-- [ ] 4.9 Write `docs/user/{en,pt-BR}/categories-and-tags.md` and add the 0.3 entry to `CHANGELOG.md`
+- [x] 4.9 Write `docs/user/{en,pt-BR}/categories-and-tags.md` and add the 0.3 entry to `CHANGELOG.md`
 
 ## 5. Release 0.4 — Organize and trash
 
