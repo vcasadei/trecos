@@ -119,5 +119,6 @@ data class Item(
  * @property containerId the container, or `null` for the house's top level.
  * @property total sum of quantity × unit price in minor units, over priced items.
  * @property unpriced number of items without a unit price.
+ * @property items number of items.
  */
-data class ContainerTotal(val containerId: String?, val total: Long, val unpriced: Int)
+data class ContainerTotal(val containerId: String?, val total: Long, val unpriced: Int, val items: Int = 0)

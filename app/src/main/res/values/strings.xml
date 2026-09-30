@@ -10,4 +10,76 @@
     <!-- Language names are shown in their own language, so they are not translated. -->
     <string name="language_english" translatable="false">English</string>
     <string name="language_portuguese_brazil" translatable="false">Português (Brasil)</string>
+
+    <!-- Places and items (0.2) -->
+    <string name="first_run_title">Name your first place</string>
+    <string name="first_run_body">You can add more houses later, such as a second home or your parents\' house.</string>
+    <string name="default_house_name">My home</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_save">Save</string>
+    <string name="action_save_new">Save + new</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_more">More options</string>
+    <string name="action_add">Add</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="add_item">Item</string>
+    <string name="add_container">Container</string>
+    <string name="field_name">Name</string>
+    <string name="error_name_required">A name is required</string>
+    <string name="field_address">Address</string>
+    <string name="field_description">Description</string>
+    <string name="field_icon">Icon</string>
+    <string name="field_colour">Colour</string>
+    <string name="colour_none">No colour</string>
+    <string name="field_qr">QR code</string>
+    <string name="error_qr_in_use">Another item or container in this house already uses this code</string>
+    <string name="field_quantity">Quantity</string>
+    <string name="error_quantity">Quantity must be a whole number from 0 to 999,999</string>
+    <string name="field_unit_price">Unit price</string>
+    <string name="error_price">Enter a price of 0 or more</string>
+    <string name="field_brand">Brand</string>
+    <string name="field_model">Model</string>
+    <string name="field_serial">Serial number</string>
+    <string name="field_value_override">Manual value (optional)</string>
+    <string name="more_fields">More fields</string>
+    <string name="fewer_fields">Fewer fields</string>
+    <string name="total_value">Total value</string>
+    <string name="date_added">Added</string>
+    <string name="date_changed">Last changed</string>
+    <string name="value_label">Value</string>
+    <string name="value_automatic">automatic</string>
+    <string name="value_manual">manual</string>
+    <string name="action_clear_override">Clear override</string>
+    <string name="section_containers">Containers (%1$d)</string>
+    <string name="section_items">Items (%1$d)</string>
+    <string name="empty_hint">Nothing here yet. Tap + to add an item or a container.</string>
+    <string name="add_house">Add house</string>
+    <string name="new_house">New house</string>
+    <string name="edit_house">Edit house</string>
+    <string name="new_container">New container</string>
+    <string name="edit_container">Edit container</string>
+    <string name="new_item">New item</string>
+    <string name="edit_item">Edit item</string>
+    <string name="delete_last_house">At least one house is required, so this one can\'t be deleted.</string>
+    <string name="switch_house">Switch house</string>
+    <string name="view_condensed">Condensed view</string>
+    <string name="view_detailed">Detailed view</string>
+    <string name="full_path">Full path</string>
+    <string name="location">Location</string>
+    <string name="close">Close</string>
+    <string name="action_move">Move</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_duplicate">Duplicate</string>
+    <string name="action_search_here">Search in this container</string>
+    <string name="action_print_qr">Print QR</string>
+    <string name="coming_later">This arrives in a later version of Trecos.</string>
+    <plurals name="unpriced_items">
+        <item quantity="one">%1$d item has no price</item>
+        <item quantity="other">%1$d items have no price</item>
+    </plurals>
+    <plurals name="item_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
 </resources>

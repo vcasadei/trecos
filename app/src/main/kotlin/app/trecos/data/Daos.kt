@@ -142,7 +142,7 @@ interface ItemDao {
      */
     @Query(
         "SELECT containerId, COALESCE(SUM(quantity * unitPrice), 0) AS total, " +
-            "SUM(CASE WHEN unitPrice IS NULL THEN 1 ELSE 0 END) AS unpriced " +
+            "SUM(CASE WHEN unitPrice IS NULL THEN 1 ELSE 0 END) AS unpriced, COUNT(*) AS items " +
             "FROM item WHERE houseId = :houseId AND deletedAt IS NULL GROUP BY containerId",
     )
     fun observeTotals(houseId: String): Flow<List<ContainerTotal>>

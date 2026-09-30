@@ -95,7 +95,7 @@ class DaoTest {
         db.items().insert(item("keys", quantity = 1))
 
         val totals = db.items().observeTotals("h1").first().associateBy { it.containerId }
-        assertEquals(ContainerTotal("boxA", total = 2_000 + 3_000, unpriced = 1), totals["boxA"])
-        assertEquals(ContainerTotal(null, total = 0, unpriced = 1), totals[null])
+        assertEquals(ContainerTotal("boxA", total = 2_000 + 3_000, unpriced = 1, items = 3), totals["boxA"])
+        assertEquals(ContainerTotal(null, total = 0, unpriced = 1, items = 1), totals[null])
     }
 }
