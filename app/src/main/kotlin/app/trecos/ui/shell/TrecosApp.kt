@@ -51,6 +51,7 @@ import app.trecos.ui.places.ItemScreen
 import app.trecos.ui.places.PlaceNavigation
 import app.trecos.ui.places.PlaceScreen
 import app.trecos.ui.places.TagsScreen
+import app.trecos.ui.search.SearchScreen
 import app.trecos.ui.places.TrashScreen
 import app.trecos.ui.places.KeepScreen
 import app.trecos.ui.places.DeleteHouseScreen
@@ -133,7 +134,9 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(Modifier.fillMaxSize()) {
             NavHost(navController, startDestination = rootRoute(TrecosTab.Home), modifier = Modifier.fillMaxSize()) {
-                composable(rootRoute(TrecosTab.Search)) { TabRootScreen(TrecosTab.Search) }
+                composable(rootRoute(TrecosTab.Search)) {
+                    Box(Modifier.fillMaxSize().testTag(rootScreenTag(TrecosTab.Search))) { SearchScreen(nav) }
+                }
                 composable(rootRoute(TrecosTab.Settings)) { TabRootScreen(TrecosTab.Settings) }
                 composable(rootRoute(TrecosTab.Home)) {
                     Box(Modifier.fillMaxSize().testTag(rootScreenTag(TrecosTab.Home))) { HomeScreen(nav) }
@@ -214,6 +217,7 @@ private fun placeNavigation(controller: NavHostController) = PlaceNavigation(
     openTrash = { house -> controller.navigate("trash/$house") },
     keep = { container -> controller.navigate("keep/$container") },
     deleteHouse = { house -> controller.navigate("house/delete/$house") },
+    searchIn = { controller.navigateToTab(TrecosTab.Search) },
 )
 
 /**

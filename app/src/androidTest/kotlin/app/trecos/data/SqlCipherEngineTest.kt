@@ -46,4 +46,12 @@ class SqlCipherEngineTest {
         val header = context.getDatabasePath(TrecosDatabase.FILE_NAME).inputStream().use { it.readNBytes(15) }
         assertEquals("SQLite format 3", String(header))
     }
+
+    @Test
+    fun fullTextSearchIgnoresAccentsOnTheSqlCipherEngine() = runBlocking {
+        db.houses().insert(House(id = "h1", name = "Apartment", icon = "house", createdAt = 1, updatedAt = 1))
+        db.items().insert(Item(id = "i1", houseId = "h1", name = "Cabeça de impressão", serial = "SN4478X21", createdAt = 1, updatedAt = 1))
+        assertEquals(listOf("i1"), db.search().matches("cabeca*").map { it.refId })
+        assertEquals(listOf("i1"), db.search().matches("name:sn4478*").map { it.refId })
+    }
 }

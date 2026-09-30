@@ -1,6 +1,7 @@
 package app.trecos
 
 import androidx.room.Room
+import app.trecos.data.SearchIndex
 import app.trecos.data.TrecosDatabase
 
 /**
@@ -19,7 +20,7 @@ class TestTrecosApplication : TrecosApplication() {
     override fun createContainer(): AppContainer = AppContainer(
         context = this,
         openDatabase = {
-            Room.inMemoryDatabaseBuilder(this, TrecosDatabase::class.java).allowMainThreadQueries().build()
+            Room.inMemoryDatabaseBuilder(this, TrecosDatabase::class.java).allowMainThreadQueries().addCallback(SearchIndex.onCreate).build()
         },
     )
 }

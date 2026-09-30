@@ -18,6 +18,7 @@ package app.trecos.ui.places
  * @property openTrash opens a house's trash.
  * @property keep opens the "choose what to keep" screen for a container being deleted.
  * @property deleteHouse opens the house deletion screen.
+ * @property searchIn opens the Search tab (already limited to a container through `AppContainer.searchWithin`).
  */
 data class PlaceNavigation(
     val back: () -> Unit,
@@ -34,4 +35,5 @@ data class PlaceNavigation(
     val openTrash: (houseId: String) -> Unit,
     val keep: (containerId: String) -> Unit,
     val deleteHouse: (houseId: String) -> Unit,
+    val searchIn: () -> Unit,
 )

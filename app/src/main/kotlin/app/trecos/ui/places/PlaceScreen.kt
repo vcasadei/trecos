@@ -45,6 +45,7 @@ import app.trecos.R
 import app.trecos.data.ListView
 import app.trecos.places.Money
 import app.trecos.places.Selection
+import app.trecos.ui.appContainer
 import app.trecos.ui.appViewModel
 import app.trecos.ui.language.AppLanguage
 import app.trecos.ui.shell.TrecosTopBar
@@ -90,6 +91,7 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
     var fullPathOpen by rememberSaveable { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val organize = rememberOrganizeController()
+    val app = appContainer()
     var selectedItems by rememberSaveable { mutableStateOf(listOf<String>()) }
     var selectedContainers by rememberSaveable { mutableStateOf(listOf<String>()) }
     val selecting = selectedItems.isNotEmpty() || selectedContainers.isNotEmpty()
@@ -175,7 +177,10 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                                     R.string.action_copy to { organize.copy(here, current.house.id) },
                                     R.string.action_duplicate to { organize.duplicate(container.id) { nav.editContainer(it) } },
                                     R.string.action_delete to { organize.delete(here, container.name) { nav.back() } },
-                                    R.string.action_search_here to { explanation = R.string.coming_later },
+                                    R.string.action_search_here to {
+                                        app.searchWithin.value = container.id
+                                        nav.searchIn()
+                                    },
                                     R.string.action_print_qr to { explanation = R.string.coming_later },
                                 )
                                 actions.forEach { (label, action) ->
