@@ -79,21 +79,17 @@ class CustomFieldScenariosTest : PlacesTestBase() {
     }
 
     /**
-     * Ticks an extra and waits until the saved list is exactly [expected]. A tap
-     * the test runner drops or doubles (seen rarely, only in full runs) is
-     * corrected by tapping again, up to three times.
+     * Ticks an extra once and waits until the saved list is exactly [expected].
+     * Preference writes can take several seconds on CI, so it waits instead of
+     * tapping again (a second tap would untick it).
      *
      * @param key the extra.
      * @param expected the extras after the tap.
      */
     private fun pickExtra(key: String, expected: List<String>) {
-        repeat(3) {
-            if (runBlocking { app.preferences.detailExtras.first() } == expected) return
-            click("extra_$key")
-            val saved = runCatching { rule.waitUntil(5_000) { runBlocking { app.preferences.detailExtras.first() } == expected } }.isSuccess
-            if (saved) return
-        }
-        throw AssertionError("extras are ${runBlocking { app.preferences.detailExtras.first() }}, expected $expected")
+        click("extra_$key")
+        val saved = runCatching { rule.waitUntil(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.detailExtras.first() } == expected } }.isSuccess
+        if (!saved) throw AssertionError("extras are ${runBlocking { app.preferences.detailExtras.first() }}, expected $expected")
     }
 
     /** Opens the house's custom fields from Settings. */

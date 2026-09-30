@@ -161,7 +161,7 @@ class PhotoScenariosTest : PlacesTestBase() {
         click("source_camera")
 
         assertEquals(1, fake.cameraCalls)
-        rule.waitUntil(10_000) { runBlocking { app.preferences.imageSource.first() } == ImageSource.Camera }
+        rule.waitUntil(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.imageSource.first() } == ImageSource.Camera }
         click("add_photo")
         assertEquals(2, fake.cameraCalls)
     }

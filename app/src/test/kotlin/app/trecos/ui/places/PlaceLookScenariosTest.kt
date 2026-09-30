@@ -143,7 +143,7 @@ class PlaceLookScenariosTest : PlacesTestBase() {
         click(VIEW_TOGGLE_TAG)
 
         text("The home office").assertIsDisplayed()
-        rule.waitUntil(10_000) { runBlocking { app.preferences.listView.first() } == ListView.Detailed }
+        rule.waitUntil(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.listView.first() } == ListView.Detailed }
 
         rule.activityRule.scenario.recreate()
         text("The home office").assertIsDisplayed()

@@ -20,6 +20,7 @@ import app.trecos.help.RatingPolicy
 import app.trecos.help.Tip
 import app.trecos.help.TipJar
 import app.trecos.help.TipOutcome
+import app.trecos.ui.places.PREFERENCE_WRITE_MS
 import app.trecos.ui.places.PlacesTestBase
 import app.trecos.ui.settings.SETTINGS_LIST_TAG
 import app.trecos.ui.shell.TrecosTab
@@ -165,7 +166,7 @@ class HelpScenariosTest : PlacesTestBase() {
     @Test
     fun theSinglePrompt() {
         returnHomeAfter(days = 15, items = 20, sessions = 5)
-        val shown = runCatching { rule.waitUntil(10_000) { reviews == 1 } }.isSuccess
+        val shown = runCatching { rule.waitUntil(PREFERENCE_WRITE_MS) { reviews == 1 } }.isSuccess
         assertTrue("no prompt: ${ratingState()}", shown)
 
         click(tabTag(TrecosTab.Settings))

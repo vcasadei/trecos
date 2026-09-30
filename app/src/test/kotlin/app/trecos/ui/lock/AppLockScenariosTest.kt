@@ -9,6 +9,7 @@ import app.trecos.data.Fixtures.item
 import app.trecos.lock.DeviceSecurity
 import app.trecos.lock.LockTimeout
 import app.trecos.ui.places.ADD_BUTTON_TAG
+import app.trecos.ui.places.PREFERENCE_WRITE_MS
 import app.trecos.ui.places.PlacesTestBase
 import app.trecos.ui.places.rowTag
 import app.trecos.ui.settings.SETTINGS_LIST_TAG
@@ -95,7 +96,8 @@ class AppLockScenariosTest : PlacesTestBase() {
         seed()
         click(tabTag(TrecosTab.Settings))
         tag(SETTINGS_LIST_TAG).performScrollToNode(hasTestTag("setting_app_lock"))
-        clickUntil("setting_app_lock") { runBlocking { app.preferences.appLock.first() } }
+        click("setting_app_lock")
+        rule.waitUntil(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.appLock.first() } }
 
         assertTrue(fake.prompts >= 1)
         assertFalse(exists(LOCK_SCREEN_TAG))
@@ -164,7 +166,7 @@ class AppLockScenariosTest : PlacesTestBase() {
 
         tag("lock_turned_off")
         assertFalse(exists(LOCK_SCREEN_TAG))
-        rule.waitUntil(10_000) { !runBlocking { app.preferences.appLock.first() } }
+        rule.waitUntil(PREFERENCE_WRITE_MS) { !runBlocking { app.preferences.appLock.first() } }
     }
 
     @Test
@@ -187,13 +189,13 @@ class AppLockScenariosTest : PlacesTestBase() {
         type("profile_name_raw", "Vitor")
         type("profile_email_raw", "someone@example.com")
         click("save_profile")
-        rule.waitUntil(10_000) { runBlocking { app.preferences.profile.first() }?.email == "someone@example.com" }
+        rule.waitUntil(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.profile.first() }?.email == "someone@example.com" }
 
         tag(SETTINGS_LIST_TAG).performScrollToNode(hasTestTag("setting_profile"))
         click("setting_profile")
         click("delete_profile")
         click("confirm_delete_profile")
-        rule.waitUntil(10_000) { runBlocking { app.preferences.profile.first() } == null }
+        rule.waitUntil(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.profile.first() } == null }
 
         val logged = ShadowLog.getLogs().joinToString("\n") { "${it.tag} ${it.msg}" }
         assertFalse("name in logs", logged.contains("Vitor"))
