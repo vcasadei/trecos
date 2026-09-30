@@ -111,7 +111,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 7.6 Implement sorting (name, date added, unit price, direction toggle, unpriced items last); test for scenario "Most expensive first"
 - [x] 7.7 Show result paths starting with the house pill, collapsed between the pill and the last level; test for scenario "Same box name in two houses"
 - [x] 7.8 Implement "Search in this container" with a removable chip; test for scenario "Searching inside a box"
-- [ ] 7.9 Write the search user docs (both languages), and add the 0.6 entry to `CHANGELOG.md`
+- [x] 7.9 Write the search user docs (both languages), and add the 0.6 entry to `CHANGELOG.md`
 
 ## 8. Release 0.7 — QR codes
 
