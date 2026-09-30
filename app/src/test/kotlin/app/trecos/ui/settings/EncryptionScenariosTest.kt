@@ -146,7 +146,7 @@ class EncryptionScenariosTest : PlacesTestBase() {
         openEncryption()
         click("setting_encryption")
         click("confirm_encryption")
-        rule.waitUntil(10_000) { restarts == 1 }
+        eventually(10_000) { restarts == 1 }
         restart()
     }
 
@@ -191,7 +191,7 @@ class EncryptionScenariosTest : PlacesTestBase() {
         click("setting_encryption")
         click("confirm_encryption")
 
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText("Encryption didn't finish", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText("Encryption didn't finish", substring = true)).fetchSemanticsNodes().isNotEmpty() }
         restart()
         assertFalse(app.encryption.keys.isEncrypted())
         assertFalse(app.encryption.swap.isPending())
@@ -252,8 +252,8 @@ class EncryptionScenariosTest : PlacesTestBase() {
         click("connect_drive")
         click("restore")
 
-        rule.waitUntil(10_000) { runBlocking { app.database.items().get("lamp") } != null }
-        rule.waitUntil(10_000) { restarts == 1 }
+        eventually(10_000) { runBlocking { app.database.items().get("lamp") } != null }
+        eventually(10_000) { restarts == 1 }
         restart()
         assertArrayEquals("this phone is encrypted with the account's key", key, app.encryption.keys.current())
     }
@@ -266,7 +266,7 @@ class EncryptionScenariosTest : PlacesTestBase() {
         openEncryption()
         click("setting_encryption")
         click("confirm_decryption")
-        rule.waitUntil(10_000) { restarts == 2 }
+        eventually(10_000) { restarts == 2 }
         restart()
 
         assertFalse(app.encryption.keys.isEncrypted())
@@ -288,7 +288,7 @@ class EncryptionScenariosTest : PlacesTestBase() {
         tag("sync_list").performScrollToNode(hasTestTag("disconnect"))
         click("disconnect")
 
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText("Turn encryption off before disconnecting", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText("Turn encryption off before disconnecting", substring = true)).fetchSemanticsNodes().isNotEmpty() }
         assertTrue(app.sync.store.load().connected)
     }
 
@@ -308,7 +308,7 @@ class EncryptionScenariosTest : PlacesTestBase() {
         tag("export_unencrypted")
         assertEquals("nothing is written unless I continue", 0, files.created)
         click("export_anyway")
-        rule.waitUntil(10_000) { target.exists() && target.length() > 0 }
+        eventually(10_000) { target.exists() && target.length() > 0 }
     }
 
     @Test

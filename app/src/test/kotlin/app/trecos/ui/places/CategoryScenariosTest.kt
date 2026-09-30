@@ -106,7 +106,7 @@ class CategoryScenariosTest : PlacesTestBase() {
         click("add_category")
         type("category_search_raw", "usb-c")
 
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText("Cabos > USB-C"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText("Cabos > USB-C"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
     }
 
     @Test
@@ -154,7 +154,7 @@ class CategoryScenariosTest : PlacesTestBase() {
         text("It will be removed from 5 items", substring = true)
         click("confirm_delete_category")
 
-        rule.waitUntil(10_000) { runBlocking { app.database.categories().usage("mech") } == 0 }
+        eventually(10_000) { runBlocking { app.database.categories().usage("mech") } == 0 }
         (1..5).forEach { assertEquals(listOf("computers.peripherals"), categoriesOf("k$it")) }
     }
 
@@ -304,6 +304,6 @@ class CategoryScenariosTest : PlacesTestBase() {
      * @param substring whether a partial match counts.
      */
     private fun text(value: String, substring: Boolean) {
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText(value, substring = substring), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText(value, substring = substring), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
     }
 }

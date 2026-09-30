@@ -63,7 +63,7 @@ class OrganizeScenariosTest : PlacesTestBase() {
         click(destTag("drawer"))
         click("dest_confirm")
 
-        rule.waitUntil(10_000) { containerOf("pi") == "drawer" }
+        eventually(10_000) { containerOf("pi") == "drawer" }
         assertTrue(runBlocking { app.database.items().get("pi")!!.updatedAt } > pi.updatedAt)
     }
 
@@ -96,7 +96,7 @@ class OrganizeScenariosTest : PlacesTestBase() {
         assertEquals("h1", runBlocking { app.database.items().get("drill")!!.houseId })
         click("clash_remove")
 
-        rule.waitUntil(10_000) { runBlocking { app.database.items().get("drill")?.houseId } == "h2" }
+        eventually(10_000) { runBlocking { app.database.items().get("drill")?.houseId } == "h2" }
         assertNull(runBlocking { app.database.items().get("drill")!!.qrCode })
     }
 
@@ -124,7 +124,7 @@ class OrganizeScenariosTest : PlacesTestBase() {
         click(destTag("drawer"))
         click("dest_confirm")
 
-        rule.waitUntil(10_000) {
+        eventually(10_000) {
             runBlocking {
                 app.database.containers().observeChildren("h1", "drawer").first().singleOrNull()
                     ?.let { app.database.items().observeIn("h1", it.id).first().size } == 12
@@ -163,8 +163,8 @@ class OrganizeScenariosTest : PlacesTestBase() {
         click(destTag("drawer"))
         click("dest_confirm")
 
-        rule.waitUntil(10_000) { listOf("a", "b", "c").all { containerOf(it) == "drawer" } }
-        rule.waitUntil(10_000) { !exists("selection_bar") }
+        eventually(10_000) { listOf("a", "b", "c").all { containerOf(it) == "drawer" } }
+        eventually(10_000) { !exists("selection_bar") }
     }
 
     @Test
@@ -203,10 +203,10 @@ class OrganizeScenariosTest : PlacesTestBase() {
         menu(R.string.action_delete)
         click("confirm_delete")
 
-        rule.waitUntil(10_000) { runBlocking { app.database.items().get("hub") } == null }
+        eventually(10_000) { runBlocking { app.database.items().get("hub") } == null }
         text("Undo").performClick()
 
-        rule.waitUntil(10_000) { runBlocking { app.database.items().get("hub") } != null }
+        eventually(10_000) { runBlocking { app.database.items().get("hub") } != null }
         assertEquals("boxA", containerOf("hub"))
     }
 
@@ -220,7 +220,7 @@ class OrganizeScenariosTest : PlacesTestBase() {
 
         click("restore_Cables bag")
 
-        rule.waitUntil(10_000) { runBlocking { app.database.containers().get("cables") } != null && containerOf("usb") != null }
+        eventually(10_000) { runBlocking { app.database.containers().get("cables") } != null && containerOf("usb") != null }
         assertEquals("boxA", runBlocking { app.database.containers().get("cables")!!.parentId })
         assertEquals("cables", containerOf("usb"))
         tag("trash_empty")
@@ -240,7 +240,7 @@ class OrganizeScenariosTest : PlacesTestBase() {
         tag("destination_picker")
         click(destTag("drawer"))
         click("dest_confirm")
-        rule.waitUntil(10_000) { containerOf("usb") == "drawer" }
+        eventually(10_000) { containerOf("usb") == "drawer" }
     }
 
     @Test
@@ -258,18 +258,18 @@ class OrganizeScenariosTest : PlacesTestBase() {
         click("keep_choose")
         click(destTag("garage"))
         click("dest_confirm")
-        rule.waitUntil(10_000) { runBlocking { app.database.containers().get("cables")?.parentId } == "garage" }
+        eventually(10_000) { runBlocking { app.database.containers().get("cables")?.parentId } == "garage" }
 
         click("keep_check_Raspberry Pi 4")
         click("move_selected")
         click("keep_choose")
         click(destTag("drawer"))
         click("dest_confirm")
-        rule.waitUntil(10_000) { containerOf("pi") == "drawer" }
+        eventually(10_000) { containerOf("pi") == "drawer" }
 
         click("keep_finish")
         click("confirm_finish")
-        rule.waitUntil(10_000) { runBlocking { app.database.organize().observeTrash("h1").first().size == 1 } }
+        eventually(10_000) { runBlocking { app.database.organize().observeTrash("h1").first().size == 1 } }
         assertNull(runBlocking { app.database.containers().get("boxA") })
         assertNull(runBlocking { app.database.items().get("mouse") })
         assertEquals("garage", runBlocking { app.database.containers().get("cables")!!.parentId })
@@ -284,7 +284,7 @@ class OrganizeScenariosTest : PlacesTestBase() {
         click("keep_check_Raspberry Pi 4")
         click("move_selected")
         click("keep_parent")
-        rule.waitUntil(10_000) { containerOf("pi") == null }
+        eventually(10_000) { containerOf("pi") == null }
 
         pressBack()
 
@@ -300,7 +300,7 @@ class OrganizeScenariosTest : PlacesTestBase() {
         tag("type_house_name").performTextInput("Beach house")
         click("confirm_delete_house")
 
-        rule.waitUntil(10_000) { runBlocking { app.database.houses().get("beach") } == null }
+        eventually(10_000) { runBlocking { app.database.houses().get("beach") } == null }
         assertNull(runBlocking { app.database.organize().itemAnyState("towel") })
         text("Apartment")
     }
