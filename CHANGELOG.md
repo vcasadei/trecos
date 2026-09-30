@@ -6,6 +6,16 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.7.0] - Unreleased
+
+### Added
+
+- QR codes on items and containers, up to 256 characters: filled from the name when free, kept on rename, unique within a house, with a link to whatever already holds a typed code.
+- A large label view with the code written underneath, Share as an image and Print through the system dialog.
+- Printing the labels of a selection (or from a container's menu) in one job, 12 per page, skipping things without a code.
+- Scanning with the Google code scanner, with no camera permission: from Search it opens the one match, asks which house, offers to create an item or container with the code and place it, or offers Restore for a trashed match; in forms it fills the code, and the name when empty.
+- A message when the scanner can't be downloaded offline.
+
 ## [0.6.0] - Unreleased
 
 ### Added

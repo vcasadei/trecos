@@ -123,7 +123,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 8.6 Add scanning to the item form and to Search; tests for scenarios "Scanning into an empty form", "Scanning when a name exists" and "Cancelling a scan"
 - [ ] 8.7 Register the Google Play developer account (US$25, the project's only cost) and create the app `app.trecos`; enrol in Play App Signing by uploading the existing release key with PEPK (not a Play-generated key), create the upload key the same way as 2.20 and store it as `upload_*` fields in `release-signing.sops.yaml` and as the repository secrets `TRECOS_UPLOAD_KEYSTORE_BASE64`, `TRECOS_UPLOAD_KEYSTORE_PASSWORD`, `TRECOS_UPLOAD_KEY_ALIAS` and `TRECOS_UPLOAD_KEY_PASSWORD`, and make the release workflow also build the App Bundle; verify that a sideloaded 0.6 install updates to the Play build without reinstalling
 - [ ] 8.8 Check Play's current closed-testing requirement, recruit testers and move to the closed track; record the process in `docs/dev/release.md`
-- [ ] 8.9 Write the user docs and FAQ answers 2 and 4 on QR labels (both languages), and add the 0.7 entry to `CHANGELOG.md`
+- [x] 8.9 Write the user docs and FAQ answers 2 and 4 on QR labels (both languages), and add the 0.7 entry to `CHANGELOG.md`
 
 ## 9. Release 0.8 — Custom fields and settings
 

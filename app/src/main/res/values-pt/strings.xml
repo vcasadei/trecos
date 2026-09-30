@@ -233,5 +233,5 @@
     <string name="unknown_code_title">Nada tem o código \"%1$s\"</string>
     <string name="create_item">Criar item</string>
     <string name="create_container">Criar compartimento</string>
-    <string name="scan_label">Ler uma etiqueta</string>
+    <string name="scan_label">Ler o código QR</string>
 </resources>
