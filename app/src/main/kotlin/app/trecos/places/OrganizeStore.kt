@@ -8,6 +8,7 @@ import app.trecos.data.Item
 import app.trecos.data.ItemCategory
 import app.trecos.data.ItemTag
 import app.trecos.data.TrashEntry
+import androidx.room.withTransaction
 import app.trecos.data.TrecosDatabase
 
 /**
@@ -62,6 +63,16 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
 
     private val dao = db.organize()
     private val tagStore = TagStore(db.tags(), clock, newId)
+    private var lastTrashStamp = 0L
+
+    /**
+     * A trash time for a new delete, later than every earlier one, so two
+     * deletes in the same millisecond never merge into one batch.
+     *
+     * @return the time to stamp the delete with.
+     */
+    @Synchronized
+    private fun trashStamp(): Long = maxOf(clock(), lastTrashStamp + 1).also { lastTrashStamp = it }
 
     /**
      * Everything inside the given containers, at any depth, trashed or not.
@@ -81,6 +92,16 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
         }
         val holders = rootIds.toSet() + found.map { it.id }
         return found to dao.itemsIncludingTrash(houseId).filter { it.containerId in holders }
+    }
+
+    /**
+     * @param containerId a container.
+     * @return how many containers and items are inside it at any depth, not counting the trash.
+     */
+    suspend fun contentCount(containerId: String): Int {
+        val container = db.containers().get(containerId) ?: return 0
+        val (containers, items) = below(container.houseId, listOf(containerId))
+        return containers.count { it.deletedAt == null } + items.count { it.deletedAt == null }
     }
 
     /**
@@ -137,7 +158,7 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
      * @throws MoveIntoItselfException if a container would go inside itself.
      * @throws IllegalStateException if a clash is left unresolved.
      */
-    suspend fun move(selection: Selection, destination: Destination, qrResolutions: Map<String, String?> = emptyMap()) {
+    suspend fun move(selection: Selection, destination: Destination, qrResolutions: Map<String, String?> = emptyMap()) = db.withTransaction {
         if (isInsideSelection(selection, destination)) throw MoveIntoItselfException()
         val unresolved = qrClashes(selection, destination).filter { it.id !in qrResolutions }
         check(unresolved.isEmpty()) { "Unresolved QR clashes: ${unresolved.map { it.code }}" }
@@ -183,7 +204,7 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
      * @param nameSuffix appended to the copied roots' names, such as " (copy)"; empty by default.
      * @return the ids of the copied roots.
      */
-    suspend fun copy(selection: Selection, destination: Destination, nameSuffix: String = ""): List<String> {
+    suspend fun copy(selection: Selection, destination: Destination, nameSuffix: String = ""): List<String> = db.withTransaction {
         val now = clock()
         val (containers, items) = collect(selection)
         val live = containers.filter { it.deletedAt == null }
@@ -221,7 +242,7 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
             copyCategoriesAndTags(from = item, to = copy)
             if (isRoot) result += copy.id
         }
-        return result
+        result
     }
 
     /**
@@ -246,8 +267,8 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
      * @param selection the things to trash.
      * @return the new trash entries' ids, for Undo.
      */
-    suspend fun trash(selection: Selection): List<String> {
-        val now = clock()
+    suspend fun trash(selection: Selection): List<String> = db.withTransaction {
+        val now = trashStamp()
         val entries = ArrayList<String>()
         for (itemId in selection.itemIds) {
             val item = db.items().get(itemId) ?: continue
@@ -262,7 +283,7 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
             entries += TrashEntry(newId(), container.houseId, TrashEntry.KIND_CONTAINER, container.id, container.name, container.parentId, now)
                 .also { dao.insertTrash(it) }.id
         }
-        return entries
+        return@withTransaction entries
     }
 
     /**
@@ -273,10 +294,10 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
      * @param destination where to restore when the original place is gone; ignored otherwise.
      * @return whether a destination is needed first, and whether QR codes were removed.
      */
-    suspend fun restore(entryId: String, destination: Destination? = null): RestoreResult {
-        val entry = dao.trashEntry(entryId) ?: return RestoreResult()
+    suspend fun restore(entryId: String, destination: Destination? = null): RestoreResult = db.withTransaction {
+        val entry = dao.trashEntry(entryId) ?: return@withTransaction RestoreResult()
         val originalGone = entry.parentId != null && dao.containerAnyState(entry.parentId).let { it == null || it.deletedAt != null }
-        if (originalGone && destination == null) return RestoreResult(needsDestination = true)
+        if (originalGone && destination == null) return@withTransaction RestoreResult(needsDestination = true)
         val parent = if (originalGone) destination!!.containerId else entry.parentId
         val now = clock()
         val (containers, items) = when (entry.kind) {
@@ -317,7 +338,7 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
             )
         }
         dao.deleteTrashEntry(entry.id)
-        return RestoreResult(qrRemoved = qrRemoved)
+        return@withTransaction RestoreResult(qrRemoved = qrRemoved)
     }
 
     /**
@@ -325,8 +346,8 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
      *
      * @param entryId the trash entry.
      */
-    suspend fun deletePermanently(entryId: String) {
-        val entry = dao.trashEntry(entryId) ?: return
+    suspend fun deletePermanently(entryId: String) = db.withTransaction {
+        val entry = dao.trashEntry(entryId) ?: return@withTransaction
         val (containers, items) = when (entry.kind) {
             TrashEntry.KIND_ITEM -> emptyList<Container>() to listOfNotNull(dao.itemAnyState(entry.targetId))
             else -> below(entry.houseId, listOf(entry.targetId)).let { (below, inside) -> (listOfNotNull(dao.containerAnyState(entry.targetId)) + below) to inside }
@@ -364,7 +385,7 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
      * @param houseId the house.
      * @throws IllegalStateException if it is the last house.
      */
-    suspend fun deleteHouse(houseId: String) {
+    suspend fun deleteHouse(houseId: String) = db.withTransaction {
         check(db.houses().count() > 1) { "The last house can't be deleted" }
         with(dao) {
             deleteHouseItemCategories(houseId)

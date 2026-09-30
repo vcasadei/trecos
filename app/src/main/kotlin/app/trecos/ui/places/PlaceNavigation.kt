@@ -15,6 +15,9 @@ package app.trecos.ui.places
  * @property addItem opens the new-item form inside a house and container (or the top level).
  * @property editItem opens an item's edit form.
  * @property openTags opens a house's tags.
+ * @property openTrash opens a house's trash.
+ * @property keep opens the "choose what to keep" screen for a container being deleted.
+ * @property deleteHouse opens the house deletion screen.
  */
 data class PlaceNavigation(
     val back: () -> Unit,
@@ -28,4 +31,7 @@ data class PlaceNavigation(
     val addItem: (houseId: String, containerId: String?) -> Unit,
     val editItem: (itemId: String) -> Unit,
     val openTags: (houseId: String) -> Unit,
+    val openTrash: (houseId: String) -> Unit,
+    val keep: (containerId: String) -> Unit,
+    val deleteHouse: (houseId: String) -> Unit,
 )

@@ -2,7 +2,7 @@ package app.trecos.ui.places
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.trecos.R
 import app.trecos.data.Container
@@ -62,10 +64,21 @@ const val STRIPE_TAG = "stripe"
  * @param value its folded value.
  * @param listView condensed or detailed.
  * @param currency the display currency code.
- * @param onClick opens the container.
+ * @param selected whether it is selected in selection mode.
+ * @param onLongClick starts or extends selection mode.
+ * @param onClick opens the container, or toggles it in selection mode.
  */
 @Composable
-fun ContainerRow(container: Container, colour: PaletteColor?, value: PlaceValue?, listView: ListView, currency: String, onClick: () -> Unit) {
+fun ContainerRow(
+    container: Container,
+    colour: PaletteColor?,
+    value: PlaceValue?,
+    listView: ListView,
+    currency: String,
+    selected: Boolean = false,
+    onLongClick: () -> Unit = {},
+    onClick: () -> Unit,
+) {
     val language = AppLanguage.current()
     val summary = buildList {
         value?.let { add(pluralStringResource(R.plurals.item_count, it.items, it.items)) }
@@ -78,6 +91,8 @@ fun ContainerRow(container: Container, colour: PaletteColor?, value: PlaceValue?
         iconKey = container.icon,
         name = container.name,
         listView = listView,
+        selected = selected,
+        onLongClick = onLongClick,
         onClick = onClick,
         details = buildList {
             if (listView == ListView.Detailed) container.description?.let { add(it to 2) }
@@ -95,7 +110,9 @@ fun ContainerRow(container: Container, colour: PaletteColor?, value: PlaceValue?
  * @param currency the display currency code.
  * @param mainIcon the main category's icon key, `null` for the empty icon, or absent without categories.
  * @param categoryLabels the item's category labels, main first, shown in the detailed view.
- * @param onClick opens the item.
+ * @param selected whether it is selected in selection mode.
+ * @param onLongClick starts or extends selection mode.
+ * @param onClick opens the item, or toggles it in selection mode.
  */
 @Composable
 fun ItemRow(
@@ -104,6 +121,8 @@ fun ItemRow(
     currency: String,
     mainIcon: String? = NO_CATEGORY,
     categoryLabels: List<String> = emptyList(),
+    selected: Boolean = false,
+    onLongClick: () -> Unit = {},
     onClick: () -> Unit,
 ) {
     val language = AppLanguage.current()
@@ -122,7 +141,10 @@ fun ItemRow(
     }
     val icon = if (mainIcon == NO_CATEGORY) R.drawable.ic_item else CategoryIcons.drawable(mainIcon)
     val iconKey = if (mainIcon == NO_CATEGORY) "item" else mainIcon ?: CategoryIcons.EMPTY
-    PlaceRow(id = item.id, stripe = null, icon = icon, iconKey = iconKey, name = item.name, listView = listView, onClick = onClick, details = details)
+    PlaceRow(
+        id = item.id, stripe = null, icon = icon, iconKey = iconKey, name = item.name, listView = listView,
+        selected = selected, onLongClick = onLongClick, onClick = onClick, details = details,
+    )
 }
 
 /**
@@ -134,6 +156,8 @@ fun ItemRow(
  * @param iconKey the icon's key, for the badge's test tag.
  * @param name the name, on one line.
  * @param listView condensed (48 dp icon) or detailed (96 dp icon).
+ * @param selected whether it is selected; selected rows are highlighted.
+ * @param onLongClick called on a long press.
  * @param onClick opens the record.
  * @param details extra lines, each with its line limit.
  */
@@ -145,6 +169,8 @@ private fun PlaceRow(
     iconKey: String,
     name: String,
     listView: ListView,
+    selected: Boolean,
+    onLongClick: () -> Unit,
     onClick: () -> Unit,
     details: List<Pair<String, Int>>,
 ) {
@@ -153,7 +179,9 @@ private fun PlaceRow(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = if (detailed) 112.dp else 64.dp)
-            .clickable(onClick = onClick)
+            .then(if (selected) Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)) else Modifier)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .semantics { this.selected = selected }
             .testTag(rowTag(id)),
         verticalAlignment = Alignment.CenterVertically,
     ) {

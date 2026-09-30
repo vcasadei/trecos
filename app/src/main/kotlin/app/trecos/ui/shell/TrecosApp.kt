@@ -7,12 +7,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,7 +37,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import app.trecos.R
+import app.trecos.ui.appContainer
 import app.trecos.ui.appViewModel
+import app.trecos.ui.places.BottomBarClearance
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import app.trecos.ui.places.ContainerFormScreen
 import app.trecos.ui.places.HomeScreen
 import app.trecos.ui.places.HouseFormScreen
@@ -39,6 +51,9 @@ import app.trecos.ui.places.ItemScreen
 import app.trecos.ui.places.PlaceNavigation
 import app.trecos.ui.places.PlaceScreen
 import app.trecos.ui.places.TagsScreen
+import app.trecos.ui.places.TrashScreen
+import app.trecos.ui.places.KeepScreen
+import app.trecos.ui.places.DeleteHouseScreen
 import app.trecos.ui.theme.LocalDarkTheme
 
 /** Test tag of the house band behind the status bar. */
@@ -65,12 +80,15 @@ private object Routes {
     const val PLACE = "place/{house}?container={container}"
     const val ITEM = "item/{item}"
     const val TAGS = "tags/{house}"
+    const val TRASH = "trash/{house}"
+    const val KEEP = "keep/{container}"
+    const val DELETE_HOUSE = "house/delete/{house}"
     const val HOUSE_FORM = "form/house?id={id}"
     const val CONTAINER_FORM = "form/container?house={house}&parent={parent}&id={id}"
     const val ITEM_FORM = "form/item?house={house}&container={container}&id={id}"
 
-    /** Whether a route is a form, which hides the bottom bar. */
-    fun isForm(route: String?) = route?.startsWith("form/") == true
+    /** Whether a route is a form or a task screen with its own bottom buttons, which hide the bottom bar. */
+    fun isForm(route: String?) = route != null && (route.startsWith("form/") || route == KEEP || route == DELETE_HOUSE)
 }
 
 /**
@@ -95,6 +113,22 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
         }
     }
     val nav = remember(navController) { placeNavigation(navController) }
+    val app = appContainer()
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val undoLabel = stringResource(R.string.action_undo)
+    LaunchedEffect(app) {
+        app.messages.collect { message ->
+            scope.launch {
+                val result = snackbar.showSnackbar(
+                    message = message.text,
+                    actionLabel = if (message.undoEntries.isNotEmpty()) undoLabel else null,
+                    duration = if (message.undoEntries.isNotEmpty()) SnackbarDuration.Long else SnackbarDuration.Short,
+                )
+                if (result == SnackbarResult.ActionPerformed) message.undoEntries.forEach { app.organize.restore(it) }
+            }
+        }
+    }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(Modifier.fillMaxSize()) {
@@ -109,6 +143,17 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                 }
                 composable(Routes.ITEM, listOf(stringArg("item"))) { entry -> ItemScreen(entry.string("item")!!, nav) }
                 composable(Routes.TAGS, listOf(stringArg("house"))) { entry -> TagsScreen(entry.string("house")!!) { navController.popBackStack() } }
+                composable(Routes.TRASH, listOf(stringArg("house"))) { entry -> TrashScreen(entry.string("house")!!) { navController.popBackStack() } }
+                composable(Routes.KEEP, listOf(stringArg("container"))) { entry ->
+                    KeepScreen(entry.string("container")!!, onBack = { navController.popBackStack() }, onFinished = { navController.popBackStack() })
+                }
+                composable(Routes.DELETE_HOUSE, listOf(stringArg("house"))) { entry ->
+                    DeleteHouseScreen(
+                        entry.string("house")!!,
+                        onBack = { navController.popBackStack() },
+                        onDeleted = { navController.popBackStack(rootRoute(TrecosTab.Home), inclusive = false) },
+                    )
+                }
                 composable(Routes.HOUSE_FORM, listOf(optionalArg("id"))) { entry ->
                     HouseFormScreen(entry.string("id")) { savedId ->
                         navController.popBackStack()
@@ -131,6 +176,12 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                         .testTag(HOUSE_BAND_TAG),
                 )
             }
+            SnackbarHost(
+                snackbar,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = if (Routes.isForm(route)) 96.dp else BottomBarClearance),
+            )
             if (!Routes.isForm(route)) {
                 TrecosBottomBar(
                     selected = currentTab,
@@ -160,6 +211,9 @@ private fun placeNavigation(controller: NavHostController) = PlaceNavigation(
     addItem = { house, container -> controller.navigate("form/item?house=$house" + (container?.let { "&container=$it" } ?: "")) },
     editItem = { item -> controller.navigate("form/item?id=$item") },
     openTags = { house -> controller.navigate("tags/$house") },
+    openTrash = { house -> controller.navigate("trash/$house") },
+    keep = { container -> controller.navigate("keep/$container") },
+    deleteHouse = { house -> controller.navigate("house/delete/$house") },
 )
 
 /**

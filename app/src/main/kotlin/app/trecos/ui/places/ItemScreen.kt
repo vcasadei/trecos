@@ -18,7 +18,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.trecos.R
 import app.trecos.places.Money
+import app.trecos.places.Selection
 import app.trecos.places.totalValue
 import app.trecos.ui.appViewModel
 import app.trecos.ui.language.AppLanguage
@@ -70,6 +73,9 @@ fun formatDate(epochMillis: Long, language: AppLanguage): String =
 fun ItemScreen(itemId: String, nav: PlaceNavigation) {
     val vm = appViewModel(key = "item/$itemId") { ItemViewModel(it, itemId) }
     val state by vm.state.collectAsStateWithLifecycle()
+    var loaded by remember { mutableStateOf(false) }
+    LaunchedEffect(state) { if (state != null) loaded = true else if (loaded) nav.back() }
+    val organize = rememberOrganizeController()
     val current = state ?: return
     val item = current.item
     val language = AppLanguage.current()
@@ -104,13 +110,20 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
                     Icon(painterResource(R.drawable.ic_more), contentDescription = stringResource(R.string.action_more))
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    listOf(R.string.action_move, R.string.action_copy, R.string.action_duplicate, R.string.action_delete).forEach { label ->
+                    val here = Selection(itemIds = listOf(item.id))
+                    listOf<Pair<Int, () -> Unit>>(
+                        R.string.action_move to { organize.move(here, item.houseId) },
+                        R.string.action_copy to { organize.copy(here, item.houseId) },
+                        R.string.action_duplicate to { organize.duplicate(item.id) { nav.editItem(it) } },
+                        R.string.action_delete to { organize.delete(here, item.name) },
+                    ).forEach { (label, action) ->
                         DropdownMenuItem(
                             text = { Text(stringResource(label)) },
                             onClick = {
                                 menuOpen = false
-                                comingLater = true
+                                action()
                             },
+                            modifier = Modifier.testTag("menu_$label"),
                         )
                     }
                 }
@@ -148,6 +161,7 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
             }
         }
     }
+    OrganizeDialogs(organize, onChooseWhatToKeep = nav.keep)
     if (comingLater) {
         AlertDialog(
             onDismissRequest = { comingLater = false },
