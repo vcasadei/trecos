@@ -33,9 +33,9 @@ run at the end of **every** release group before it is tagged.
 - [x] 2.3 Implement the first-run house prompt ("My home" pre-filled); test for scenario "First run"
 - [x] 2.4 Implement house create/edit (name required, address, description, icon from the place set, colour); tests for scenarios "Creating a second house", "House without a name" and "Deleting the last house"
 - [x] 2.5 Implement the Home tab entry point (single house opens directly, house list at 2 or more, last-used house, switcher with "Add house"); tests for scenarios "Single house" and "Several houses"
-- [ ] 2.6 Implement nested container create/edit (name required, description, QR text, icon, colour); tests for scenarios "Box inside a box" and "Container without a name"
-- [ ] 2.7 Build the container screen (fixed top bar, scrolling header, Containers and Items sections with counts, empty-state hint, overflow menu); tests for scenarios "Container with contents" and "Empty container", plus screenshots in both themes
-- [ ] 2.8 Build the "+" speed dial with Item and Container options floating to its left; tests for scenarios "Adding from a container" and "Dismissing the options"
+- [x] 2.6 Implement nested container create/edit (name required, description, QR text, icon, colour); tests for scenarios "Box inside a box" and "Container without a name"
+- [x] 2.7 Build the container screen (fixed top bar, scrolling header, Containers and Items sections with counts, empty-state hint, overflow menu); tests for scenarios "Container with contents" and "Empty container", plus screenshots in both themes
+- [x] 2.8 Build the "+" speed dial with Item and Container options floating to its left; tests for scenarios "Adding from a container" and "Dismissing the options"
 - [ ] 2.9 Implement item fields and validation (name required, quantity a whole number from 0 to 999,999 with default 1, unit price of 0 or more, brand, model, serial, QR, description); tests for scenarios "Minimal item", "Invalid quantity" and "Missing name"
 - [ ] 2.10 Implement the total value (quantity × unit price, none without a price) and added/changed dates; tests for scenarios "Screws" and "Editing updates the date"
 - [ ] 2.11 Build the item form (essentials, "More fields", Save, Save + new keeping the location); verify with a UI test that Save + new keeps the container
