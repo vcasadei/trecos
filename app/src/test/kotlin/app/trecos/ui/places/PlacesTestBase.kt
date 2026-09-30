@@ -132,6 +132,19 @@ abstract class PlacesTestBase {
         rule.waitForIdle()
     }
 
+    /**
+     * Waits until some node with the tag shows text containing [expected];
+     * needed right after navigating, while the previous screen may still be
+     * composed.
+     *
+     * @param tag the test tag.
+     * @param expected the text to wait for.
+     */
+    protected fun waitForTextIn(tag: String, expected: String) {
+        val matcher = androidx.compose.ui.test.hasTestTag(tag).and(androidx.compose.ui.test.hasText(expected, substring = true))
+        rule.waitUntil(10_000) { rule.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+    }
+
     /** Presses system back. */
     protected fun pressBack() {
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }

@@ -58,13 +58,13 @@ run at the end of **every** release group before it is tagged.
 ## 3. Database migrations
 
 - [x] 3.1 Implement the pre-migration safety copy (`pre-migration-v<N>.db` before any migration, restored automatically if the migration fails, deleted after the next successful launch); verify with a test that a deliberately failing migration leaves the database readable at the previous version
-- [ ] 3.2 Set up the migration test harness (`MigrationTestHelper` over exported schemas, run in CI); verify with a sample v1 → v2 test
+- [x] 3.2 Set up the migration test harness (`MigrationTestHelper` over exported schemas, run in CI); verify with a sample v1 → v2 test
 - [x] 3.3 Document the expand-and-contract rule and the per-release migration checklist in `docs/architecture/data-model.md`
 - [x] 3.4 Run the down path: restore the pre-migration copy in a test and verify that the prior schema version and row counts are back
 
 ## 4. Release 0.3 — Categories and tags
 
-- [ ] 4.1 Migration v1 → v2 (expand): add `Category`, `ItemCategory` (ordered), `Tag`, `ItemTag` and `TokenCategoryCount`; verify with a migration test that preserves existing items
+- [x] 4.1 Migration v1 → v2 (expand): add `Category`, `ItemCategory` (ordered), `Tag`, `ItemTag` and `TokenCategoryCount`; verify with a migration test that preserves existing items
 - [ ] 4.2 Seed the built-in category tree from a bundled asset (stable keys, icons, English and Portuguese names), matching the full list in the spec; tests that every listed category exists, that built-ins cannot be renamed or deleted, and for scenario "Built-ins in Portuguese"
 - [ ] 4.3 Build the category picker (search box, several categories per item, order, set main); tests for scenarios "Cable with two ends" and "Changing the main category"
 - [ ] 4.4 Implement per-house custom categories (top level or sub, icon picker with empty default, delete removes assignments); tests for scenarios "New subcategory", "Deleting a used custom category" and "Other houses don't see it"

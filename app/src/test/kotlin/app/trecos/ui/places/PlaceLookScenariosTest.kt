@@ -20,6 +20,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /**
  * Scenarios of the places "Container value", "Colours", "House indicator" and
@@ -27,6 +28,7 @@ import org.robolectric.RobolectricTestRunner
  * Robolectric reports a status bar of height 0, so the band's presence is checked, not its size.
  */
 @RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "w360dp-h800dp-xhdpi")
 class PlaceLookScenariosTest : PlacesTestBase() {
 
     /** @return whether any node with the tag exists. */
@@ -57,10 +59,10 @@ class PlaceLookScenariosTest : PlacesTestBase() {
         )
         runBlocking { app.preferences.setCurrency("BRL") }
         click(rowTag("office"))
-        tag("place_value").assertTextContains("R$4,220.00 · automatic", substring = true)
+        waitForTextIn("place_value", "R$4,220.00 · automatic")
 
         click(rowTag("boxB"))
-        tag("place_value").assertTextContains("R$500.00 · manual", substring = true)
+        waitForTextIn("place_value", "R$500.00 · manual")
         tag("unpriced_hint").assertTextContains("1 item has no price")
 
         click("clear_override")

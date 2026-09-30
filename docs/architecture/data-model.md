@@ -17,7 +17,7 @@ committed in `app/schemas/app.trecos.data.TrecosDatabase/<version>.json`.
 | No foreign keys | Soft deletes and sync merges apply rows in any order; relations are enforced in code |
 | Inserts fail on a clash; updates are explicit | Room's upsert silently drops a row whose unique QR code clashes |
 
-## Tables (schema version 1)
+## Tables (schema version 2)
 
 ### `house`
 
@@ -65,6 +65,24 @@ Indexes: `(houseId, parentId)`; unique `(houseId, qrCode)`.
 | `deletedAt` | INTEGER? | |
 
 Indexes: `(houseId, containerId)`; unique `(houseId, qrCode)`.
+
+### Categories and tags (added in schema 2)
+
+Built-in categories are **not** stored: they are read from the bundled asset
+`assets/categories.json` and referenced everywhere by their stable key, such as
+`cables.usb_c`, so every device resolves them identically and they can't be
+renamed or deleted.
+
+| Table | Columns | Notes |
+|---|---|---|
+| `category` | `id`, `houseId`, `parentId?`, `name`, `icon?`, `createdAt`, `updatedAt` | Custom categories of one house. `parentId` is a built-in top-level key or a custom top-level id; null makes it a top level. `icon` null shows the empty default icon |
+| `item_category` | `id`, `houseId`, `itemId`, `categoryId`, `position`, `createdAt` | `categoryId` is a built-in key or a custom id; position 0 is the main category. Unique `(itemId, categoryId)` |
+| `tag` | `id`, `houseId`, `name`, `normalized`, `createdAt`, `updatedAt` | `normalized` is lower case without accents; unique `(houseId, normalized)` |
+| `item_tag` | `id`, `houseId`, `itemId`, `tagId`, `createdAt` | Unique `(itemId, tagId)` |
+| `token_category_count` | `houseId`, `token`, `categoryId`, `count` | Learned suggestion counts (design D7); primary key `(houseId, token, categoryId)`; device only |
+
+Deleting a custom category or a tag removes its rows and its assignments.
+These tables get deletion markers when sync arrives (0.11), by expand and contract.
 
 ## Rules enforced in code
 
