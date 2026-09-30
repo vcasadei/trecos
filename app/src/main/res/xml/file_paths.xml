@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Camera captures land in cache/camera/ and are deleted once imported. -->
+<!-- Camera captures land in cache/camera/ (deleted once imported); shared labels in cache/labels/. -->
 <paths>
     <cache-path name="camera" path="camera/" />
+    <cache-path name="labels" path="labels/" />
 </paths>

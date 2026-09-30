@@ -43,6 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.trecos.R
 import app.trecos.data.ListView
+import app.trecos.AppMessage
+import app.trecos.data.Container
+import app.trecos.data.Item
+import app.trecos.places.Label as QrLabel
 import app.trecos.places.Money
 import app.trecos.places.Selection
 import app.trecos.ui.appContainer
@@ -92,6 +96,19 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
     val listState = rememberLazyListState()
     val organize = rememberOrganizeController()
     val app = appContainer()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val printer = LocalLabelPrinter.current
+    var labelShown by remember { mutableStateOf<QrLabel?>(null) }
+    fun printLabels(containers: List<Container>, items: List<Item>) {
+        val codes = containers.mapNotNull { it.qrCode } + items.mapNotNull { it.qrCode }
+        val missing = containers.size + items.size - codes.size
+        if (codes.isNotEmpty()) printer.print(context, codes.map { QrLabel(it) })
+        if (missing > 0) {
+            val text = if (codes.isEmpty() && missing == 1) app.resources.getString(R.string.no_qr_code)
+            else app.resources.getQuantityString(R.plurals.labels_without_code, missing, missing)
+            app.messages.tryEmit(AppMessage(text))
+        }
+    }
     var selectedItems by rememberSaveable { mutableStateOf(listOf<String>()) }
     var selectedContainers by rememberSaveable { mutableStateOf(listOf<String>()) }
     val selecting = selectedItems.isNotEmpty() || selectedContainers.isNotEmpty()
@@ -115,6 +132,10 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                     onMove = { organize.move(selection, current.house.id) { clearSelection() } },
                     onCopy = { organize.copy(selection, current.house.id) { clearSelection() } },
                     onDelete = { organize.delete(selection, null) { clearSelection() } },
+                    onPrint = {
+                        printLabels(current.containers.filter { it.id in selectedContainers }, current.items.filter { it.id in selectedItems })
+                        clearSelection()
+                    },
                 )
             } else Box {
                 TrecosTopBar(
@@ -181,7 +202,7 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                                         app.searchWithin.value = container.id
                                         nav.searchIn()
                                     },
-                                    R.string.action_print_qr to { explanation = R.string.coming_later },
+                                    R.string.action_print_qr to { printLabels(listOf(container), emptyList()) },
                                 )
                                 actions.forEach { (label, action) ->
                                     DropdownMenuItem(
@@ -238,6 +259,7 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                         onShowFullPath = { fullPathOpen = true },
                         onClearOverride = vm::clearOverride,
                         language = language,
+                        onShowQr = { labelShown = QrLabel(it) },
                     )
                 }
                 if (current.containers.isNotEmpty()) {
@@ -298,6 +320,7 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
     }
 
     OrganizeDialogs(organize, onChooseWhatToKeep = nav.keep)
+    labelShown?.let { QrLabelView(it) { labelShown = null } }
     explanation?.let { message ->
         AlertDialog(
             onDismissRequest = { explanation = null },
@@ -329,6 +352,7 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
  * @param onShowFullPath called when "…" is tapped.
  * @param onClearOverride removes the manual value.
  * @param language the app language, for number formats.
+ * @param onShowQr opens the large QR label for a code.
  */
 @Composable
 private fun PlaceHeader(
@@ -338,6 +362,7 @@ private fun PlaceHeader(
     onShowFullPath: () -> Unit,
     onClearOverride: () -> Unit,
     language: AppLanguage,
+    onShowQr: (String) -> Unit,
 ) {
     val container = state.container
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -380,8 +405,14 @@ private fun PlaceHeader(
                 housePillText = houseColour.onBand,
             )
         }
-        container?.qrCode?.let {
-            SafeText("${stringResource(R.string.field_qr)}: $it", maxLines = 1, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        container?.qrCode?.let { code ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable { onShowQr(code) }.testTag("show_qr"),
+            ) {
+                Icon(painterResource(R.drawable.ic_qr), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                SafeText(" $code", maxLines = 1, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             val label = stringResource(if (value.manual) R.string.value_manual else R.string.value_automatic)
@@ -418,9 +449,18 @@ private fun PlaceHeader(
  * @param onMove moves the selection.
  * @param onCopy copies the selection.
  * @param onDelete deletes the selection.
+ * @param onPrint prints the selection's QR labels.
  */
 @Composable
-private fun SelectionBar(count: Int, onClear: () -> Unit, onSelectAll: () -> Unit, onMove: () -> Unit, onCopy: () -> Unit, onDelete: () -> Unit) {
+private fun SelectionBar(
+    count: Int,
+    onClear: () -> Unit,
+    onSelectAll: () -> Unit,
+    onMove: () -> Unit,
+    onCopy: () -> Unit,
+    onDelete: () -> Unit,
+    onPrint: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -434,6 +474,7 @@ private fun SelectionBar(count: Int, onClear: () -> Unit, onSelectAll: () -> Uni
         IconButton(onClick = onClear) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.clear_selection)) }
         Text(
             pluralStringResource(R.plurals.selected_count, count, count),
+            maxLines = 1,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f).testTag("selected_count"),
         )
@@ -442,6 +483,7 @@ private fun SelectionBar(count: Int, onClear: () -> Unit, onSelectAll: () -> Uni
             Triple(R.drawable.ic_move, R.string.action_move, onMove),
             Triple(R.drawable.ic_copy, R.string.action_copy, onCopy),
             Triple(R.drawable.ic_delete, R.string.action_delete, onDelete),
+            Triple(R.drawable.ic_print, R.string.action_print_qr, onPrint),
         ).forEach { (icon, label, action) ->
             IconButton(onClick = action) { Icon(painterResource(icon), contentDescription = stringResource(label)) }
         }

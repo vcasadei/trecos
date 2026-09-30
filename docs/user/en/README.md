@@ -8,4 +8,5 @@ The guide is written as each feature ships:
 | [categories-and-tags.md](categories-and-tags.md) | 0.3 |
 | [moving-and-deleting.md](moving-and-deleting.md) | 0.4 |
 | [search.md](search.md) | 0.6 |
-| [faq.md](faq.md) (also shown in the app) | 1.0 (answers 3 and 6 drafted) |
+| [qr-labels.md](qr-labels.md) | 0.7 |
+| [faq.md](faq.md) (also shown in the app) | 1.0 (answers 2, 3, 4 and 6 drafted) |

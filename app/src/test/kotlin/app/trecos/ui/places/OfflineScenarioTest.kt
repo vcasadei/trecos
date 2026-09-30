@@ -64,7 +64,7 @@ class OfflineScenarioTest : PlacesTestBase() {
      * @return the id of the first container with that name.
      */
     private fun containerId(name: String): String {
-        rule.waitUntil(10_000) { runBlocking { app.database.containers().observeChildren(houseId(), null).first().any { it.name == name } } }
+        eventually(10_000) { runBlocking { app.database.containers().observeChildren(houseId(), null).first().any { it.name == name } } }
         return runBlocking { app.database.containers().observeChildren(houseId(), null).first().first { it.name == name }.id }
     }
 
@@ -89,7 +89,7 @@ class OfflineScenarioTest : PlacesTestBase() {
      * @return the node.
      */
     private fun text(value: String, substring: Boolean) = run {
-        rule.waitUntil(10_000) {
+        eventually(10_000) {
             rule.onAllNodes(androidx.compose.ui.test.hasText(value, substring = substring), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
         }
         rule.onNode(androidx.compose.ui.test.hasText(value, substring = substring), useUnmergedTree = true)

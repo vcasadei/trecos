@@ -136,11 +136,11 @@ class PhotoScenariosTest : PlacesTestBase() {
         runBlocking { app.preferences.setImageSource(ImageSource.Gallery) }
         fake.next = listOf(jpeg(10), jpeg(20), jpeg(30))
         editPi()
-        rule.waitUntil(10_000) { rule.onAllNodes(isPhotoThumb, useUnmergedTree = true).fetchSemanticsNodes().size == 1 }
+        eventually(10_000) { rule.onAllNodes(isPhotoThumb, useUnmergedTree = true).fetchSemanticsNodes().size == 1 }
         click("add_photo")
 
         assertEquals(listOf(2), fake.galleryMax)
-        rule.waitUntil(10_000) { rule.onAllNodes(isPhotoThumb, useUnmergedTree = true).fetchSemanticsNodes().size == 3 }
+        eventually(10_000) { rule.onAllNodes(isPhotoThumb, useUnmergedTree = true).fetchSemanticsNodes().size == 3 }
     }
 
     @Test
@@ -161,7 +161,7 @@ class PhotoScenariosTest : PlacesTestBase() {
         click("source_camera")
 
         assertEquals(1, fake.cameraCalls)
-        rule.waitUntil(10_000) { runBlocking { app.preferences.imageSource.first() } == ImageSource.Camera }
+        eventually(10_000) { runBlocking { app.preferences.imageSource.first() } == ImageSource.Camera }
         click("add_photo")
         assertEquals(2, fake.cameraCalls)
     }
@@ -189,7 +189,7 @@ class PhotoScenariosTest : PlacesTestBase() {
         click("photo_main_${shas[2]}")
         saveAndClose()
 
-        rule.waitUntil(10_000) { runBlocking { app.database.photos().forOwner("pi").firstOrNull()?.sha256 } == shas[2] }
+        eventually(10_000) { runBlocking { app.database.photos().forOwner("pi").firstOrNull()?.sha256 } == shas[2] }
         pressBack()
         tag(photoTag(shas[2])).assertIsDisplayed()
     }
@@ -215,7 +215,7 @@ class PhotoScenariosTest : PlacesTestBase() {
         File(app.photoStore.photoFile(shas[0]).parentFile!!.parentFile, "thumbs").deleteRecursively()
 
         tag(photoTag(shas[0])).assertIsDisplayed()
-        rule.waitUntil(10_000) { File(app.photoStore.photoFile(shas[0]).parentFile!!.parentFile, "thumbs/${shas[0]}.webp").exists() }
+        eventually(10_000) { File(app.photoStore.photoFile(shas[0]).parentFile!!.parentFile, "thumbs/${shas[0]}.webp").exists() }
     }
 
     @Test
@@ -229,7 +229,7 @@ class PhotoScenariosTest : PlacesTestBase() {
         newItem()
 
         assertEquals(1, fake.cameraCalls)
-        rule.waitUntil(10_000) { rule.onAllNodes(isPhotoThumb, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(isPhotoThumb, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
         tag(fieldTag("name")).assertIsFocused()
     }
 

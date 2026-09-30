@@ -149,7 +149,8 @@ class SearchScenariosTest : PlacesTestBase() {
         click("filters_done")
 
         count("2 items")
-        assertEquals(listOf("pi", "usb"), resultIds())
+        // The count updates before the result rows recompose.
+        eventually(10_000) { resultIds() == listOf("pi", "usb") }
     }
 
     @Test
@@ -176,7 +177,7 @@ class SearchScenariosTest : PlacesTestBase() {
         click("sort_UnitPrice")
         click("sort_direction")
 
-        rule.waitUntil(10_000) { resultIds() == listOf("dear", "cheap", "none") }
+        eventually(10_000) { resultIds() == listOf("dear", "cheap", "none") }
     }
 
     @Test
