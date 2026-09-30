@@ -78,6 +78,21 @@ class CustomFieldScenariosTest : PlacesTestBase() {
         click("setting_$key")
     }
 
+    /**
+     * Ticks an extra and waits until it is saved. A tap the CI runner drops
+     * (seen once, never locally) is repeated, up to three times.
+     *
+     * @param key the extra.
+     */
+    private fun pickExtra(key: String) {
+        repeat(3) {
+            click("extra_$key")
+            val saved = runCatching { rule.waitUntil(5_000) { key in runBlocking { app.preferences.detailExtras.first() } } }.isSuccess
+            if (saved) return
+        }
+        throw AssertionError("$key was not saved")
+    }
+
     /** Opens the house's custom fields from Settings. */
     private fun openHouseFields() {
         click(tabTag(TrecosTab.Settings))
@@ -203,10 +218,9 @@ class CustomFieldScenariosTest : PlacesTestBase() {
         }
         click(tabTag(TrecosTab.Settings))
         settingsRow("extras")
-        click("extra_${DetailExtras.TAGS}")
-        rule.waitUntil(10_000) { DetailExtras.TAGS in runBlocking { app.preferences.detailExtras.first() } }
-        click("extra_${DetailExtras.BRAND}")
-        rule.waitUntil(10_000) { runBlocking { app.preferences.detailExtras.first() } == listOf(DetailExtras.CATEGORIES, DetailExtras.TAGS, DetailExtras.BRAND) }
+        pickExtra(DetailExtras.TAGS)
+        pickExtra(DetailExtras.BRAND)
+        assertEquals(listOf(DetailExtras.CATEGORIES, DetailExtras.TAGS, DetailExtras.BRAND), runBlocking { app.preferences.detailExtras.first() })
         pressBack()
         tag(SETTINGS_LIST_TAG).performScrollToNode(hasTestTag("setting_extras"))
         waitForTextIn("value_extras", "Categories, Tags, Brand")
