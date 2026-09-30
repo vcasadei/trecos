@@ -23,6 +23,8 @@ import app.trecos.categories.TagStore
 import app.trecos.categories.TextNormalizer
 import app.trecos.places.FieldError
 import app.trecos.places.Money
+import app.trecos.places.FieldDraft
+import app.trecos.data.FieldType
 import app.trecos.places.Validation
 import app.trecos.ui.language.AppLanguage
 import app.trecos.ui.theme.PaletteColor
@@ -210,7 +212,7 @@ class HouseFormViewModel(private val app: AppContainer, private val houseId: Str
 
     /**
      * Copies a house's custom categories (keeping subcategories under their
-     * copied parents) and tags into another house. Items are never copied.
+     * copied parents), tags and house-wide fields into another house. Items are never copied.
      *
      * @param from the house to copy from.
      * @param to the new house.
@@ -226,6 +228,9 @@ class HouseFormViewModel(private val app: AppContainer, private val houseId: Str
         }
         app.database.tags().all(from).forEach { tag ->
             app.database.tags().insert(tag.copy(id = app.newId(), houseId = to, createdAt = now, updatedAt = now))
+        }
+        app.database.fields().houseFields(from).forEach { field ->
+            app.database.fields().insertDef(field.copy(id = app.newId(), houseId = to, createdAt = now, updatedAt = now))
         }
     }
 
@@ -306,6 +311,16 @@ class ContainerFormViewModel(
     /** Field errors of the last rejected save. */
     var errors by mutableStateOf<Set<FieldError>>(emptySet())
         private set
+
+    /**
+     * Fills in a scanned code, and the name too when it is still empty.
+     *
+     * @param code the scanned code.
+     */
+    fun fillFromScan(code: String) {
+        qrCode = code
+        if (name.isBlank()) name = code
+    }
 
     /** Who holds the code the user typed, when it is taken. */
     var qrHolder by mutableStateOf<QrHolder?>(null)
@@ -473,9 +488,60 @@ class ItemFormViewModel(
     var errors by mutableStateOf<Set<FieldError>>(emptySet())
         private set
 
+    /**
+     * Fills in a scanned code, and the name too when it is still empty.
+     *
+     * @param code the scanned code.
+     */
+    fun fillFromScan(code: String) {
+        qrCode = code
+        if (name.isBlank()) name = code
+    }
+
     /** Who holds the code the user typed, when it is taken. */
     var qrHolder by mutableStateOf<QrHolder?>(null)
         private set
+
+    /** The custom fields: the house's, then the item's own. */
+    var fields by mutableStateOf<List<FieldDraft>>(emptyList())
+        private set
+
+    /** Errors of custom fields, by their index in [fields]. */
+    var fieldErrors by mutableStateOf<Map<Int, FieldError>>(emptyMap())
+        private set
+
+    /**
+     * Changes a custom field's input.
+     *
+     * @param index the field's index in [fields].
+     * @param input the new input.
+     */
+    fun setField(index: Int, input: String) {
+        fields = fields.mapIndexed { i, draft -> if (i == index) draft.copy(input = input) else draft }
+        fieldErrors = fieldErrors - index
+    }
+
+    /**
+     * Adds a field to this item only.
+     *
+     * @param name the field's name, not empty.
+     * @param type its type.
+     * @param unit a Number field's unit, or `null`.
+     */
+    fun addItemField(name: String, type: FieldType, unit: String?) {
+        fields = fields + FieldDraft(defId = null, name = name, type = type, unit = unit?.trim()?.ifEmpty { null })
+    }
+
+    /**
+     * Removes one of this item's own fields (house-wide fields stay, and are cleared instead).
+     *
+     * @param index the field's index in [fields].
+     */
+    fun removeField(index: Int) {
+        val draft = fields.getOrNull(index) ?: return
+        fields = if (draft.houseWide) fields.mapIndexed { i, d -> if (i == index) d.copy(input = "") else d } else fields.filterIndexed { i, _ -> i != index }
+        fieldErrors = emptyMap()
+    }
 
     /** Where the next saved item goes; kept by "Save + new". */
     var location: Pair<String, String?> = houseId to containerId
@@ -507,6 +573,8 @@ class ItemFormViewModel(
                     moreFields = listOf(brand, model, serial, qrCode, descriptionState).any(String::isNotEmpty) || tags.isNotEmpty()
                 }
             }
+            fields = app.fields.drafts(location.first, existing?.id, AppLanguage.current())
+            if (fields.any { it.input.isNotEmpty() }) moreFields = true
             app.database.categories().observeCustom(location.first).collect { custom ->
                 catalog = CategoryCatalog(app.builtInCategories, custom)
                 categories = categories.filter { catalog[it] != null }
@@ -631,7 +699,10 @@ class ItemFormViewModel(
                 decision.error?.let { add(it) }
             }
             errors = found
-            if (found.isNotEmpty() || validName == null || validQuantity == null) return@launch
+            val language = AppLanguage.current()
+            fieldErrors = app.fields.validate(fields, language)
+            if (fieldErrors.isNotEmpty()) moreFields = true
+            if (found.isNotEmpty() || fieldErrors.isNotEmpty() || validName == null || validQuantity == null) return@launch
             val now = app.clock()
             val item = Item(
                 id = old?.id ?: app.newId(),
@@ -656,7 +727,9 @@ class ItemFormViewModel(
             CategorySuggester.learn(app.database.categories(), item.houseId, "${item.name} ${item.description.orEmpty()}", categories)
             tagStore.setForItem(item.houseId, item.id, tags)
             photos.save(item.houseId, Photo.OWNER_ITEM, item.id)
+            app.fields.save(item.houseId, item.id, fields, language)
             if (andNew && old == null) {
+                fields = app.fields.drafts(item.houseId, null, language)
                 photos.clear()
                 nameState = ""
                 quantity = "1"

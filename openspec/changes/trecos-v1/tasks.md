@@ -128,14 +128,14 @@ run at the end of **every** release group before it is tagged.
 ## 9. Release 0.8 — Custom fields and settings
 
 - [x] 9.1 Migration v5 → v6 (expand): add `FieldDef` (house-wide or per item) and `FieldValue`; verify with a migration test
-- [ ] 9.2 Implement field types (Text, Number with unit label, Date, Yes/No) and validation; tests for scenarios "Number with unit" and "Wrong type"
-- [ ] 9.3 Implement house-wide field definitions in Settings (rename keeps values, delete confirms the count); tests for scenarios "Adding a house-wide field" and "Deleting a used field"
-- [ ] 9.4 Implement per-item fields; test for scenario "One-off field"
-- [ ] 9.5 Index custom text values as part of the description, and offer custom fields as detailed-view extras; test for scenario "Searching a custom value"
-- [ ] 9.6 Include field definitions in "copy from another house"; extend the test for scenario "Copying from another house"
-- [ ] 9.7 Build the Settings structure (sections in order) with DataStore defaults applied immediately and kept on the device only; tests for scenarios "Fresh install" and "Immediate effect"
-- [ ] 9.8 Implement the currency change warning and relabelling; tests for scenarios "Relabelling" and "Cancelling"
-- [ ] 9.9 Implement the detailed-view extras picker (limit of 3), start screen, form-or-photo-first setting and image source setting; tests for scenarios "Picking extras" and "Too many"
+- [x] 9.2 Implement field types (Text, Number with unit label, Date, Yes/No) and validation; tests for scenarios "Number with unit" and "Wrong type"
+- [x] 9.3 Implement house-wide field definitions in Settings (rename keeps values, delete confirms the count); tests for scenarios "Adding a house-wide field" and "Deleting a used field"
+- [x] 9.4 Implement per-item fields; test for scenario "One-off field"
+- [x] 9.5 Index custom text values as part of the description, and offer custom fields as detailed-view extras; test for scenario "Searching a custom value"
+- [x] 9.6 Include field definitions in "copy from another house"; extend the test for scenario "Copying from another house"
+- [x] 9.7 Build the Settings structure (sections in order) with DataStore defaults applied immediately and kept on the device only; tests for scenarios "Fresh install" and "Immediate effect"
+- [x] 9.8 Implement the currency change warning and relabelling; tests for scenarios "Relabelling" and "Cancelling"
+- [x] 9.9 Implement the detailed-view extras picker (limit of 3), start screen, form-or-photo-first setting and image source setting; tests for scenarios "Picking extras" and "Too many"
 - [ ] 9.10 Write the user docs on custom fields and settings (both languages), and add the 0.8 entry to `CHANGELOG.md`
 
 ## 10. Release 0.9 — App lock and profile

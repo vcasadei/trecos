@@ -1,6 +1,16 @@
 package app.trecos.ui.shell
 
 import android.app.Activity
+import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import app.trecos.data.StartScreen
+import app.trecos.ui.settings.SettingsScreen
+import app.trecos.ui.settings.SettingsNavigation
+import app.trecos.ui.settings.HouseFieldsScreen
+import app.trecos.ui.settings.ExtrasScreen
+import app.trecos.ui.settings.CurrencyScreen
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -85,6 +95,9 @@ private object Routes {
     const val TRASH = "trash/{house}"
     const val KEEP = "keep/{container}"
     const val DELETE_HOUSE = "house/delete/{house}"
+    const val CURRENCY = "settings/currency"
+    const val EXTRAS = "settings/extras"
+    const val FIELDS = "settings/fields/{house}"
     const val HOUSE_FORM = "form/house?id={id}"
     const val CONTAINER_FORM = "form/container?house={house}&parent={parent}&id={id}&qr={qr}"
     const val ITEM_FORM = "form/item?house={house}&container={container}&id={id}&qr={qr}"
@@ -119,6 +132,13 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val undoLabel = stringResource(R.string.action_undo)
+    var startApplied by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(app) {
+        if (!startApplied) {
+            startApplied = true
+            if (app.preferences.startScreen.first() == StartScreen.Search) navController.navigateToTab(TrecosTab.Search)
+        }
+    }
     LaunchedEffect(app) {
         app.messages.collect { message ->
             scope.launch {
@@ -138,7 +158,22 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                 composable(rootRoute(TrecosTab.Search)) {
                     Box(Modifier.fillMaxSize().testTag(rootScreenTag(TrecosTab.Search))) { SearchScreen(nav) }
                 }
-                composable(rootRoute(TrecosTab.Settings)) { TabRootScreen(TrecosTab.Settings) }
+                composable(rootRoute(TrecosTab.Settings)) {
+                    Box(Modifier.fillMaxSize().testTag(rootScreenTag(TrecosTab.Settings))) {
+                        SettingsScreen(
+                            SettingsNavigation(
+                                openCurrency = { navController.navigate(Routes.CURRENCY) },
+                                openExtras = { navController.navigate(Routes.EXTRAS) },
+                                openFields = { house -> navController.navigate("settings/fields/$house") },
+                                openTags = nav.openTags,
+                                openTrash = nav.openTrash,
+                            ),
+                        )
+                    }
+                }
+                composable(Routes.CURRENCY) { CurrencyScreen { navController.popBackStack() } }
+                composable(Routes.EXTRAS) { ExtrasScreen { navController.popBackStack() } }
+                composable(Routes.FIELDS, listOf(stringArg("house"))) { entry -> HouseFieldsScreen(entry.string("house")!!) { navController.popBackStack() } }
                 composable(rootRoute(TrecosTab.Home)) {
                     Box(Modifier.fillMaxSize().testTag(rootScreenTag(TrecosTab.Home))) { HomeScreen(nav) }
                 }
@@ -284,15 +319,3 @@ private fun NavHostController.navigateToTab(tab: TrecosTab) {
     }
 }
 
-/**
- * A tab root that has no content yet (Search and Settings arrive in later
- * releases): a title and no back arrow.
- *
- * @param tab the tab this root belongs to.
- */
-@Composable
-private fun TabRootScreen(tab: TrecosTab) {
-    Column(Modifier.fillMaxSize().testTag(rootScreenTag(tab))) {
-        TrecosTopBar(title = stringResource(tab.label), onBack = null)
-    }
-}

@@ -33,6 +33,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.trecos.R
+import app.trecos.places.CustomFields
+import app.trecos.data.FieldType
 import app.trecos.places.Money
 import app.trecos.places.Selection
 import app.trecos.places.totalValue
@@ -167,6 +169,14 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
                 ) {
                     Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     SafeText(value, maxLines = if (label == R.string.field_description || label == R.string.field_categories) 20 else 2, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+            items(current.customFields, key = { "custom_${it.fieldId}" }) { field ->
+                val type = runCatching { FieldType.valueOf(field.type) }.getOrDefault(FieldType.Text)
+                val text = CustomFields.display(type, field.value, field.unit, language, stringResource(R.string.answer_yes), stringResource(R.string.answer_no))
+                Column(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}.testTag("detail_custom_${field.name}")) {
+                    SafeText(field.name, maxLines = 1, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    SafeText(text, maxLines = if (type == FieldType.Text) 20 else 2, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }

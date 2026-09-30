@@ -6,6 +6,7 @@ import app.trecos.data.Container
 import app.trecos.data.CustomCategory
 import app.trecos.data.Item
 import app.trecos.data.ItemCategory
+import app.trecos.data.FieldDef
 import app.trecos.data.ItemTag
 import app.trecos.data.Photo
 import app.trecos.data.TrashEntry
@@ -186,7 +187,10 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
             val crossing = item.houseId != destination.houseId
             val isRoot = item.id in roots
             if (!crossing && !isRoot) continue
-            if (crossing) carryCategoriesAndTags(item, destination.houseId)
+            if (crossing) {
+                carryCategoriesAndTags(item, destination.houseId)
+                carryFields(item.id, destination.houseId)
+            }
             db.items().update(
                 item.copy(
                     houseId = destination.houseId,
@@ -245,6 +249,7 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
             )
             db.items().insert(copy)
             copyCategoriesAndTags(from = item, to = copy)
+            copyFields(from = item, to = copy)
             copyPhotos(from = item.id, to = copy.id, houseId = copy.houseId, ownerType = Photo.OWNER_ITEM)
             if (isRoot) result += copy.id
         }
@@ -362,6 +367,8 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
         db.photos().deleteOwners(itemIds + containers.filter { it.deletedAt == entry.trashedAt }.map { it.id })
         dao.deleteCategoriesOf(itemIds)
         dao.deleteTagsOf(itemIds)
+        db.fields().deleteValuesOfItems(itemIds)
+        db.fields().deleteDefsOfItems(itemIds)
         dao.hardDeleteItems(itemIds)
         dao.hardDeleteContainers(containers.filter { it.deletedAt == entry.trashedAt }.map { it.id })
         dao.deleteTrashEntry(entry.id)
@@ -395,6 +402,8 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
     suspend fun deleteHouse(houseId: String) = db.withTransaction {
         check(db.houses().count() > 1) { "The last house can't be deleted" }
         db.photos().deleteHouse(houseId)
+        db.fields().deleteHouseValues(houseId)
+        db.fields().deleteHouseDefs(houseId)
         with(dao) {
             deleteHouseItemCategories(houseId)
             deleteHouseItemTags(houseId)
@@ -440,6 +449,64 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
         val names = dao.tagsOf(from.id).map { it.name }
         val tags = names.mapNotNull { tagStore.findOrCreate(to.houseId, it) }.distinctBy { it.id }
         db.tags().insertAssignments(tags.map { ItemTag(newId(), to.houseId, to.id, it.id, now) })
+    }
+
+    /**
+     * Moves an item's custom values to another house. Its own fields move with
+     * it; a house-wide field's value goes to the target house's field with the
+     * same name and type, or becomes a field of this item when there is none.
+     *
+     * @param itemId the item being moved.
+     * @param targetHouse the destination house.
+     */
+    private suspend fun carryFields(itemId: String, targetHouse: String) {
+        val fields = db.fields()
+        val now = clock()
+        for (value in fields.values(itemId)) {
+            val def = fields.def(value.fieldId) ?: continue
+            val targetDef = targetField(def, itemId, targetHouse, now)
+            fields.updateValue(value.copy(houseId = targetHouse, fieldId = targetDef, updatedAt = now))
+        }
+    }
+
+    /**
+     * Gives a copy the original's custom values, carried to the copy's house when it differs.
+     *
+     * @param from the original item.
+     * @param to the copy.
+     */
+    private suspend fun copyFields(from: Item, to: Item) {
+        val fields = db.fields()
+        val now = clock()
+        for (value in fields.values(from.id)) {
+            val def = fields.def(value.fieldId) ?: continue
+            val targetDef = when {
+                def.itemId != null -> newId().also { fields.insertDef(def.copy(id = it, houseId = to.houseId, itemId = to.id, createdAt = now, updatedAt = now)) }
+                to.houseId == from.houseId -> def.id
+                else -> targetField(def, to.id, to.houseId, now)
+            }
+            fields.insertValue(value.copy(id = newId(), houseId = to.houseId, itemId = to.id, fieldId = targetDef, createdAt = now, updatedAt = now))
+        }
+    }
+
+    /**
+     * Finds where a value goes in another house.
+     *
+     * @param def the value's current field.
+     * @param itemId the item the value belongs to in the target house.
+     * @param targetHouse the target house.
+     * @param now the current time.
+     * @return the field id to use: the item's own field (moved), the target
+     *   house's matching field, or a new field of the item.
+     */
+    private suspend fun targetField(def: FieldDef, itemId: String, targetHouse: String, now: Long): String {
+        val fields = db.fields()
+        if (def.itemId != null) {
+            fields.updateDef(def.copy(houseId = targetHouse, itemId = itemId, updatedAt = now))
+            return def.id
+        }
+        fields.findHouseField(targetHouse, def.name, def.type)?.let { return it.id }
+        return newId().also { fields.insertDef(def.copy(id = it, houseId = targetHouse, itemId = itemId, createdAt = now, updatedAt = now)) }
     }
 
     /**

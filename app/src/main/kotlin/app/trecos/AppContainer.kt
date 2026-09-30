@@ -8,6 +8,7 @@ import app.trecos.categories.Category
 import app.trecos.categories.CategorySuggester
 import app.trecos.data.AppPreferences
 import app.trecos.data.TrecosDatabase
+import app.trecos.places.FieldStore
 import app.trecos.places.OrganizeStore
 import app.trecos.places.PhotoStore
 import java.util.UUID
@@ -52,6 +53,9 @@ class AppContainer(
 
     /** Moving, copying, the trash and house deletion. */
     val organize: OrganizeStore by lazy { OrganizeStore(database, clock, newId) }
+
+    /** Custom field definitions and values. */
+    val fields: FieldStore by lazy { FieldStore(database, clock, newId) }
 
     /**
      * Deletes photo files nothing refers to any more, keeping the last hour's

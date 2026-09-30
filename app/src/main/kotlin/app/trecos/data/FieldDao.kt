@@ -98,4 +98,33 @@ interface FieldDao {
             "WHERE v.houseId = :houseId",
     )
     fun observeForHouse(houseId: String): Flow<List<ItemFieldValue>>
+
+    /** @return every filled-in value of every house with its definition, for search rows. */
+    @Query("SELECT d.id AS fieldId, v.itemId, d.name, d.type, d.unit, v.value FROM field_value v JOIN field_def d ON d.id = v.fieldId")
+    fun observeAll(): Flow<List<ItemFieldValue>>
+
+    /**
+     * @param houseId the house.
+     * @param name the field name.
+     * @param type a [FieldType] name.
+     * @return the house-wide field with that name (ignoring case) and type, or `null`.
+     */
+    @Query("SELECT * FROM field_def WHERE houseId = :houseId AND itemId IS NULL AND name = :name COLLATE NOCASE AND type = :type LIMIT 1")
+    suspend fun findHouseField(houseId: String, name: String, type: String): FieldDef?
+
+    /** @param itemIds items whose values and own fields are deleted. */
+    @Query("DELETE FROM field_value WHERE itemId IN (:itemIds)")
+    suspend fun deleteValuesOfItems(itemIds: List<String>)
+
+    /** @param itemIds items whose own field definitions are deleted. */
+    @Query("DELETE FROM field_def WHERE itemId IN (:itemIds)")
+    suspend fun deleteDefsOfItems(itemIds: List<String>)
+
+    /** @param houseId the house whose values are deleted. */
+    @Query("DELETE FROM field_value WHERE houseId = :houseId")
+    suspend fun deleteHouseValues(houseId: String)
+
+    /** @param houseId the house whose field definitions are deleted. */
+    @Query("DELETE FROM field_def WHERE houseId = :houseId")
+    suspend fun deleteHouseDefs(houseId: String)
 }

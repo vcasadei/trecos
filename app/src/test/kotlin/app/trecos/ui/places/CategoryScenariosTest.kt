@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTextInput
 import com.github.takahirom.roborazzi.captureRoboImage
 import app.trecos.data.CustomCategory
+import app.trecos.data.FieldDef
 import app.trecos.data.Fixtures.container
 import app.trecos.data.Fixtures.house
 import app.trecos.data.Fixtures.item
@@ -232,6 +233,8 @@ class CategoryScenariosTest : PlacesTestBase() {
             app.database.categories().insertCustom(CustomCategory("mech", "h1", null, "Mechanical", "keyboard", 1, 1))
             app.database.categories().insertCustom(CustomCategory("sw", "h1", "mech", "Switches", null, 1, 1))
             app.database.tags().insert(Tag("t1", "h1", "borrowed", "borrowed", 1, 1))
+            app.database.fields().insertDef(FieldDef("f1", "h1", null, "Purchase date", "Date", null, 0, 1, 1))
+            app.database.fields().insertDef(FieldDef("f2", "h1", "laptop", "Firmware", "Text", null, 0, 1, 1))
         }
         text("Apartment").performClick()
         click("switch_add_house")
@@ -247,6 +250,9 @@ class CategoryScenariosTest : PlacesTestBase() {
         assertEquals(mech.id, copied.first { it.name == "Switches" }.parentId)
         assertTrue(mech.id != "mech")
         assertEquals(listOf("borrowed"), runBlocking { app.database.tags().all(beach.id).map { it.name } })
+        val fields = runBlocking { app.database.fields().houseFields(beach.id) }
+        assertEquals(listOf("Purchase date" to "Date"), fields.map { it.name to it.type })
+        assertTrue(fields.single().id != "f1")
         assertEquals(0, runBlocking { app.database.items().observeIn(beach.id, null).first().size })
     }
 

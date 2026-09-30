@@ -24,6 +24,11 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.trecos.R
+import app.trecos.places.totalValue
+import app.trecos.places.CustomFields
+import app.trecos.data.ItemFieldValue
+import app.trecos.data.FieldType
+import app.trecos.data.DetailExtras
 import app.trecos.data.Container
 import app.trecos.data.Item
 import app.trecos.data.ListView
@@ -105,14 +110,58 @@ fun ContainerRow(
 }
 
 /**
+ * What a detailed item row shows besides its description, quantity and price
+ * (spec "Detailed-view extra fields").
+ *
+ * @property keys the chosen extras, in order ([DetailExtras] keys).
+ * @property tags the item's tag names.
+ * @property fields the item's filled-in custom fields.
+ */
+data class RowExtras(val keys: List<String>, val tags: List<String> = emptyList(), val fields: List<ItemFieldValue> = emptyList())
+
+/**
+ * Builds the text of a row's extras, skipping those without a value.
+ *
+ * @param item the item.
+ * @param extras the chosen extras and their data.
+ * @param categoryLabels the item's category labels, main first.
+ * @param currency the display currency code.
+ * @return each extra's text, in order.
+ */
+@Composable
+private fun extraTexts(item: Item, extras: RowExtras, categoryLabels: List<String>, currency: String): List<String> {
+    val language = AppLanguage.current()
+    val yes = stringResource(R.string.answer_yes)
+    val no = stringResource(R.string.answer_no)
+    return extras.keys.mapNotNull { key ->
+        when (key) {
+            DetailExtras.CATEGORIES -> categoryLabels.takeIf { it.isNotEmpty() }?.joinToString(" · ")
+            DetailExtras.TAGS -> extras.tags.takeIf { it.isNotEmpty() }?.joinToString(", ")
+            DetailExtras.TOTAL -> totalValue(item.quantity, item.unitPrice)?.let { "${stringResource(R.string.extra_total)}: ${Money.format(it, currency, language)}" }
+            DetailExtras.BRAND -> item.brand?.let { "${stringResource(R.string.field_brand)}: $it" }
+            DetailExtras.MODEL -> item.model?.let { "${stringResource(R.string.field_model)}: $it" }
+            DetailExtras.SERIAL -> item.serial?.let { "${stringResource(R.string.field_serial)}: $it" }
+            DetailExtras.QR -> item.qrCode?.let { "${stringResource(R.string.field_qr)}: $it" }
+            DetailExtras.ADDED -> "${stringResource(R.string.extra_added)}: ${formatDate(item.createdAt, language)}"
+            DetailExtras.CHANGED -> "${stringResource(R.string.extra_changed)}: ${formatDate(item.updatedAt, language)}"
+            else -> extras.fields.firstOrNull { DetailExtras.CUSTOM_PREFIX + it.fieldId == key }?.let { field ->
+                val type = runCatching { FieldType.valueOf(field.type) }.getOrDefault(FieldType.Text)
+                "${field.name}: ${CustomFields.display(type, field.value, field.unit, language, yes, no)}"
+            }
+        }
+    }
+}
+
+/**
  * An item in a list: icon (its photo from 0.5), name, and in the detailed
- * view its description, quantity and unit price. Empty fields are hidden.
+ * view its extras, description, quantity and unit price. Empty fields are hidden.
  *
  * @param item the item.
  * @param listView condensed or detailed.
  * @param currency the display currency code.
  * @param mainIcon the main category's icon key, `null` for the empty icon, or absent without categories.
  * @param categoryLabels the item's category labels, main first, shown in the detailed view.
+ * @param extras the detailed view's extras; categories only by default.
  * @param selected whether it is selected in selection mode.
  * @param photo the main photo's SHA-256, shown instead of the icon, or `null`.
  * @param onLongClick starts or extends selection mode.
@@ -125,6 +174,7 @@ fun ItemRow(
     currency: String,
     mainIcon: String? = NO_CATEGORY,
     categoryLabels: List<String> = emptyList(),
+    extras: RowExtras = RowExtras(DetailExtras.default),
     selected: Boolean = false,
     photo: String? = null,
     onLongClick: () -> Unit = {},
@@ -133,7 +183,8 @@ fun ItemRow(
     val language = AppLanguage.current()
     val details = if (listView == ListView.Detailed) {
         buildList {
-            if (categoryLabels.isNotEmpty()) add(categoryLabels.joinToString(" · ") to 1)
+            val texts = extraTexts(item, extras, categoryLabels, currency)
+            if (texts.isNotEmpty()) add(texts.joinToString(" · ") to if (texts.size == 1) 1 else 2)
             item.description?.let { add(it to 2) }
             val numbers = listOfNotNull(
                 "${stringResource(R.string.field_quantity)}: ${item.quantity}",
