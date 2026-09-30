@@ -177,6 +177,7 @@ fun SearchScreen(nav: PlaceNavigation) {
                             currency = current.currency,
                             mainIcon = ids.firstOrNull()?.let { current.catalog[it]?.icon } ?: NO_CATEGORY,
                             categoryLabels = ids.mapNotNull { current.catalog.label(it, language) },
+                            extras = current.detail.forItem(item.id),
                             photo = current.mainPhotos[item.id],
                         ) { nav.openItem(item.id) }
                     }

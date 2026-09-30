@@ -10,6 +10,7 @@ import app.trecos.places.MatchIn
 import app.trecos.places.SearchFilters
 import app.trecos.places.SearchScope
 import app.trecos.places.SortBy
+import app.trecos.ui.theme.ThemeMode
 import java.util.Currency
 import java.util.Locale
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +27,37 @@ enum class AddFlow { FormFirst, PhotoFirst }
 
 /** When the house colour band is drawn behind the status bar. */
 enum class HouseBand { Automatic, Always, Never }
+
+/** The tab the app opens on. */
+enum class StartScreen { Home, Search }
+
+/**
+ * The extra fields a detailed row can show (spec "Detailed-view extra fields").
+ * Custom fields are stored as [CUSTOM_PREFIX] plus the field id.
+ */
+object DetailExtras {
+    const val CATEGORIES = "categories"
+    const val TAGS = "tags"
+    const val TOTAL = "total"
+    const val BRAND = "brand"
+    const val MODEL = "model"
+    const val SERIAL = "serial"
+    const val QR = "qr"
+    const val ADDED = "added"
+    const val CHANGED = "changed"
+
+    /** The prefix of a custom field's key. */
+    const val CUSTOM_PREFIX = "field:"
+
+    /** The most extras a row shows. */
+    const val MAX = 3
+
+    /** The built-in extras, in the picker's order. */
+    val builtIn = listOf(CATEGORIES, TAGS, TOTAL, BRAND, MODEL, SERIAL, QR, ADDED, CHANGED)
+
+    /** The default: categories. */
+    val default = listOf(CATEGORIES)
+}
 
 /**
  * Device-only preferences (design D13); nothing here is synced.
@@ -56,6 +88,21 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
     /** What adding an item starts with; the form by default. */
     val addFlow: Flow<AddFlow> = store.data.map { prefs ->
         prefs[ADD_FLOW]?.let { runCatching { AddFlow.valueOf(it) }.getOrNull() } ?: AddFlow.FormFirst
+    }
+
+    /** The theme; follows the system by default. */
+    val theme: Flow<ThemeMode> = store.data.map { prefs ->
+        prefs[THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.FollowSystem
+    }
+
+    /** The tab the app opens on; Home by default. */
+    val startScreen: Flow<StartScreen> = store.data.map { prefs ->
+        prefs[START_SCREEN]?.let { runCatching { StartScreen.valueOf(it) }.getOrNull() } ?: StartScreen.Home
+    }
+
+    /** The detailed view's extra fields, in order; categories by default. */
+    val detailExtras: Flow<List<String>> = store.data.map { prefs ->
+        prefs[DETAIL_EXTRAS]?.let { stored -> stored.split(',').filter(String::isNotEmpty) } ?: DetailExtras.default
     }
 
     /** The search filters and order, kept until "Clear all" (the typed text is never stored). */
@@ -141,6 +188,38 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
     }
 
     /**
+     * Saves the theme.
+     *
+     * @param mode the chosen theme.
+     */
+    suspend fun setTheme(mode: ThemeMode) = store.edit { it[THEME] = mode.name }
+
+    /**
+     * Saves the tab the app opens on.
+     *
+     * @param screen the chosen tab.
+     */
+    suspend fun setStartScreen(screen: StartScreen) = store.edit { it[START_SCREEN] = screen.name }
+
+    /**
+     * Saves the detailed view's extras, keeping at most [DetailExtras.MAX].
+     *
+     * @param extras the chosen extras, in order.
+     */
+    suspend fun setDetailExtras(extras: List<String>) = updateDetailExtras { extras }
+
+    /**
+     * Changes the detailed view's extras from their stored value in one edit,
+     * so quick taps never overwrite each other. At most [DetailExtras.MAX] are kept.
+     *
+     * @param change builds the new extras from the current ones.
+     */
+    suspend fun updateDetailExtras(change: (List<String>) -> List<String>) = store.edit { prefs ->
+        val current = prefs[DETAIL_EXTRAS]?.split(',')?.filter(String::isNotEmpty) ?: DetailExtras.default
+        prefs[DETAIL_EXTRAS] = change(current).distinct().take(DetailExtras.MAX).joinToString(",")
+    }
+
+    /**
      * Saves the display currency. Amounts are relabelled, never converted.
      *
      * @param code an ISO 4217 code such as `BRL`.
@@ -161,6 +240,9 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
         val SEARCH_TAGS = stringSetPreferencesKey("search_tags")
         val SEARCH_SORT = stringPreferencesKey("search_sort")
         val SEARCH_DESCENDING = booleanPreferencesKey("search_descending")
+        val THEME = stringPreferencesKey("theme")
+        val START_SCREEN = stringPreferencesKey("start_screen")
+        val DETAIL_EXTRAS = stringPreferencesKey("detail_extras")
 
         /**
          * @return the currency of the phone's region, or USD when the region has none.

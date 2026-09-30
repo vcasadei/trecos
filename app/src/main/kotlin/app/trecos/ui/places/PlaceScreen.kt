@@ -292,6 +292,7 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                             currency = current.currency,
                             mainIcon = ids.firstOrNull()?.let { current.catalog[it]?.icon } ?: NO_CATEGORY,
                             categoryLabels = ids.mapNotNull { current.catalog.label(it, language) },
+                            extras = current.extras.forItem(item.id),
                             selected = item.id in selectedItems,
                             photo = current.mainPhotos[item.id],
                             onLongClick = toggle,

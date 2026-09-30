@@ -136,6 +136,13 @@ interface TagDao {
 
     /**
      * @param houseId the house.
+     * @return each item-tag pair of the house as (item id, tag name), by name, updating as they change.
+     */
+    @Query("SELECT item_tag.itemId AS itemId, tag.name AS tag FROM item_tag JOIN tag ON tag.id = item_tag.tagId WHERE tag.houseId = :houseId ORDER BY tag.name")
+    fun observeItemTagNames(houseId: String): Flow<List<ItemTagName>>
+
+    /**
+     * @param houseId the house.
      * @return the house's tags.
      */
     @Query("SELECT * FROM tag WHERE houseId = :houseId")

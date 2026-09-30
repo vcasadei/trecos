@@ -3,6 +3,7 @@ package app.trecos.ui.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.trecos.AppContainer
+import app.trecos.ui.places.DetailData
 import app.trecos.categories.CategoryCatalog
 import app.trecos.data.Container
 import app.trecos.data.House
@@ -39,6 +40,7 @@ import kotlinx.coroutines.launch
  * @property mainPhotos each owner's main photo.
  * @property listView the app-wide list view.
  * @property currency the display currency.
+ * @property detail the detailed rows' extras.
  */
 data class SearchState(
     val results: List<SearchResult>,
@@ -52,6 +54,7 @@ data class SearchState(
     val mainPhotos: Map<String, String>,
     val listView: ListView,
     val currency: String,
+    val detail: DetailData = DetailData(),
 )
 
 /**
@@ -92,8 +95,10 @@ class SearchViewModel(private val app: AppContainer) : ViewModel() {
         app.searchWithin,
     ) { houses, tags, photos, (view, currency), within -> Lookups(houses, tags.associate { it.normalized to it.name }, photos.associate { it.ownerId to it.sha256 }, view, currency, within) }
 
+    private val extras = combine(app.preferences.detailExtras, db.fields().observeAll()) { keys, fields -> keys to fields.groupBy { it.itemId } }
+
     /** The Search tab's state, or `null` while loading. */
-    val state: StateFlow<SearchState?> = combine(data, matched, app.preferences.searchFilters, lookups) { data, matched, filters, lookups ->
+    val state: StateFlow<SearchState?> = combine(data, matched, app.preferences.searchFilters, lookups, extras) { data, matched, filters, lookups, (keys, fields) ->
         val catalog = CategoryCatalog(app.builtInCategories, data.custom)
         val trees = data.containers.groupBy { it.houseId }.mapValues { (_, list) -> PlaceTree(list, emptyList()) }
         val withinContainer = lookups.within?.let { id -> data.containers.firstOrNull { it.id == id } }
@@ -113,6 +118,11 @@ class SearchViewModel(private val app: AppContainer) : ViewModel() {
             mainPhotos = lookups.mainPhotos,
             listView = lookups.listView,
             currency = lookups.currency,
+            detail = DetailData(
+                keys = keys,
+                tags = data.itemTags.mapValues { (_, names) -> names.mapNotNull { lookups.tags[it] }.sorted() },
+                fields = fields,
+            ),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

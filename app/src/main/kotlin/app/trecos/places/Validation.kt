@@ -16,6 +16,15 @@ enum class FieldError {
 
     /** The QR code is longer than [Validation.MAX_QR]. */
     QrTooLong,
+
+    /** A Number custom field holds something that isn't a number. */
+    NumberInvalid,
+
+    /** A Date custom field holds something that isn't a date. */
+    DateInvalid,
+
+    /** A new custom field has no name. */
+    FieldNameRequired,
 }
 
 /** Field rules for houses, containers and items. */
