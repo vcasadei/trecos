@@ -213,7 +213,8 @@ class CustomFieldScenariosTest : PlacesTestBase() {
         tag("value_extras").assertTextContains("Categories, Tags, Brand")
 
         click(tabTag(TrecosTab.Home))
-        rule.onNode(hasTestTag(rowTag("pi"))).assertTextContains("borrowed", substring = true).assertTextContains("Brand: Raspberry", substring = true)
+        val row = hasTestTag(rowTag("pi")).and(androidx.compose.ui.test.hasText("borrowed", substring = true)).and(androidx.compose.ui.test.hasText("Brand: Raspberry", substring = true))
+        rule.waitUntil(10_000) { rule.onAllNodes(row).fetchSemanticsNodes().isNotEmpty() }
     }
 
     @Test

@@ -103,9 +103,8 @@ fun CurrencyScreen(onBack: () -> Unit) {
             text = { Text(stringResource(R.string.currency_warning), modifier = Modifier.testTag("currency_warning")) },
             confirmButton = {
                 TextButton(onClick = {
-                    vm.setCurrency(code)
                     pending = null
-                    onBack()
+                    vm.setCurrency(code, onBack)
                 }, modifier = Modifier.testTag("confirm_currency")) { Text(stringResource(R.string.action_change)) }
             },
             dismissButton = {

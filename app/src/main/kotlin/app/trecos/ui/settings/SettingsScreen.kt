@@ -116,8 +116,16 @@ class SettingsViewModel(private val app: AppContainer) : ViewModel() {
     /** @param source where photos come from. */
     fun setImageSource(source: ImageSource) = launch { prefs.setImageSource(source) }
 
-    /** @param code the new ISO currency code, after the user accepted the warning. */
-    fun setCurrency(code: String) = launch { prefs.setCurrency(code) }
+    /**
+     * Saves the currency, then calls [then]; leaving the screen first would cancel the save.
+     *
+     * @param code the new ISO currency code, after the user accepted the warning.
+     * @param then called once it is saved.
+     */
+    fun setCurrency(code: String, then: () -> Unit) = launch {
+        prefs.setCurrency(code)
+        then()
+    }
 
     /**
      * Adds or removes a detailed-view extra; a fourth is refused.

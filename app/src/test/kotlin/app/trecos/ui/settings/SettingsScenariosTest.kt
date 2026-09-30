@@ -120,7 +120,8 @@ class SettingsScenariosTest : PlacesTestBase() {
 
         rule.waitUntil(10_000) { runBlocking { app.preferences.currency.first() } == "USD" }
         click(tabTag(TrecosTab.Home))
-        rule.onNode(hasTestTag(rowTag("tv"))).assertTextContains("$3,500.00", substring = true)
+        val row = hasTestTag(rowTag("tv")).and(androidx.compose.ui.test.hasText("$3,500.00", substring = true))
+        rule.waitUntil(10_000) { rule.onAllNodes(row).fetchSemanticsNodes().isNotEmpty() }
     }
 
     @Test
