@@ -54,6 +54,7 @@ val coverageExcludes = listOf(
     "app/trecos/ui/**",
     "app/trecos/MainActivity*",
     "**/ComposableSingletons*",
+    "**/*_Impl*",
     "**/R.class",
     "**/R$*.class",
     "**/BuildConfig.*",
