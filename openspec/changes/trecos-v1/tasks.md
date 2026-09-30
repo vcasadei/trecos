@@ -90,7 +90,7 @@ run at the end of **every** release group before it is tagged.
 
 ## 6. Release 0.5 — Photos
 
-- [ ] 6.1 Migration v3 → v4 (expand): add `Photo` (owner, sha256, position); verify with a migration test
+- [x] 6.1 Migration v3 → v4 (expand): add `Photo` (owner, sha256, position); verify with a migration test
 - [ ] 6.2 Implement the photo store (decode to at most 1920 px with orientation corrected, WebP q80 without metadata, sha256 file names, 320 px square thumbnail, original discarded); tests for scenarios "Photo from a 12-megapixel camera" (no GPS in the output) and "Unreadable file"
 - [ ] 6.3 Integrate the camera app through `FileProvider` (never saving into the gallery) and the Photo Picker (multi-select up to the remaining slots), with no permissions requested; tests for scenarios "Picking from the gallery" and "Limit reached", plus a manifest test that no camera or storage permission is declared
 - [ ] 6.4 Implement the first-use image source prompt ("Remember my choice" checked by default); tests for scenarios "Remembering" and "Keep asking"
