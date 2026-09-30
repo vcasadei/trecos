@@ -98,7 +98,7 @@ class SettingsScenariosTest : PlacesTestBase() {
         click("setting_theme")
         click("option_theme_${ThemeMode.Dark}")
 
-        rule.waitUntil(10_000) { runBlocking { app.preferences.theme.first() } == ThemeMode.Dark }
+        eventually(10_000) { runBlocking { app.preferences.theme.first() } == ThemeMode.Dark }
         rule.waitForIdle()
         val image = rule.onRoot().captureToImage().asAndroidBitmap()
         assertEquals(android.graphics.Color.BLACK, image.getPixel(image.width / 2, image.height / 3))
@@ -118,10 +118,10 @@ class SettingsScenariosTest : PlacesTestBase() {
         tag("currency_warning")
         click("confirm_currency")
 
-        rule.waitUntil(10_000) { runBlocking { app.preferences.currency.first() } == "USD" }
+        eventually(10_000) { runBlocking { app.preferences.currency.first() } == "USD" }
         click(tabTag(TrecosTab.Home))
         val row = hasTestTag(rowTag("tv")).and(androidx.compose.ui.test.hasText("$3,500.00", substring = true))
-        rule.waitUntil(10_000) { rule.onAllNodes(row).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(row).fetchSemanticsNodes().isNotEmpty() }
     }
 
     @Test
@@ -144,7 +144,7 @@ class SettingsScenariosTest : PlacesTestBase() {
         openSettings()
         click("setting_start")
         click("option_start_${StartScreen.Search}")
-        rule.waitUntil(10_000) { runBlocking { app.preferences.startScreen.first() } == StartScreen.Search }
+        eventually(10_000) { runBlocking { app.preferences.startScreen.first() } == StartScreen.Search }
 
         rule.runOnUiThread { rule.activity.setContent { TrecosTheme { TrecosApp() } } }
         tag(rootScreenTag(TrecosTab.Search))

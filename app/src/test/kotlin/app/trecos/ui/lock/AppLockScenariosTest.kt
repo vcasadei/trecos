@@ -95,7 +95,7 @@ class AppLockScenariosTest : PlacesTestBase() {
         seed()
         settingsRow("app_lock")
 
-        rule.waitUntil(10_000) { runBlocking { app.preferences.appLock.first() } }
+        eventually(10_000) { runBlocking { app.preferences.appLock.first() } }
         assertEquals(1, fake.prompts)
         assertFalse(exists(LOCK_SCREEN_TAG))
     }
@@ -123,7 +123,7 @@ class AppLockScenariosTest : PlacesTestBase() {
 
         fake.passes = false
         leaveAndReturn(2 * 60_000)
-        rule.waitUntil(10_000) { exists(LOCK_SCREEN_TAG) }
+        eventually(10_000) { exists(LOCK_SCREEN_TAG) }
     }
 
     @Test
@@ -141,7 +141,7 @@ class AppLockScenariosTest : PlacesTestBase() {
 
         fake.passes = true
         click("unlock")
-        rule.waitUntil(10_000) { !exists(LOCK_SCREEN_TAG) }
+        eventually(10_000) { !exists(LOCK_SCREEN_TAG) }
         tag(rowTag("pi"))
     }
 
@@ -149,9 +149,9 @@ class AppLockScenariosTest : PlacesTestBase() {
     fun recentAppsPreview() {
         seed()
         lockOn()
-        rule.waitUntil(10_000) { rule.activity.hidingFromRecents }
+        eventually(10_000) { rule.activity.hidingFromRecents }
         runBlocking { app.preferences.setAppLock(false) }
-        rule.waitUntil(10_000) { !rule.activity.hidingFromRecents }
+        eventually(10_000) { !rule.activity.hidingFromRecents }
     }
 
     @Test
@@ -163,7 +163,7 @@ class AppLockScenariosTest : PlacesTestBase() {
 
         tag("lock_turned_off")
         assertFalse(exists(LOCK_SCREEN_TAG))
-        rule.waitUntil(10_000) { !runBlocking { app.preferences.appLock.first() } }
+        eventually(10_000) { !runBlocking { app.preferences.appLock.first() } }
     }
 
     @Test
@@ -186,13 +186,13 @@ class AppLockScenariosTest : PlacesTestBase() {
         type("profile_name_raw", "Vitor")
         type("profile_email_raw", "someone@example.com")
         click("save_profile")
-        rule.waitUntil(10_000) { runBlocking { app.preferences.profile.first() }?.email == "someone@example.com" }
+        eventually(10_000) { runBlocking { app.preferences.profile.first() }?.email == "someone@example.com" }
 
         tag(SETTINGS_LIST_TAG).performScrollToNode(hasTestTag("setting_profile"))
         click("setting_profile")
         click("delete_profile")
         click("confirm_delete_profile")
-        rule.waitUntil(10_000) { runBlocking { app.preferences.profile.first() } == null }
+        eventually(10_000) { runBlocking { app.preferences.profile.first() } == null }
 
         val logged = ShadowLog.getLogs().joinToString("\n") { "${it.tag} ${it.msg}" }
         assertFalse("name in logs", logged.contains("Vitor"))

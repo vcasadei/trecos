@@ -90,7 +90,7 @@ class CustomFieldScenariosTest : PlacesTestBase() {
         repeat(3) {
             if (runBlocking { app.preferences.detailExtras.first() } == expected) return
             click("extra_$key")
-            val saved = runCatching { rule.waitUntil(5_000) { runBlocking { app.preferences.detailExtras.first() } == expected } }.isSuccess
+            val saved = runCatching { eventually(5_000) { runBlocking { app.preferences.detailExtras.first() } == expected } }.isSuccess
             if (saved) return
         }
         throw AssertionError("extras are ${runBlocking { app.preferences.detailExtras.first() }}, expected $expected")
@@ -173,7 +173,7 @@ class CustomFieldScenariosTest : PlacesTestBase() {
 
         click("delete_Purchase date")
         click("confirm_delete_field")
-        rule.waitUntil(10_000) { runBlocking { app.database.fields().def("date") } == null }
+        eventually(10_000) { runBlocking { app.database.fields().def("date") } == null }
         assertEquals(0, runBlocking { app.database.fields().valueCount("date") })
     }
 
@@ -208,7 +208,7 @@ class CustomFieldScenariosTest : PlacesTestBase() {
         click("match_Description")
         tag(SEARCH_FIELD_TAG).performTextInput("Klipper")
 
-        rule.waitUntil(10_000) { exists(rowTag("printer")) && !exists(rowTag("mouse")) }
+        eventually(10_000) { exists(rowTag("printer")) && !exists(rowTag("mouse")) }
     }
 
     @Test
@@ -230,7 +230,7 @@ class CustomFieldScenariosTest : PlacesTestBase() {
 
         click(tabTag(TrecosTab.Home))
         val row = hasTestTag(rowTag("pi")).and(androidx.compose.ui.test.hasText("borrowed", substring = true)).and(androidx.compose.ui.test.hasText("Brand: Raspberry", substring = true))
-        rule.waitUntil(10_000) { rule.onAllNodes(row).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(row).fetchSemanticsNodes().isNotEmpty() }
     }
 
     @Test

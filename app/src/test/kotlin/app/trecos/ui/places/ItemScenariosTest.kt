@@ -95,7 +95,7 @@ class ItemScenariosTest : PlacesTestBase() {
         saveAndClose()
 
         val today = formatDate(System.currentTimeMillis(), AppLanguage.English)
-        rule.waitUntil(10_000) {
+        eventually(10_000) {
             rule.onAllNodes(
                 androidx.compose.ui.test.hasTestTag(detailTag(R.string.date_changed)).and(androidx.compose.ui.test.hasText(today, substring = true)),
             ).fetchSemanticsNodes().isNotEmpty()
@@ -115,7 +115,7 @@ class ItemScenariosTest : PlacesTestBase() {
         type("name", "USB-C cable")
         click("save_new")
 
-        rule.waitUntil(10_000) {
+        eventually(10_000) {
             tag(fieldTag("name")).fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.EditableText].text.isEmpty()
         }
         type("name", "HDMI cable")
