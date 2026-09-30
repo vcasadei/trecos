@@ -114,7 +114,7 @@ class SyncScenariosTest : PlacesTestBase() {
 
     /** Waits for text anywhere. */
     private fun shows(text: String) =
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText(text, substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText(text, substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
 
     /** Seeds a house with an item. */
     private fun house() = seed(items = listOf(item("pi").copy(name = "Raspberry Pi")))
@@ -123,7 +123,7 @@ class SyncScenariosTest : PlacesTestBase() {
     private fun connect() {
         openSync()
         click("connect_drive")
-        rule.waitUntil(10_000) { app.sync.store.load().connected && app.sync.store.load().lastSuccess != null }
+        eventually(10_000) { app.sync.store.load().connected && app.sync.store.load().lastSuccess != null }
     }
 
     @Test
@@ -165,7 +165,7 @@ class SyncScenariosTest : PlacesTestBase() {
         remote.failAt = remote.calls + 1
         click("sync_now")
 
-        rule.waitUntil(10_000) { app.sync.store.load().lastError != null }
+        eventually(10_000) { app.sync.store.load().lastError != null }
         tag("sync_error").assertTextContains("Couldn't reach Google Drive", substring = true)
         shows("Trecos will try again automatically.")
         shows("Last sync:")
@@ -192,7 +192,7 @@ class SyncScenariosTest : PlacesTestBase() {
 
         tag("conflict_question").assertTextContains("Quantity: 2 or 5?")
         click("keep_theirs")
-        rule.waitUntil(10_000) { runBlocking { app.database.items().get("pi") }?.quantity == 5 }
+        eventually(10_000) { runBlocking { app.database.items().get("pi") }?.quantity == 5 }
         tag("no_conflicts")
     }
 
@@ -220,7 +220,7 @@ class SyncScenariosTest : PlacesTestBase() {
         openConflicts()
         click("conflict_keep")
 
-        rule.waitUntil(10_000) { runBlocking { app.database.items().get("pi") }?.name == "Pi 4" }
+        eventually(10_000) { runBlocking { app.database.items().get("pi") }?.name == "Pi 4" }
         assertTrue(runBlocking { app.database.snapshots().trash("h1") }.isEmpty())
         assertEquals(before.id, runBlocking { app.database.items().get("pi") }!!.id)
     }
@@ -234,7 +234,7 @@ class SyncScenariosTest : PlacesTestBase() {
         tag("conflict_question").assertTextContains("deleted or trashed on", substring = true)
         click("conflict_delete")
 
-        rule.waitUntil(10_000) { runBlocking { app.database.organize().itemAnyState("pi") } == null }
+        eventually(10_000) { runBlocking { app.database.organize().itemAnyState("pi") } == null }
     }
 
     @Test
@@ -256,7 +256,7 @@ class SyncScenariosTest : PlacesTestBase() {
 
         tag("restore_offer").assertTextContains("Parents", substring = true)
         click("restore")
-        rule.waitUntil(10_000) { runBlocking { app.database.houses().get("h9") } != null }
+        eventually(10_000) { runBlocking { app.database.houses().get("h9") } != null }
         assertNull("the empty first house was replaced", runBlocking { app.database.houses().get("h1") })
         assertEquals("Lamp", runBlocking { app.database.items().get("lamp") }!!.name)
     }
@@ -270,7 +270,7 @@ class SyncScenariosTest : PlacesTestBase() {
 
         tag("merge_offer")
         click("merge")
-        rule.waitUntil(10_000) { runBlocking { app.database.houses().get("h9") } != null }
+        eventually(10_000) { runBlocking { app.database.houses().get("h9") } != null }
         assertTrue(runBlocking { app.database.houses().get("h1") } != null)
     }
 
@@ -282,7 +282,7 @@ class SyncScenariosTest : PlacesTestBase() {
         click("connect_drive")
         click("keep_drive")
 
-        rule.waitUntil(10_000) { runBlocking { app.database.houses().get("h9") } != null && runBlocking { app.database.houses().get("h1") } == null }
+        eventually(10_000) { runBlocking { app.database.houses().get("h9") } != null && runBlocking { app.database.houses().get("h1") } == null }
     }
 
     @Test
@@ -292,7 +292,7 @@ class SyncScenariosTest : PlacesTestBase() {
         remote.refs["h1"]!!["tablet"] = Ref("future", 1, formatVersion = 99)
         click("sync_now")
 
-        rule.waitUntil(10_000) { app.sync.store.load().lastError != null }
+        eventually(10_000) { app.sync.store.load().lastError != null }
         tag("sync_error").assertTextContains("newer version of Trecos", substring = true)
     }
 
@@ -305,7 +305,7 @@ class SyncScenariosTest : PlacesTestBase() {
 
         tag("upload_again")
         click("upload_again")
-        rule.waitUntil(10_000) { remote.exists && !app.sync.store.load().driveMissing }
+        eventually(10_000) { remote.exists && !app.sync.store.load().driveMissing }
     }
 
     @Test
@@ -315,7 +315,7 @@ class SyncScenariosTest : PlacesTestBase() {
         tag("sync_list").performScrollToNode(hasTestTag("disconnect"))
         click("disconnect")
 
-        rule.waitUntil(10_000) { !app.sync.store.load().connected }
+        eventually(10_000) { !app.sync.store.load().connected }
         assertEquals("Raspberry Pi", runBlocking { app.database.items().get("pi") }!!.name)
         tag("connect_drive")
     }
@@ -364,9 +364,9 @@ class SyncScenariosTest : PlacesTestBase() {
         driver.setAllConstraintsMet(info.id)
         driver.setPeriodDelayMet(info.id)
 
-        rule.waitUntil(10_000) { remote.commits["h1"]!!.size == before + 1 }
+        eventually(10_000) { remote.commits["h1"]!!.size == before + 1 }
         // The worker may still be finishing after the commit is written; a periodic job then waits for its next run.
-        rule.waitUntil(10_000) { work.getWorkInfoById(info.id).get()!!.state == WorkInfo.State.ENQUEUED }
+        eventually(10_000) { work.getWorkInfoById(info.id).get()!!.state == WorkInfo.State.ENQUEUED }
         assertTrue(info.periodicityInfo!!.repeatIntervalMillis >= 24 * 60 * 60 * 1000L)
     }
 
@@ -392,7 +392,7 @@ class SyncScenariosTest : PlacesTestBase() {
         assertTrue("photos wait for Wi-Fi", remote.objects.isEmpty())
         app.sync.onUnmeteredNetwork = { true }
         click("sync_now")
-        rule.waitUntil(10_000) { remote.objects.containsKey(sha) }
+        eventually(10_000) { remote.objects.containsKey(sha) }
     }
 
     /** Adds a conflict as a sync would. */
