@@ -149,6 +149,21 @@ abstract class PlacesTestBase {
         rule.waitUntil(10_000) { rule.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
     }
 
+    /**
+     * Waits until a form field shows exactly [expected]; forms load their
+     * values after they open.
+     *
+     * @param field the field's short name.
+     * @param expected the text to wait for.
+     */
+    protected fun waitForField(field: String, expected: String) {
+        rule.waitUntil(10_000) {
+            rule.onAllNodes(androidx.compose.ui.test.hasTestTag(fieldTag(field)), useUnmergedTree = true).fetchSemanticsNodes().any {
+                it.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.EditableText) { androidx.compose.ui.text.AnnotatedString("") }.text == expected
+            }
+        }
+    }
+
     /** Presses system back. */
     protected fun pressBack() {
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }

@@ -145,7 +145,7 @@ class OrganizeScenariosTest : PlacesTestBase() {
         click(rowTag("usb"))
         menu(R.string.action_duplicate)
 
-        tag(fieldTag("name")).assertTextContains("USB-C cable 1m (copy)")
+        waitForField("name", "USB-C cable 1m (copy)")
         val inBag = runBlocking { app.database.items().observeIn("h1", "cables").first().map { it.name } }
         assertEquals(listOf("USB-C cable 1m", "USB-C cable 1m (copy)"), inBag)
     }
