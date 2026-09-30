@@ -9,6 +9,11 @@ import app.trecos.AppContainer
 import app.trecos.data.Container
 import app.trecos.data.House
 import app.trecos.data.Item
+import app.trecos.data.Photo
+import app.trecos.AppMessage
+import app.trecos.R
+import android.net.Uri
+import kotlinx.coroutines.CoroutineScope
 import app.trecos.data.ItemCategory
 import app.trecos.data.CustomCategory
 import app.trecos.categories.CategoryCatalog
@@ -26,6 +31,87 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
+ * The photos of a form while it is being edited: imported at once, saved as
+ * photo rows only when the form is saved.
+ *
+ * @param app the app's container.
+ * @param scope the form's scope.
+ */
+class PhotoDraft(private val app: AppContainer, private val scope: CoroutineScope) {
+
+    /** The photos' SHA-256s, main first. */
+    var photos by mutableStateOf<List<String>>(emptyList())
+        private set
+
+    /**
+     * Loads an existing owner's photos.
+     *
+     * @param ownerId the item, container or house.
+     */
+    suspend fun load(ownerId: String) {
+        photos = app.database.photos().forOwner(ownerId).map { it.sha256 }
+    }
+
+    /**
+     * Imports picked or captured images, up to the free slots. Images that
+     * can't be decoded are reported; the others are added.
+     *
+     * @param uris the images.
+     */
+    fun import(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+        scope.launch {
+            var failed = 0
+            for (uri in uris) {
+                if (photos.size >= Photo.MAX_PER_OWNER) break
+                val sha = app.photoStore.import(uri)
+                if (sha == null) failed++ else if (sha !in photos) photos = photos + sha
+            }
+            app.cameraDir.listFiles()?.forEach { it.delete() }
+            if (failed > 0) app.messages.tryEmit(AppMessage(app.resources.getQuantityString(R.plurals.photos_failed, failed, failed)))
+        }
+    }
+
+    /** @param sha a photo to make the main one. */
+    fun setMain(sha: String) {
+        if (sha in photos) photos = listOf(sha) + (photos - sha)
+    }
+
+    /** @param sha a photo to remove. */
+    fun remove(sha: String) {
+        photos = photos - sha
+    }
+
+    /**
+     * Moves a photo.
+     *
+     * @param from its position.
+     * @param to its new position.
+     */
+    fun move(from: Int, to: Int) {
+        if (from !in photos.indices || to !in photos.indices) return
+        photos = photos.toMutableList().apply { add(to, removeAt(from)) }
+    }
+
+    /** Starts over with no photos, for "Save + new". */
+    fun clear() {
+        photos = emptyList()
+    }
+
+    /**
+     * Saves the photos as the owner's photo rows.
+     *
+     * @param houseId the owner's house.
+     * @param ownerType [Photo.OWNER_ITEM], [Photo.OWNER_CONTAINER] or [Photo.OWNER_HOUSE].
+     * @param ownerId the owner.
+     */
+    suspend fun save(houseId: String, ownerType: String, ownerId: String) {
+        val now = app.clock()
+        app.database.photos().replaceFor(ownerId, photos.mapIndexed { i, sha -> Photo(app.newId(), houseId, ownerType, ownerId, sha, i, now) })
+    }
+}
+
+/**
  * Edits a new or existing house.
  *
  * @param app the app's container.
@@ -33,6 +119,9 @@ import kotlinx.coroutines.launch
  */
 class HouseFormViewModel(private val app: AppContainer, private val houseId: String?) : ViewModel() {
     private var existing: House? = null
+
+    /** The house's photos. */
+    val photos = PhotoDraft(app, viewModelScope)
 
     /** The typed name. */
     var name by mutableStateOf("")
@@ -70,6 +159,7 @@ class HouseFormViewModel(private val app: AppContainer, private val houseId: Str
             existing = houseId?.let { app.database.houses().get(it) }
             if (houseId == null) otherHouses = houses
             existing?.let {
+                photos.load(it.id)
                 name = it.name
                 address = it.address.orEmpty()
                 description = it.description.orEmpty()
@@ -133,6 +223,7 @@ class HouseFormViewModel(private val app: AppContainer, private val houseId: Str
             } else {
                 app.database.houses().update(house)
             }
+            photos.save(house.id, Photo.OWNER_HOUSE, house.id)
             onSaved(house.id)
         }
     }
@@ -153,6 +244,9 @@ class ContainerFormViewModel(
     private val containerId: String?,
 ) : ViewModel() {
     private var existing: Container? = null
+
+    /** The container's photos. */
+    val photos = PhotoDraft(app, viewModelScope)
 
     /** The typed name. */
     var name by mutableStateOf("")
@@ -182,6 +276,7 @@ class ContainerFormViewModel(
                 existing = app.database.containers().get(containerId)
                 val currency = app.preferences.currency.first()
                 existing?.let {
+                    photos.load(it.id)
                     name = it.name
                     description = it.description.orEmpty()
                     qrCode = it.qrCode.orEmpty()
@@ -228,6 +323,7 @@ class ContainerFormViewModel(
                 updatedAt = now,
             )
             if (old == null) app.database.containers().insert(container) else app.database.containers().update(container)
+            photos.save(container.houseId, Photo.OWNER_CONTAINER, container.id)
             onSaved()
         }
     }
@@ -250,6 +346,9 @@ class ItemFormViewModel(
 ) : ViewModel() {
     private var existing: Item? = null
     private val tagStore = TagStore(app.database.tags(), app.clock, app.newId)
+
+    /** The item's photos. */
+    val photos = PhotoDraft(app, viewModelScope)
     private var suggestionJob: Job? = null
     private var completionJob: Job? = null
 
@@ -335,6 +434,7 @@ class ItemFormViewModel(
                 existing = app.database.items().get(itemId)
                 val currency = app.preferences.currency.first()
                 existing?.let {
+                    photos.load(it.id)
                     nameState = it.name
                     quantity = it.quantity.toString()
                     unitPrice = it.unitPrice?.let { p -> Money.formatInput(p, currency, AppLanguage.current()) }.orEmpty()
@@ -495,7 +595,9 @@ class ItemFormViewModel(
             )
             CategorySuggester.learn(app.database.categories(), item.houseId, "${item.name} ${item.description.orEmpty()}", categories)
             tagStore.setForItem(item.houseId, item.id, tags)
+            photos.save(item.houseId, Photo.OWNER_ITEM, item.id)
             if (andNew && old == null) {
+                photos.clear()
                 nameState = ""
                 quantity = "1"
                 unitPrice = ""

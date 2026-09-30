@@ -248,6 +248,38 @@ class OrganizeStoreTest {
     }
 
     @Test
+    fun aCopiedItemHasItsOwnPhotoRows() = runBlocking {
+        db.photos().insert(listOf(app.trecos.data.Photo("p1", "h1", app.trecos.data.Photo.OWNER_ITEM, "pi", "abc", 0, 1)))
+        val copy = store.copy(Selection(itemIds = listOf("pi")), Destination("h2", null)).single()
+
+        val rows = db.photos().forOwner(copy)
+        assertEquals(1, rows.size)
+        assertEquals("abc", rows.single().sha256)
+        assertEquals("h2", rows.single().houseId)
+        assertTrue(rows.single().id != "p1")
+        assertEquals(1, db.photos().forOwner("pi").size)
+    }
+
+    @Test
+    fun aPurgeRemovesPhotoRowsAndThenTheFiles() = runBlocking {
+        val files = java.io.File(ApplicationProvider.getApplicationContext<android.content.Context>().cacheDir, "purge-test").apply { deleteRecursively() }
+        val photoStore = PhotoStore(files, ApplicationProvider.getApplicationContext<android.content.Context>().contentResolver)
+        val jpeg = java.io.File(files.apply { mkdirs() }, "in.jpg")
+        android.graphics.Bitmap.createBitmap(300, 200, android.graphics.Bitmap.Config.ARGB_8888)
+            .compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, jpeg.outputStream())
+        val sha = photoStore.import(android.net.Uri.fromFile(jpeg))!!
+        db.photos().insert(listOf(app.trecos.data.Photo("p1", "h1", app.trecos.data.Photo.OWNER_ITEM, "usb", sha, 0, 1)))
+
+        store.trash(Selection(containerIds = listOf("cables")))
+        now += OrganizeStore.RETENTION_MS + 1
+        store.purge()
+
+        assertEquals(emptyList<String>(), db.photos().referencedHashes())
+        assertEquals(1, photoStore.deleteUnreferenced(db.photos().referencedHashes().toSet()))
+        assertTrue(!photoStore.photoFile(sha).exists())
+    }
+
+    @Test
     fun deletingAHouseIsPermanent() = runBlocking {
         db.items().insert(item("x", houseId = "h2"))
         db.categories().insertCustom(CustomCategory("c", "h2", null, "Mine", null, 1, 1))

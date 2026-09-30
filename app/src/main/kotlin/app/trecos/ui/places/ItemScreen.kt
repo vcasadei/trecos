@@ -133,6 +133,13 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = BottomBarClearance),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (current.photos.isNotEmpty()) {
+                item {
+                    var viewing by rememberSaveable { mutableStateOf<Int?>(null) }
+                    PhotoCarousel(current.photos) { viewing = it }
+                    viewing?.let { PhotoViewer(current.photos, it) { viewing = null } }
+                }
+            }
             item {
                 val houseColour = PaletteColor.fromKey(current.house.colorKey) ?: PaletteColor.Stone
                 Breadcrumb(

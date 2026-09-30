@@ -173,4 +173,19 @@
         <item quantity="many">%1$d dias restantes</item>
         <item quantity="other">%1$d dias restantes</item>
     </plurals>
+
+    <!-- Photos (0.5) -->
+    <string name="field_photos">Fotos</string>
+    <string name="add_photo">Adicionar foto</string>
+    <string name="photo_limit">O máximo é 3 fotos.</string>
+    <string name="source_title">Adicionar uma foto de</string>
+    <string name="source_camera">Câmera</string>
+    <string name="source_gallery">Galeria</string>
+    <string name="remember_choice">Lembrar minha escolha</string>
+    <string name="photo_n">Foto %1$d de %2$d</string>
+    <plurals name="photos_failed">
+        <item quantity="one">%1$d foto não pôde ser adicionada.</item>
+        <item quantity="many">%1$d fotos não puderam ser adicionadas.</item>
+        <item quantity="other">%1$d fotos não puderam ser adicionadas.</item>
+    </plurals>
 </resources>

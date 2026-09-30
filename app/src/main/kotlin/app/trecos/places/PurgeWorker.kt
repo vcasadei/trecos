@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 
 /**
  * The daily maintenance job: permanently removes whatever has been in any
- * house's trash for more than 30 days.
+ * house's trash for more than 30 days, then the photo files nothing uses.
  *
  * @param context the application context.
  * @param params the worker parameters.
@@ -24,7 +24,9 @@ class PurgeWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
      * @return success; a failure is retried the next day.
      */
     override suspend fun doWork(): Result {
-        (applicationContext as TrecosApplication).container.organize.purge()
+        val app = (applicationContext as TrecosApplication).container
+        app.organize.purge()
+        app.freeUnusedPhotos()
         return Result.success()
     }
 

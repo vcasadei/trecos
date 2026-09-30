@@ -139,7 +139,10 @@ fun TrashScreen(houseId: String, onBack: () -> Unit) {
             confirmButton = {
                 TextButton(onClick = {
                     confirmEmpty = false
-                    scope.launch { app.organize.emptyTrash(entries.map { it.id }) }
+                    scope.launch {
+                        app.organize.emptyTrash(entries.map { it.id })
+                        app.freeUnusedPhotos()
+                    }
                 }, modifier = Modifier.testTag("confirm_empty")) { Text(stringResource(R.string.empty_trash)) }
             },
             dismissButton = { TextButton(onClick = { confirmEmpty = false }) { Text(stringResource(R.string.action_cancel)) } },
@@ -152,7 +155,10 @@ fun TrashScreen(houseId: String, onBack: () -> Unit) {
             confirmButton = {
                 TextButton(onClick = {
                     confirmDelete = null
-                    scope.launch { app.organize.deletePermanently(entry.id) }
+                    scope.launch {
+                        app.organize.deletePermanently(entry.id)
+                        app.freeUnusedPhotos()
+                    }
                 }, modifier = Modifier.testTag("confirm_purge")) { Text(stringResource(R.string.delete_permanently)) }
             },
             dismissButton = { TextButton(onClick = { confirmDelete = null }) { Text(stringResource(R.string.action_cancel)) } },
@@ -379,6 +385,7 @@ fun DeleteHouseScreen(houseId: String, onBack: () -> Unit, onDeleted: () -> Unit
                 onClick = {
                     scope.launch {
                         app.organize.deleteHouse(houseId)
+                        app.freeUnusedPhotos()
                         app.database.houses().observeAll().first().firstOrNull()?.let { app.preferences.setLastHouse(it.id) }
                         onDeleted()
                     }

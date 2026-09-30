@@ -248,6 +248,7 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                             listView = current.listView,
                             currency = current.currency,
                             selected = container.id in selectedContainers,
+                            photo = current.mainPhotos[container.id],
                             onLongClick = toggle,
                             onClick = { if (selecting) toggle() else nav.openContainer(current.house.id, container.id) },
                         )
@@ -265,6 +266,7 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                             mainIcon = ids.firstOrNull()?.let { current.catalog[it]?.icon } ?: NO_CATEGORY,
                             categoryLabels = ids.mapNotNull { current.catalog.label(it, language) },
                             selected = item.id in selectedItems,
+                            photo = current.mainPhotos[item.id],
                             onLongClick = toggle,
                         ) { if (selecting) toggle() else nav.openItem(item.id) }
                     }
@@ -342,10 +344,16 @@ private fun PlaceHeader(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        PlaceIconBadge(
-            icon = container?.let { PlaceIcons.container(it.icon) } ?: PlaceIcons.house(state.house.icon),
-            size = 96.dp,
-        )
+        if (state.photos.isNotEmpty()) {
+            var viewing by rememberSaveable { mutableStateOf<Int?>(null) }
+            PhotoCarousel(state.photos) { viewing = it }
+            viewing?.let { PhotoViewer(state.photos, it) { viewing = null } }
+        } else {
+            PlaceIconBadge(
+                icon = container?.let { PlaceIcons.container(it.icon) } ?: PlaceIcons.house(state.house.icon),
+                size = 96.dp,
+            )
+        }
         (container?.description ?: state.house.description)?.let { description ->
             Text(
                 text = description,

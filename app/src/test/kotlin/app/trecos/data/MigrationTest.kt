@@ -60,8 +60,21 @@ class MigrationTest {
     }
 
     @Test
+    fun version3To4AddsPhotosAndKeepsData() {
+        helper.createDatabase(DB, 3).use { db ->
+            db.execSQL("INSERT INTO house (id, name, icon, createdAt, updatedAt) VALUES ('h1', 'Apartment', 'house', 1, 1)")
+            db.execSQL("INSERT INTO item (id, houseId, name, quantity, createdAt, updatedAt) VALUES ('i1', 'h1', 'Mouse', 1, 1, 1)")
+            db.execSQL("INSERT INTO trash_entry (id, houseId, kind, targetId, name, parentId, trashedAt) VALUES ('t', 'h1', 'item', 'i1', 'Mouse', NULL, 5)")
+        }
+        helper.runMigrationsAndValidate(DB, 4, true).use { db ->
+            db.query("SELECT (SELECT COUNT(*) FROM item) + (SELECT COUNT(*) FROM trash_entry)").use { it.moveToFirst(); assertEquals(2, it.getInt(0)) }
+            db.query("SELECT COUNT(*) FROM photo").use { it.moveToFirst(); assertEquals(0, it.getInt(0)) }
+        }
+    }
+
+    @Test
     fun theCurrentVersionIsTheLatestExportedSchema() {
-        assertEquals(3, TrecosDatabase.VERSION)
+        assertEquals(4, TrecosDatabase.VERSION)
     }
 
     private companion object {
