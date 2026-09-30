@@ -66,7 +66,7 @@ class PlaceLookScenariosTest : PlacesTestBase() {
         tag("unpriced_hint").assertTextContains("1 item has no price")
 
         click("clear_override")
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText("R$0.00 · automatic", substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText("R$0.00 · automatic", substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
         assertEquals(null, runBlocking { app.database.containers().get("boxB")?.valueOverride })
     }
 
@@ -125,7 +125,7 @@ class PlaceLookScenariosTest : PlacesTestBase() {
             app.database.houses().insert(house("h2", "Parents"))
             app.preferences.setHouseBand(HouseBand.Never)
         }
-        rule.waitUntil(10_000) { !exists(HOUSE_BAND_TAG) }
+        eventually(10_000) { !exists(HOUSE_BAND_TAG) }
     }
 
     @Test
@@ -143,7 +143,7 @@ class PlaceLookScenariosTest : PlacesTestBase() {
         click(VIEW_TOGGLE_TAG)
 
         text("The home office").assertIsDisplayed()
-        rule.waitUntil(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.listView.first() } == ListView.Detailed }
+        eventually(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.listView.first() } == ListView.Detailed }
 
         rule.activityRule.scenario.recreate()
         text("The home office").assertIsDisplayed()

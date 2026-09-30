@@ -89,7 +89,7 @@ class HelpScenariosTest : PlacesTestBase() {
 
     /** Waits for text anywhere. */
     private fun shows(text: String) =
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText(text, substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText(text, substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
 
     @Test
     fun readingAnAnswer() {
@@ -166,7 +166,7 @@ class HelpScenariosTest : PlacesTestBase() {
     @Test
     fun theSinglePrompt() {
         returnHomeAfter(days = 15, items = 20, sessions = 5)
-        val shown = runCatching { rule.waitUntil(PREFERENCE_WRITE_MS) { reviews == 1 } }.isSuccess
+        val shown = runCatching { eventually(PREFERENCE_WRITE_MS) { reviews == 1 } }.isSuccess
         assertTrue("no prompt: ${ratingState()}", shown)
 
         click(tabTag(TrecosTab.Settings))

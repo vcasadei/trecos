@@ -129,7 +129,7 @@ class BackupScenariosTest : PlacesTestBase() {
 
     /** Waits for an app-wide message. */
     private fun message(text: String) {
-        rule.waitUntil(15_000) { rule.onAllNodes(androidx.compose.ui.test.hasText(text, substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        eventually(15_000) { rule.onAllNodes(androidx.compose.ui.test.hasText(text, substring = true)).fetchSemanticsNodes().isNotEmpty() }
     }
 
     @Test

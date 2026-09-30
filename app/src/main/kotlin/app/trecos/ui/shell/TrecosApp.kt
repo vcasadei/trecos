@@ -170,8 +170,10 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
             val counters = app.preferences.rating.first()
             val first = counters.firstOpen ?: return@LaunchedEffect
             if (RatingPolicy.shouldPrompt(first, app.clock(), app.database.items().countActive(), counters.sessions, counters.reviewShown, inFlow = false)) {
-                app.preferences.markReviewShown()
+                // Show before recording, and record on the app scope: leaving Home can cancel this effect,
+                // and the prompt must never be marked as shown without having been shown.
                 app.review.show(activity)
+                app.scope.launch { app.preferences.markReviewShown() }
             }
         }
     }

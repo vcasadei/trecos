@@ -29,7 +29,7 @@ class HouseScenariosTest : PlacesTestBase() {
         text("My home").assertIsDisplayed()
         val houses = runBlocking { app.database.houses().observeAll().first() }
         assertEquals(listOf("My home"), houses.map { it.name })
-        rule.waitUntil(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.lastHouseId.first() } == houses.first().id }
+        eventually(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.lastHouseId.first() } == houses.first().id }
     }
 
     @Test

@@ -67,7 +67,7 @@ abstract class PlacesTestBase {
      * @return the node.
      */
     protected fun tag(tag: String): SemanticsNodeInteraction {
-        rule.waitUntil(10_000) {
+        eventually(10_000) {
             rule.onAllNodes(androidx.compose.ui.test.hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
         }
         return rule.onNodeWithTag(tag, useUnmergedTree = true)
@@ -92,7 +92,7 @@ abstract class PlacesTestBase {
      * @return the node.
      */
     protected fun text(text: String): SemanticsNodeInteraction {
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty() }
         return rule.onNode(hasText(text))
     }
 
@@ -102,7 +102,7 @@ abstract class PlacesTestBase {
      * @param text the text.
      */
     protected fun gone(text: String) {
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isEmpty() }
     }
 
     /**
@@ -138,7 +138,7 @@ abstract class PlacesTestBase {
      */
     protected fun clickDescription(description: String) {
         val matcher = androidx.compose.ui.test.hasContentDescription(description)
-        rule.waitUntil(10_000) { rule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty() }
         rule.onNode(matcher).performClick()
         rule.waitForIdle()
     }
@@ -146,7 +146,7 @@ abstract class PlacesTestBase {
     /** Taps Save on a form expected to be valid, then waits until the form has closed. */
     protected fun saveAndClose() {
         click("save")
-        rule.waitUntil(10_000) {
+        eventually(10_000) {
             rule.onAllNodes(androidx.compose.ui.test.hasTestTag("save"), useUnmergedTree = true).fetchSemanticsNodes().isEmpty()
         }
         rule.waitForIdle()
@@ -162,7 +162,7 @@ abstract class PlacesTestBase {
      */
     protected fun waitForTextIn(tag: String, expected: String) {
         val matcher = androidx.compose.ui.test.hasTestTag(tag).and(androidx.compose.ui.test.hasText(expected, substring = true))
-        rule.waitUntil(10_000) { rule.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
     }
 
     /**
@@ -173,7 +173,7 @@ abstract class PlacesTestBase {
      * @param expected the text to wait for.
      */
     protected fun waitForField(field: String, expected: String) {
-        rule.waitUntil(10_000) {
+        eventually(10_000) {
             rule.onAllNodes(androidx.compose.ui.test.hasTestTag(fieldTag(field)), useUnmergedTree = true).fetchSemanticsNodes().any {
                 it.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.EditableText) { androidx.compose.ui.text.AnnotatedString("") }.text == expected
             }
@@ -192,9 +192,26 @@ abstract class PlacesTestBase {
         repeat(3) {
             if (done()) return
             click(tag)
-            if (runCatching { rule.waitUntil(PREFERENCE_WRITE_MS) { done() } }.isSuccess) return
+            if (runCatching { eventually(PREFERENCE_WRITE_MS) { done() } }.isSuccess) return
         }
         throw AssertionError("Tapping $tag had no effect")
+    }
+
+    /**
+     * Waits until [condition] holds, running the main looper on every check.
+     * Coroutines that continue on the main dispatcher (a ViewModel finishing a
+     * preference or database write) only run when the paused Robolectric looper
+     * is idled; a plain `rule.waitUntil` around a `runBlocking` read doesn't
+     * always do that, so writes seemed to hang until the test ended.
+     *
+     * @param timeoutMs how long to wait.
+     * @param condition what to wait for.
+     */
+    protected fun eventually(timeoutMs: Long = 10_000, condition: () -> Boolean) {
+        rule.waitUntil(timeoutMs) {
+            org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+            condition()
+        }
     }
 
     /** Presses system back. */
@@ -210,5 +227,5 @@ val isPhotoThumb = androidx.compose.ui.test.SemanticsMatcher("is a photo thumbna
     node.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.TestTag) { "" }.matches(Regex("photo_[0-9a-f]{64}"))
 }
 
-/** How long tests wait for a preference write: DataStore writes sometimes take several seconds on CI. */
+/** How long tests wait for stored data to change. */
 const val PREFERENCE_WRITE_MS = 30_000L

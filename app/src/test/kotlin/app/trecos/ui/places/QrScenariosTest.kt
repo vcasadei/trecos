@@ -81,7 +81,7 @@ class QrScenariosTest : PlacesTestBase() {
      * @param name the text.
      */
     private fun shown(name: String) =
-        rule.waitUntil(10_000) { rule.onAllNodes(androidx.compose.ui.test.hasText(name), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(androidx.compose.ui.test.hasText(name), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
 
     /** Opens the new-container form on the house's top level. */
     private fun newContainer() {

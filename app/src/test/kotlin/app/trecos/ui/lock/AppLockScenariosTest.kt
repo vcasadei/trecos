@@ -3,6 +3,7 @@ package app.trecos.ui.lock
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import app.trecos.data.Fixtures.item
@@ -96,8 +97,9 @@ class AppLockScenariosTest : PlacesTestBase() {
         seed()
         click(tabTag(TrecosTab.Settings))
         tag(SETTINGS_LIST_TAG).performScrollToNode(hasTestTag("setting_app_lock"))
-        click("setting_app_lock")
-        rule.waitUntil(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.appLock.first() } }
+        rule.waitForIdle()
+        tag("setting_app_lock").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        eventually(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.appLock.first() } }
 
         assertTrue(fake.prompts >= 1)
         assertFalse(exists(LOCK_SCREEN_TAG))
@@ -126,7 +128,7 @@ class AppLockScenariosTest : PlacesTestBase() {
 
         fake.passes = false
         leaveAndReturn(2 * 60_000)
-        rule.waitUntil(10_000) { exists(LOCK_SCREEN_TAG) }
+        eventually(10_000) { exists(LOCK_SCREEN_TAG) }
     }
 
     @Test
@@ -144,7 +146,7 @@ class AppLockScenariosTest : PlacesTestBase() {
 
         fake.passes = true
         click("unlock")
-        rule.waitUntil(10_000) { !exists(LOCK_SCREEN_TAG) }
+        eventually(10_000) { !exists(LOCK_SCREEN_TAG) }
         tag(rowTag("pi"))
     }
 
@@ -152,9 +154,9 @@ class AppLockScenariosTest : PlacesTestBase() {
     fun recentAppsPreview() {
         seed()
         lockOn()
-        rule.waitUntil(10_000) { rule.activity.hidingFromRecents }
+        eventually(10_000) { rule.activity.hidingFromRecents }
         runBlocking { app.preferences.setAppLock(false) }
-        rule.waitUntil(10_000) { !rule.activity.hidingFromRecents }
+        eventually(10_000) { !rule.activity.hidingFromRecents }
     }
 
     @Test
@@ -166,7 +168,7 @@ class AppLockScenariosTest : PlacesTestBase() {
 
         tag("lock_turned_off")
         assertFalse(exists(LOCK_SCREEN_TAG))
-        rule.waitUntil(PREFERENCE_WRITE_MS) { !runBlocking { app.preferences.appLock.first() } }
+        eventually(PREFERENCE_WRITE_MS) { !runBlocking { app.preferences.appLock.first() } }
     }
 
     @Test
@@ -189,13 +191,13 @@ class AppLockScenariosTest : PlacesTestBase() {
         type("profile_name_raw", "Vitor")
         type("profile_email_raw", "someone@example.com")
         click("save_profile")
-        rule.waitUntil(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.profile.first() }?.email == "someone@example.com" }
+        eventually(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.profile.first() }?.email == "someone@example.com" }
 
         tag(SETTINGS_LIST_TAG).performScrollToNode(hasTestTag("setting_profile"))
         click("setting_profile")
         click("delete_profile")
         click("confirm_delete_profile")
-        rule.waitUntil(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.profile.first() } == null }
+        eventually(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.profile.first() } == null }
 
         val logged = ShadowLog.getLogs().joinToString("\n") { "${it.tag} ${it.msg}" }
         assertFalse("name in logs", logged.contains("Vitor"))
