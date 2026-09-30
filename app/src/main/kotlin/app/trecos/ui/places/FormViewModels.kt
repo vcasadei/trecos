@@ -617,12 +617,19 @@ class ItemFormViewModel(
      */
     fun save(andNew: Boolean, onSaved: () -> Unit) {
         viewModelScope.launch {
+            // Everything is read when Save is tapped, before anything suspends: typing during
+            // the save neither leaks into this item nor, with "Save + new", gets cleared.
+            val saved = listOf(nameState, quantity, unitPrice, brand, model, serial, qrCode, descriptionState)
+            val (typedName, typedQuantity, typedPrice, typedBrand, typedModel) = saved
+            val (typedSerial, typedQr, typedDescription) = saved.drop(5)
+            val savedCategories = categories
+            val savedTags = tags
             val old = existing
             val currency = app.preferences.currency.first()
-            val validName = Validation.name(nameState)
-            val validQuantity = Validation.quantity(quantity)
-            val price = Validation.optional(unitPrice)?.let { Money.parse(it, currency, AppLanguage.current()) ?: -1L }
-            val decision = if (validName == null) QrDecision(null, null, null) else resolveQr(app, location.first, qrCode, validName, old?.id ?: "", old == null)
+            val validName = Validation.name(typedName)
+            val validQuantity = Validation.quantity(typedQuantity)
+            val price = Validation.optional(typedPrice)?.let { Money.parse(it, currency, AppLanguage.current()) ?: -1L }
+            val decision = if (validName == null) QrDecision(null, null, null) else resolveQr(app, location.first, typedQr, validName, old?.id ?: "", old == null)
             val qr = decision.code
             qrHolder = decision.holder
             val found = buildSet {
@@ -641,33 +648,33 @@ class ItemFormViewModel(
                 name = validName,
                 quantity = validQuantity,
                 unitPrice = price,
-                brand = Validation.optional(brand),
-                model = Validation.optional(model),
-                serial = Validation.optional(serial),
+                brand = Validation.optional(typedBrand),
+                model = Validation.optional(typedModel),
+                serial = Validation.optional(typedSerial),
                 qrCode = qr,
-                description = Validation.optional(descriptionState),
+                description = Validation.optional(typedDescription),
                 createdAt = old?.createdAt ?: now,
                 updatedAt = now,
             )
             if (old == null) app.database.items().insert(item) else app.database.items().update(item)
             app.database.categories().replaceForItem(
                 item.id,
-                categories.mapIndexed { i, id -> ItemCategory(app.newId(), item.houseId, item.id, id, i, now) },
+                savedCategories.mapIndexed { i, id -> ItemCategory(app.newId(), item.houseId, item.id, id, i, now) },
             )
-            CategorySuggester.learn(app.database.categories(), item.houseId, "${item.name} ${item.description.orEmpty()}", categories)
-            tagStore.setForItem(item.houseId, item.id, tags)
+            CategorySuggester.learn(app.database.categories(), item.houseId, "${item.name} ${item.description.orEmpty()}", savedCategories)
+            tagStore.setForItem(item.houseId, item.id, savedTags)
             photos.save(item.houseId, Photo.OWNER_ITEM, item.id)
             if (andNew && old == null) {
                 photos.clear()
-                nameState = ""
-                quantity = "1"
-                unitPrice = ""
-                brand = ""
-                model = ""
-                serial = ""
-                qrCode = ""
-                descriptionState = ""
-                tags = emptyList()
+                if (nameState == saved[0]) nameState = ""
+                if (quantity == saved[1]) quantity = "1"
+                if (unitPrice == saved[2]) unitPrice = ""
+                if (brand == saved[3]) brand = ""
+                if (model == saved[4]) model = ""
+                if (serial == saved[5]) serial = ""
+                if (qrCode == saved[6]) qrCode = ""
+                if (descriptionState == saved[7]) descriptionState = ""
+                if (tags == savedTags) tags = emptyList()
                 suggestions = emptyList()
             } else {
                 onSaved()
