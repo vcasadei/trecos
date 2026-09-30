@@ -1,25 +1,34 @@
 package app.trecos.ui.text
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.dp
 
 /** The separator between breadcrumb levels. */
 const val BREADCRUMB_SEPARATOR = " > "
 
 /** The label of the collapsed levels. */
 const val BREADCRUMB_COLLAPSED = "…"
+
+/** Test tag of the house pill, the first segment when shown as a pill. */
+const val HOUSE_PILL_TAG = "house_pill"
 
 /** Test tag of the collapsed "…" segment. */
 const val BREADCRUMB_COLLAPSED_TAG = "breadcrumb_collapsed"
@@ -62,6 +71,9 @@ fun breadcrumbCrumbs(levels: List<String>, fitsOnOneLine: Boolean): List<Crumb> 
  * @param onLevelClick called with the index of the level tapped.
  * @param onCollapsedClick called when "…" is tapped, to show the full path.
  * @param modifier modifier for the breadcrumb.
+ * @param housePill when not `null`, the first level (the house) is drawn as a
+ *   pill in this colour, with [housePillText] as its text colour.
+ * @param housePillText the text colour of the house pill.
  */
 @Composable
 fun Breadcrumb(
@@ -69,6 +81,8 @@ fun Breadcrumb(
     onLevelClick: (Int) -> Unit,
     onCollapsedClick: () -> Unit,
     modifier: Modifier = Modifier,
+    housePill: Color? = null,
+    housePillText: Color = Color.White,
 ) {
     val style = LocalTextStyle.current.merge(MaterialTheme.typography.bodyMedium)
     val measurer = rememberTextMeasurer()
@@ -90,15 +104,30 @@ fun Breadcrumb(
                         maxLines = 1,
                         modifier = Modifier.testTag(BREADCRUMB_COLLAPSED_TAG).clickable(onClick = onCollapsedClick),
                     )
-                    is Crumb.Level -> Text(
-                        text = crumb.label,
-                        style = style,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .weight(1f, fill = false)
-                            .clickable { onLevelClick(crumb.index) },
-                    )
+                    is Crumb.Level -> {
+                        val pill = housePill != null && crumb.index == 0
+                        Text(
+                            text = crumb.label,
+                            style = style,
+                            color = if (pill) housePillText else Color.Unspecified,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .then(
+                                    if (pill) {
+                                        Modifier
+                                            .testTag(HOUSE_PILL_TAG)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(housePill)
+                                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                                    } else {
+                                        Modifier
+                                    },
+                                )
+                                .clickable { onLevelClick(crumb.index) },
+                        )
+                    }
                 }
             }
         }

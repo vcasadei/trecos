@@ -1,7 +1,9 @@
-# Submits the full Gradle dependency tree, including transitive dependencies,
-# to GitHub's dependency graph so Dependabot alerts cover every library.
-# GitHub can't read Gradle version catalogs on its own. Alerts track the
-# default branch, so this runs on pushes to master.
+# Submits the app's runtime dependencies, including transitive ones, to
+# GitHub's dependency graph so Dependabot alerts cover every library that
+# ships in Trecos. Build-tool classpaths (Gradle plugins) are left out: they
+# never reach users and Dependabot can't update them. GitHub can't read Gradle
+# version catalogs on its own. Alerts track the default branch, so this runs
+# on pushes to master.
 name: Dependency graph
 
 on:
@@ -28,3 +30,5 @@ jobs:
           java-version: "17"
 
       - uses: gradle/actions/dependency-submission@v6
+        env:
+          DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: .*RuntimeClasspath
