@@ -98,8 +98,8 @@ class SyncEngineTest {
         val organize = OrganizeStore(db, { now++ }, { UUID.randomUUID().toString() })
 
         /** Syncs, pulling [pull] too. */
-        fun sync(photosAllowed: Boolean = true, pull: Set<String> = emptySet()) =
-            runBlocking { engine.sync(remote, DriveUser("Vitor", "v@example.com"), photosAllowed, create = true, pull = pull) }
+        fun sync(photosAllowed: Boolean = true, pull: Set<String> = emptySet(), through: SyncRemote = remote) =
+            runBlocking { engine.sync(through, DriveUser("Vitor", "v@example.com"), photosAllowed, create = true, pull = pull) }
 
         /** @return an item. */
         fun item(id: String) = runBlocking { db.items().get(id) }
@@ -323,6 +323,21 @@ class SyncEngineTest {
             assertEquals("no duplicate commits at step $step", expectedCommits, remote.commits["h1"]!!.size)
             assertEquals("step $step", expectedHistory, phone.engine.history().size)
         }
+    }
+
+    @Test
+    fun throughTheDriveLayout() {
+        val drive = DriveRemoteTest.FakeDrive()
+        val phone = phone()
+        phone.sync(through = DriveRemote(drive))
+        val tablet = device("tablet")
+        tablet.sync(pull = setOf("h1"), through = DriveRemote(drive))
+        tablet.edit("pi") { it.copy(quantity = 8) }
+        tablet.sync(through = DriveRemote(drive))
+        phone.sync(through = DriveRemote(drive))
+
+        assertEquals(8, phone.item("pi")!!.quantity)
+        assertEquals(1, drive.entries.values.count { it.file.name == "Trecos" })
     }
 
     @Test

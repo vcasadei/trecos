@@ -48,6 +48,27 @@ class DriveAuthException(message: String) : DriveException(401, message)
 /** The file doesn't exist (any more). */
 class DriveNotFoundException(message: String) : DriveException(404, message)
 
+/** The Drive operations sync needs; [DriveClient] is the real one, tests use an in-memory one. */
+interface DriveFiles {
+    /** @see DriveClient.list */
+    suspend fun list(query: String, space: String = "drive"): List<DriveFile>
+
+    /** @see DriveClient.createFolder */
+    suspend fun createFolder(name: String, parent: String?): DriveFile
+
+    /** @see DriveClient.upload */
+    suspend fun upload(name: String, parent: String, bytes: ByteArray, mimeType: String = "application/octet-stream"): DriveFile
+
+    /** @see DriveClient.update */
+    suspend fun update(id: String, bytes: ByteArray, mimeType: String = "application/octet-stream")
+
+    /** @see DriveClient.download */
+    suspend fun download(id: String): ByteArray
+
+    /** @see DriveClient.delete */
+    suspend fun delete(id: String)
+}
+
 /**
  * Drive REST v3 over `HttpsURLConnection` (design D14): no Google client
  * library. Failed requests that may succeed later (429, 5xx, network errors)
@@ -65,7 +86,7 @@ class DriveClient(
     private val attempts: Int = 5,
     private val backoffMs: Long = 1_000,
     private val sleep: suspend (Long) -> Unit = { delay(it) },
-) {
+) : DriveFiles {
     private val json = Json { ignoreUnknownKeys = true }
 
     @Serializable
@@ -81,7 +102,7 @@ class DriveClient(
      * @param space `drive` or `appDataFolder`.
      * @return the files.
      */
-    suspend fun list(query: String, space: String = "drive"): List<DriveFile> {
+    override suspend fun list(query: String, space: String): List<DriveFile> {
         val files = ArrayList<DriveFile>()
         var page: String? = null
         do {
@@ -101,7 +122,7 @@ class DriveClient(
      * @param parent the folder it goes in, or `null` for My Drive.
      * @return the folder.
      */
-    suspend fun createFolder(name: String, parent: String?): DriveFile {
+    override suspend fun createFolder(name: String, parent: String?): DriveFile {
         val metadata = metadata(name, parent, FOLDER)
         val body = request("POST", "$baseUrl/drive/v3/files?fields=${enc(FIELDS)}", metadata.toByteArray(), "application/json; charset=UTF-8")
         return json.decodeFromString(DriveFile.serializer(), body.decodeToString())
@@ -116,7 +137,7 @@ class DriveClient(
      * @param mimeType the content type.
      * @return the file.
      */
-    suspend fun upload(name: String, parent: String, bytes: ByteArray, mimeType: String = "application/octet-stream"): DriveFile {
+    override suspend fun upload(name: String, parent: String, bytes: ByteArray, mimeType: String): DriveFile {
         val boundary = "trecos-${System.nanoTime()}"
         val body = buildString {
             append("--$boundary\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n")
@@ -134,7 +155,7 @@ class DriveClient(
      * @param bytes the new content.
      * @param mimeType the content type.
      */
-    suspend fun update(id: String, bytes: ByteArray, mimeType: String = "application/octet-stream") {
+    override suspend fun update(id: String, bytes: ByteArray, mimeType: String) {
         request("PATCH", "$baseUrl/upload/drive/v3/files/${enc(id)}?uploadType=media", bytes, mimeType)
     }
 
@@ -142,10 +163,10 @@ class DriveClient(
      * @param id the file.
      * @return its content.
      */
-    suspend fun download(id: String): ByteArray = request("GET", "$baseUrl/drive/v3/files/${enc(id)}?alt=media")
+    override suspend fun download(id: String): ByteArray = request("GET", "$baseUrl/drive/v3/files/${enc(id)}?alt=media")
 
     /** @param id the file to delete for good. */
-    suspend fun delete(id: String) {
+    override suspend fun delete(id: String) {
         try {
             request("DELETE", "$baseUrl/drive/v3/files/${enc(id)}")
         } catch (_: DriveNotFoundException) {
