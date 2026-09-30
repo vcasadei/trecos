@@ -39,7 +39,7 @@ class HouseScenariosTest : PlacesTestBase() {
         click("switch_add_house")
         type("name", "Casa dos meus pais")
         type("address", "Rua das Flores, 10")
-        click("save")
+        saveAndClose()
 
         text("Casa dos meus pais").assertIsDisplayed()
         val houses = runBlocking { app.database.houses().observeAll().first() }

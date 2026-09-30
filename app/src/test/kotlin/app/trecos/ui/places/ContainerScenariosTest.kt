@@ -40,7 +40,7 @@ class ContainerScenariosTest : PlacesTestBase() {
         click(ADD_BUTTON_TAG)
         text("Container").performClick()
         type("name", "Cables bag")
-        click("save")
+        saveAndClose()
 
         text("Containers (1)").assertIsDisplayed()
         text("Cables bag").assertIsDisplayed()
@@ -90,7 +90,7 @@ class ContainerScenariosTest : PlacesTestBase() {
         click(ADD_BUTTON_TAG)
         text("Item").performClick()
         type("name", "USB-C cable")
-        click("save")
+        saveAndClose()
 
         text("USB-C cable").assertIsDisplayed()
         val saved = runBlocking { app.database.items().observeIn("h1", "boxA").first() }

@@ -123,6 +123,15 @@ abstract class PlacesTestBase {
         rule.waitForIdle()
     }
 
+    /** Taps Save on a form expected to be valid, then waits until the form has closed. */
+    protected fun saveAndClose() {
+        click("save")
+        rule.waitUntil(10_000) {
+            rule.onAllNodes(androidx.compose.ui.test.hasTestTag("save"), useUnmergedTree = true).fetchSemanticsNodes().isEmpty()
+        }
+        rule.waitForIdle()
+    }
+
     /** Presses system back. */
     protected fun pressBack() {
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }

@@ -43,7 +43,7 @@ class ItemScenariosTest : PlacesTestBase() {
         seed()
         newItem()
         type("name", "Raspberry Pi 4")
-        click("save")
+        saveAndClose()
 
         text("Raspberry Pi 4").assertIsDisplayed()
         val saved = topLevelItems().single()
@@ -92,7 +92,7 @@ class ItemScenariosTest : PlacesTestBase() {
 
         clickDescription("Edit")
         type("quantity", "5")
-        click("save")
+        saveAndClose()
 
         val today = formatDate(System.currentTimeMillis(), AppLanguage.English)
         detail(R.string.date_changed).assertTextContains(today, substring = true)
@@ -115,7 +115,7 @@ class ItemScenariosTest : PlacesTestBase() {
             tag(fieldTag("name")).fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.EditableText].text.isEmpty()
         }
         type("name", "HDMI cable")
-        click("save")
+        saveAndClose()
 
         text("HDMI cable").assertIsDisplayed()
         val saved = runBlocking { app.database.items().observeIn("h1", "boxA").first() }

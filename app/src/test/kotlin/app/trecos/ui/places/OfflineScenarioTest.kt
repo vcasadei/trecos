@@ -35,18 +35,18 @@ class OfflineScenarioTest : PlacesTestBase() {
         click(ADD_BUTTON_TAG)
         text("Container").performClick()
         type("name", "Office")
-        click("save")
+        saveAndClose()
         click(rowTag(containerId("Office")))
 
         click(ADD_BUTTON_TAG)
         text("Item").performClick()
         type("name", "Laptop")
         type("price", "3500")
-        click("save")
+        saveAndClose()
         click(rowTag(itemId("Laptop")))
         clickDescription("Edit")
         type("quantity", "2")
-        click("save")
+        saveAndClose()
 
         text("7,000.00", substring = true).assertIsDisplayed()
         val laptop = runBlocking { app.database.items().get(itemId("Laptop"))!! }
