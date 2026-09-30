@@ -8,6 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToString
 import androidx.test.core.app.ApplicationProvider
 import app.trecos.AppContainer
 import app.trecos.MainActivity
@@ -25,8 +26,21 @@ import org.junit.Rule
  */
 abstract class PlacesTestBase {
 
-    @get:Rule
+    @get:Rule(order = 1)
     val rule = createAndroidComposeRule<MainActivity>()
+
+    /** On failure, prints every window's semantics tree, to diagnose failures seen only on CI. */
+    @get:Rule(order = 2)
+    val dumpOnFailure = object : org.junit.rules.TestWatcher() {
+        override fun failed(e: Throwable?, description: org.junit.runner.Description?) {
+            runCatching {
+                val roots = rule.onAllNodes(androidx.compose.ui.test.isRoot(), useUnmergedTree = true)
+                val count = roots.fetchSemanticsNodes().size
+                println("SEMANTICS on failure of ${description?.methodName}: $count window(s)")
+                (0 until count).forEach { println(roots[it].printToString(maxDepth = Int.MAX_VALUE)) }
+            }.onFailure { println("SEMANTICS dump failed: $it") }
+        }
+    }
 
     /** The app's container, with its in-memory database. */
     protected val app: AppContainer get() = ApplicationProvider.getApplicationContext<TrecosApplication>().container
