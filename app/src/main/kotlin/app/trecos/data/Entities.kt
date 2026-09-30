@@ -1,6 +1,7 @@
 package app.trecos.data
 
 import androidx.room.Entity
+import kotlinx.serialization.Serializable
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
@@ -18,6 +19,7 @@ import androidx.room.PrimaryKey
  * @property updatedAt last change time, epoch milliseconds.
  * @property deletedAt deletion time, or `null` while the house exists.
  */
+@Serializable
 @Entity(tableName = "house")
 data class House(
     @PrimaryKey val id: String,
@@ -47,6 +49,7 @@ data class House(
  * @property updatedAt last change time, epoch milliseconds.
  * @property deletedAt deletion time, or `null` while it exists.
  */
+@Serializable
 @Entity(
     tableName = "container",
     indices = [
@@ -88,6 +91,7 @@ data class Container(
  * @property updatedAt when any field last changed, epoch milliseconds.
  * @property deletedAt deletion time, or `null` while it exists.
  */
+@Serializable
 @Entity(
     tableName = "item",
     indices = [
