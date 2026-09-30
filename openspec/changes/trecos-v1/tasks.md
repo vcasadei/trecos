@@ -195,11 +195,11 @@ run at the end of **every** release group before it is tagged.
 
 ## 15. Quality Gates
 
-- [ ] 15.1 Build compiles cleanly: `./gradlew assembleRelease`
-- [ ] 15.2 Linter and static analysis pass with no errors: `./gradlew lintRelease`
-- [ ] 15.3 Strict type checking passes, with Kotlin warnings treated as errors: `./gradlew compileReleaseKotlin`
-- [ ] 15.4 Unit, Robolectric and migration tests pass: `./gradlew testDebugUnitTest`
-- [ ] 15.5 Screenshot tests match the recorded baselines: `./gradlew verifyRoborazziDebug`
-- [ ] 15.6 The coverage threshold is maintained or raised: `./gradlew jacocoCoverageVerification`
-- [ ] 15.7 OpenSpec artifacts remain valid: `openspec validate trecos-v1 --strict`
-- [ ] 15.8 No secrets in the branch: `pre-commit run gitleaks --all-files`
+- [x] 15.1 Build compiles cleanly: `./gradlew assembleRelease`
+- [x] 15.2 Linter and static analysis pass with no errors: `./gradlew lintRelease`
+- [x] 15.3 Strict type checking passes, with Kotlin warnings treated as errors: `./gradlew compileReleaseKotlin`
+- [x] 15.4 Unit, Robolectric and migration tests pass: `./gradlew testDebugUnitTest`
+- [x] 15.5 Screenshot tests match the recorded baselines: `./gradlew verifyRoborazziDebug`
+- [x] 15.6 The coverage threshold is maintained or raised: `./gradlew jacocoCoverageVerification`
+- [x] 15.7 OpenSpec artifacts remain valid: `openspec validate trecos-v1 --strict`
+- [x] 15.8 No secrets in the branch: `pre-commit run gitleaks --all-files`
