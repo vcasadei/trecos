@@ -6,6 +6,21 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.8.0] - Unreleased
+
+### Added
+
+- Custom fields on items: Text, Number (with a unit label), Date and Yes/No, validated by type.
+- House-wide fields in Settings (rename keeps values; delete says how many values go and needs confirming) and one-off fields added from an item's form.
+- Custom values on the item screen and as detailed-view extras; Text values found by Search as part of the description; values kept when moving, copying or duplicating, and field definitions copied with a new house.
+- The Settings tab: General (language, currency, start on), Appearance (theme, house colour band, list view, detailed-view extras), Items & photos (new item starts with, image source, tags), Custom fields, Trash and About. Settings apply at once and stay on the device.
+- Changing the currency relabels prices after a warning that nothing is converted; Cancel keeps the old one.
+- Up to three detailed-view extras from categories, tags, total value, brand, model, serial number, QR code, dates and custom fields.
+
+### Changed
+
+- Database schema 6: custom field definitions and values, indexed for search.
+
 ## [0.7.0] - Unreleased
 
 ### Added

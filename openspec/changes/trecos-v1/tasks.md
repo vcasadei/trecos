@@ -136,7 +136,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 9.7 Build the Settings structure (sections in order) with DataStore defaults applied immediately and kept on the device only; tests for scenarios "Fresh install" and "Immediate effect"
 - [x] 9.8 Implement the currency change warning and relabelling; tests for scenarios "Relabelling" and "Cancelling"
 - [x] 9.9 Implement the detailed-view extras picker (limit of 3), start screen, form-or-photo-first setting and image source setting; tests for scenarios "Picking extras" and "Too many"
-- [ ] 9.10 Write the user docs on custom fields and settings (both languages), and add the 0.8 entry to `CHANGELOG.md`
+- [x] 9.10 Write the user docs on custom fields and settings (both languages), and add the 0.8 entry to `CHANGELOG.md`
 
 ## 10. Release 0.9 — App lock and profile
 
