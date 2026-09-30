@@ -213,4 +213,25 @@
         <item quantity="many">%1$d resultados</item>
         <item quantity="other">%1$d resultados</item>
     </plurals>
+
+    <!-- QR codes (0.7) -->
+    <string name="qr_auto_taken">O código \"%1$s\" já é usado nesta casa, então este ficou sem código QR.</string>
+    <string name="error_qr_in_use_by">Já usado por \"%1$s\"</string>
+    <string name="open_holder">Abrir</string>
+    <string name="error_qr_too_long">Um código QR pode ter no máximo 256 caracteres</string>
+    <string name="action_print">Imprimir</string>
+    <string name="action_share">Compartilhar</string>
+    <string name="no_qr_code">Isto não tem código QR.</string>
+    <plurals name="labels_without_code">
+        <item quantity="one">%1$d não tinha código QR e ficou de fora.</item>
+        <item quantity="many">%1$d não tinham código QR e ficaram de fora.</item>
+        <item quantity="other">%1$d não tinham código QR e ficaram de fora.</item>
+    </plurals>
+    <string name="scan_unavailable">A leitura precisa de um download único pela internet. Você ainda pode digitar um código na busca.</string>
+    <string name="trashed_notice">\"%1$s\" está na lixeira.</string>
+    <string name="choose_house_title">Qual casa?</string>
+    <string name="unknown_code_title">Nada tem o código \"%1$s\"</string>
+    <string name="create_item">Criar item</string>
+    <string name="create_container">Criar compartimento</string>
+    <string name="scan_label">Ler uma etiqueta</string>
 </resources>

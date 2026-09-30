@@ -144,6 +144,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.work.runtime)
     implementation(libs.coil.compose)
+    implementation(libs.zxing.core)
+    implementation(libs.play.services.code.scanner)
+    implementation(libs.androidx.print)
     baselineProfile(project(":baselineprofile"))
 
     testImplementation(libs.junit)

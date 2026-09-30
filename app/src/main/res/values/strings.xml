@@ -210,4 +210,24 @@
         <item quantity="one">%1$d result</item>
         <item quantity="other">%1$d results</item>
     </plurals>
+
+    <!-- QR codes (0.7) -->
+    <string name="qr_auto_taken">The code \"%1$s\" is already used in this house, so this one has no QR code.</string>
+    <string name="error_qr_in_use_by">Already used by \"%1$s\"</string>
+    <string name="open_holder">Open it</string>
+    <string name="error_qr_too_long">A QR code can have at most 256 characters</string>
+    <string name="action_print">Print</string>
+    <string name="action_share">Share</string>
+    <string name="no_qr_code">This has no QR code.</string>
+    <plurals name="labels_without_code">
+        <item quantity="one">%1$d had no QR code and was skipped.</item>
+        <item quantity="other">%1$d had no QR code and were skipped.</item>
+    </plurals>
+    <string name="scan_unavailable">Scanning needs a one-time download over the internet. You can still type a code into search.</string>
+    <string name="trashed_notice">\"%1$s\" is in the trash.</string>
+    <string name="choose_house_title">Which house?</string>
+    <string name="unknown_code_title">Nothing has the code \"%1$s\"</string>
+    <string name="create_item">Create item</string>
+    <string name="create_container">Create container</string>
+    <string name="scan_label">Scan a label</string>
 </resources>

@@ -1,5 +1,6 @@
 package app.trecos.ui.places
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -82,6 +83,7 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
     var fullPathOpen by rememberSaveable { mutableStateOf(false) }
     var menuOpen by rememberSaveable { mutableStateOf(false) }
     var comingLater by rememberSaveable { mutableStateOf(false) }
+    var showQr by rememberSaveable { mutableStateOf(false) }
     val path = current.tree.path(item.containerId)
     val levels = listOf(current.house.name) + path.map { it.name } + item.name
     val fields = listOfNotNull(
@@ -159,6 +161,7 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
                 Column(
                     Modifier
                         .fillMaxWidth()
+                        .then(if (label == R.string.field_qr) Modifier.clickable { showQr = true } else Modifier)
                         .semantics(mergeDescendants = true) {}
                         .testTag(detailTag(label)),
                 ) {
@@ -169,6 +172,7 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
         }
     }
     OrganizeDialogs(organize, onChooseWhatToKeep = nav.keep)
+    if (showQr) item.qrCode?.let { QrLabelView(app.trecos.places.Label(it)) { showQr = false } }
     if (comingLater) {
         AlertDialog(
             onDismissRequest = { comingLater = false },

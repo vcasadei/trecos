@@ -1,6 +1,7 @@
 package app.trecos.ui.shell
 
 import android.app.Activity
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -85,8 +86,8 @@ private object Routes {
     const val KEEP = "keep/{container}"
     const val DELETE_HOUSE = "house/delete/{house}"
     const val HOUSE_FORM = "form/house?id={id}"
-    const val CONTAINER_FORM = "form/container?house={house}&parent={parent}&id={id}"
-    const val ITEM_FORM = "form/item?house={house}&container={container}&id={id}"
+    const val CONTAINER_FORM = "form/container?house={house}&parent={parent}&id={id}&qr={qr}"
+    const val ITEM_FORM = "form/item?house={house}&container={container}&id={id}&qr={qr}"
 
     /** Whether a route is a form or a task screen with its own bottom buttons, which hide the bottom bar. */
     fun isForm(route: String?) = route != null && (route.startsWith("form/") || route == KEEP || route == DELETE_HOUSE)
@@ -163,11 +164,21 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                         if (savedId != null && entry.string("id") == null) nav.openHouse(savedId)
                     }
                 }
-                composable(Routes.CONTAINER_FORM, listOf(optionalArg("house"), optionalArg("parent"), optionalArg("id"))) { entry ->
-                    ContainerFormScreen(entry.string("house").orEmpty(), entry.string("parent"), entry.string("id")) { navController.popBackStack() }
+                composable(Routes.CONTAINER_FORM, listOf(optionalArg("house"), optionalArg("parent"), optionalArg("id"), optionalArg("qr"))) { entry ->
+                    ContainerFormScreen(
+                        entry.string("house").orEmpty(), entry.string("parent"), entry.string("id"),
+                        onDone = { navController.popBackStack() },
+                        onOpenHolder = { holder -> openHolder(navController, holder) },
+                        scannedCode = entry.string("qr"),
+                    )
                 }
-                composable(Routes.ITEM_FORM, listOf(optionalArg("house"), optionalArg("container"), optionalArg("id"))) { entry ->
-                    ItemFormScreen(entry.string("house").orEmpty(), entry.string("container"), entry.string("id")) { navController.popBackStack() }
+                composable(Routes.ITEM_FORM, listOf(optionalArg("house"), optionalArg("container"), optionalArg("id"), optionalArg("qr"))) { entry ->
+                    ItemFormScreen(
+                        entry.string("house").orEmpty(), entry.string("container"), entry.string("id"),
+                        onDone = { navController.popBackStack() },
+                        onOpenHolder = { holder -> openHolder(navController, holder) },
+                        scannedCode = entry.string("qr"),
+                    )
                 }
             }
             band?.let { colour ->
@@ -218,7 +229,24 @@ private fun placeNavigation(controller: NavHostController) = PlaceNavigation(
     keep = { container -> controller.navigate("keep/$container") },
     deleteHouse = { house -> controller.navigate("house/delete/$house") },
     searchIn = { controller.navigateToTab(TrecosTab.Search) },
+    addContainerWithCode = { house, parent, code ->
+        controller.navigate("form/container?house=$house" + (parent?.let { "&parent=$it" } ?: "") + "&qr=${Uri.encode(code)}")
+    },
+    addItemWithCode = { house, container, code ->
+        controller.navigate("form/item?house=$house" + (container?.let { "&container=$it" } ?: "") + "&qr=${Uri.encode(code)}")
+    },
 )
+
+/**
+ * Opens the item or container holding a QR code, leaving the form.
+ *
+ * @param controller the navigation controller.
+ * @param holder the holder.
+ */
+private fun openHolder(controller: NavHostController, holder: app.trecos.data.QrHolder) {
+    controller.popBackStack()
+    if (holder.kind == "item") controller.navigate("item/${holder.id}") else controller.navigate("place/${holder.houseId}?container=${holder.id}")
+}
 
 /**
  * @param name the argument name.

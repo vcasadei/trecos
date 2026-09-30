@@ -1,5 +1,11 @@
 package app.trecos.ui.places
 
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -38,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import app.trecos.R
 import app.trecos.places.FieldError
 import app.trecos.data.AddFlow
+import app.trecos.data.QrHolder
 import app.trecos.ui.appContainer
 import app.trecos.ui.appViewModel
 import app.trecos.ui.shell.TrecosTopBar
@@ -118,6 +125,58 @@ private fun Field(
 }
 
 /**
+ * The QR code field: its error names the holder of a taken code, with a
+ * button to open it.
+ *
+ * @param value the typed code.
+ * @param onValueChange called as the user types.
+ * @param errors the form's field errors.
+ * @param holder who holds a taken code, or `null`.
+ * @param onOpenHolder opens the holder.
+ * @param onScanned receives a scanned code.
+ */
+@Composable
+private fun QrField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    errors: Set<FieldError>,
+    holder: QrHolder?,
+    onOpenHolder: (QrHolder) -> Unit,
+    onScanned: (String) -> Unit,
+) {
+    val app = appContainer()
+    val scanner = LocalQrScanner.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val message = when {
+        FieldError.QrTooLong in errors -> stringResource(R.string.error_qr_too_long)
+        FieldError.QrInUse in errors && holder != null -> stringResource(R.string.error_qr_in_use_by, holder.name)
+        FieldError.QrInUse in errors -> stringResource(R.string.error_qr_in_use)
+        else -> null
+    }
+    Column {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(stringResource(R.string.field_qr)) },
+            isError = message != null,
+            supportingText = message?.let { { Text(it, modifier = Modifier.testTag("error_qr")) } },
+            trailingIcon = {
+                IconButton(
+                    onClick = { scope.launch { scanForForm(scanner, context, app)?.let(onScanned) } },
+                    modifier = Modifier.testTag("form_scan"),
+                ) { Icon(painterResource(R.drawable.ic_qr), contentDescription = stringResource(R.string.scan_label)) }
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth().testTag(fieldTag("qr")),
+        )
+        if (holder != null && FieldError.QrInUse in errors) {
+            TextButton(onClick = { onOpenHolder(holder) }, modifier = Modifier.testTag("open_holder")) { Text(stringResource(R.string.open_holder)) }
+        }
+    }
+}
+
+/**
  * A label above a picker.
  *
  * @param label the label resource.
@@ -194,10 +253,18 @@ private fun CopyFromPicker(vm: HouseFormViewModel) {
  * @param parentId the parent of a new container, or `null` for the top level.
  * @param containerId the container to edit, or `null` for a new one.
  * @param onDone leaves the form.
+ * @param onOpenHolder opens the item or container holding a taken QR code.
  */
 @Composable
-fun ContainerFormScreen(houseId: String, parentId: String?, containerId: String?, onDone: () -> Unit) {
-    val vm = appViewModel(key = "containerForm/$containerId/$parentId") { ContainerFormViewModel(it, houseId, parentId, containerId) }
+fun ContainerFormScreen(
+    houseId: String,
+    parentId: String?,
+    containerId: String?,
+    onDone: () -> Unit,
+    onOpenHolder: (QrHolder) -> Unit = {},
+    scannedCode: String? = null,
+) {
+    val vm = appViewModel(key = "containerForm/$containerId/$parentId/$scannedCode") { ContainerFormViewModel(it, houseId, parentId, containerId, scannedCode) }
     FormFrame(
         title = stringResource(if (containerId == null) R.string.new_container else R.string.edit_container),
         onBack = onDone,
@@ -206,7 +273,10 @@ fun ContainerFormScreen(houseId: String, parentId: String?, containerId: String?
         PhotoEditor(vm.photos.photos, vm.photos::import, vm.photos::setMain, vm.photos::remove, vm.photos::move)
         Field(R.string.field_name, vm.name, { vm.name = it }, "name", R.string.error_name_required.takeIf { FieldError.NameRequired in vm.errors })
         Field(R.string.field_description, vm.description, { vm.description = it }, "description", singleLine = false)
-        Field(R.string.field_qr, vm.qrCode, { vm.qrCode = it }, "qr", R.string.error_qr_in_use.takeIf { FieldError.QrInUse in vm.errors })
+        QrField(vm.qrCode, { vm.qrCode = it }, vm.errors, vm.qrHolder, onOpenHolder) { code ->
+            vm.qrCode = code
+            if (vm.name.isBlank()) vm.name = code
+        }
         Field(
             R.string.field_value_override, vm.valueOverride, { vm.valueOverride = it }, "override",
             R.string.error_price.takeIf { FieldError.PriceInvalid in vm.errors }, KeyboardType.Decimal,
@@ -225,10 +295,18 @@ fun ContainerFormScreen(houseId: String, parentId: String?, containerId: String?
  * @param containerId the container of a new item, or `null` for the top level.
  * @param itemId the item to edit, or `null` for a new one.
  * @param onDone leaves the form.
+ * @param onOpenHolder opens the item or container holding a taken QR code.
  */
 @Composable
-fun ItemFormScreen(houseId: String, containerId: String?, itemId: String?, onDone: () -> Unit) {
-    val vm = appViewModel(key = "itemForm/$itemId/$containerId") { ItemFormViewModel(it, houseId, containerId, itemId) }
+fun ItemFormScreen(
+    houseId: String,
+    containerId: String?,
+    itemId: String?,
+    onDone: () -> Unit,
+    onOpenHolder: (QrHolder) -> Unit = {},
+    scannedCode: String? = null,
+) {
+    val vm = appViewModel(key = "itemForm/$itemId/$containerId/$scannedCode") { ItemFormViewModel(it, houseId, containerId, itemId, scannedCode) }
     val addFlow by appContainer().preferences.addFlow.collectAsState(initial = null)
     var photoFirstPending by rememberSaveable { mutableStateOf(itemId == null) }
     var focusName by rememberSaveable { mutableStateOf(false) }
@@ -283,7 +361,10 @@ fun ItemFormScreen(houseId: String, containerId: String?, itemId: String?, onDon
             Field(R.string.field_brand, vm.brand, { vm.brand = it }, "brand")
             Field(R.string.field_model, vm.model, { vm.model = it }, "model")
             Field(R.string.field_serial, vm.serial, { vm.serial = it }, "serial")
-            Field(R.string.field_qr, vm.qrCode, { vm.qrCode = it }, "qr", R.string.error_qr_in_use.takeIf { FieldError.QrInUse in vm.errors })
+            QrField(vm.qrCode, { vm.qrCode = it }, vm.errors, vm.qrHolder, onOpenHolder) { code ->
+            vm.qrCode = code
+            if (vm.name.isBlank()) vm.name = code
+        }
             Field(R.string.field_description, vm.description, { vm.description = it }, "description", singleLine = false)
             TagsField(vm)
         }

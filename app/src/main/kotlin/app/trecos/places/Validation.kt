@@ -13,12 +13,18 @@ enum class FieldError {
 
     /** Another item or container in the house already uses this QR code. */
     QrInUse,
+
+    /** The QR code is longer than [Validation.MAX_QR]. */
+    QrTooLong,
 }
 
 /** Field rules for houses, containers and items. */
 object Validation {
     /** The largest quantity an item can have. */
     const val MAX_QUANTITY = 999_999
+
+    /** The longest QR code, in characters. */
+    const val MAX_QR = 256
 
     /**
      * @param name the typed name.

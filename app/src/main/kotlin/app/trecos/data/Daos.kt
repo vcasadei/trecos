@@ -182,4 +182,51 @@ interface QrDao {
             "(SELECT COUNT(*) FROM container WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId AND deletedAt IS NULL)",
     )
     suspend fun countUses(houseId: String, code: String, exceptId: String): Int
+
+    /**
+     * Finds who holds a code in a house, for the "already used by" message.
+     *
+     * @param houseId the house.
+     * @param code the code.
+     * @param exceptId the record being edited.
+     * @return the holder, or `null` when the code is free (the trash doesn't count).
+     */
+    @Query(
+        "SELECT 'item' AS kind, id, name, houseId FROM item WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId AND deletedAt IS NULL " +
+            "UNION ALL SELECT 'container' AS kind, id, name, houseId FROM container WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId AND deletedAt IS NULL LIMIT 1",
+    )
+    suspend fun holder(houseId: String, code: String, exceptId: String): QrHolder?
+
+    /**
+     * Finds everything with a code in every house, trashed things included, for lookup after a scan.
+     *
+     * @param code the exact, case-sensitive code.
+     * @return every item and container holding it.
+     */
+    @Query(
+        "SELECT 'item' AS kind, id, name, houseId, deletedAt FROM item WHERE qrCode = :code " +
+            "UNION ALL SELECT 'container' AS kind, id, name, houseId, deletedAt FROM container WHERE qrCode = :code",
+    )
+    suspend fun lookup(code: String): List<QrMatch>
 }
+
+/**
+ * The item or container holding a QR code.
+ *
+ * @property kind `item` or `container`.
+ * @property id its id.
+ * @property name its name.
+ * @property houseId its house.
+ */
+data class QrHolder(val kind: String, val id: String, val name: String, val houseId: String)
+
+/**
+ * A thing found for a scanned code.
+ *
+ * @property kind `item` or `container`.
+ * @property id its id.
+ * @property name its name.
+ * @property houseId its house.
+ * @property deletedAt when it went to the trash, or `null`.
+ */
+data class QrMatch(val kind: String, val id: String, val name: String, val houseId: String, val deletedAt: Long?)

@@ -15,6 +15,7 @@ import app.trecos.R
 import android.net.Uri
 import kotlinx.coroutines.CoroutineScope
 import app.trecos.data.ItemCategory
+import app.trecos.data.QrHolder
 import app.trecos.data.CustomCategory
 import app.trecos.categories.CategoryCatalog
 import app.trecos.categories.CategorySuggester
@@ -29,6 +30,40 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+
+/**
+ * Checks a typed QR code and, for a new record with the field left blank,
+ * picks its name as the code when that is free (spec "QR code identity").
+ *
+ * @param app the app's container.
+ * @param houseId the record's house.
+ * @param typed what the user typed in the QR field.
+ * @param name the record's validated name, or `null`.
+ * @param exceptId the record being edited, or an empty string for a new one.
+ * @param isNew whether the record is being created.
+ * @return the code to save (or `null`), the error, and the holder of a taken code.
+ */
+internal suspend fun resolveQr(app: AppContainer, houseId: String, typed: String, name: String?, exceptId: String, isNew: Boolean): QrDecision {
+    val code = Validation.optional(typed)
+    if (code != null) {
+        if (code.length > Validation.MAX_QR) return QrDecision(null, FieldError.QrTooLong, null)
+        val holder = app.database.qr().holder(houseId, code, exceptId)
+        return if (holder != null) QrDecision(null, FieldError.QrInUse, holder) else QrDecision(code, null, null)
+    }
+    if (!isNew || name == null || name.length > Validation.MAX_QR) return QrDecision(null, null, null)
+    if (app.database.qr().countUses(houseId, name, exceptId) == 0) return QrDecision(name, null, null)
+    app.messages.tryEmit(AppMessage(app.resources.getString(R.string.qr_auto_taken, name)))
+    return QrDecision(null, null, null)
+}
+
+/**
+ * The outcome of [resolveQr].
+ *
+ * @property code the code to save, or `null` for none.
+ * @property error the QR field's error, or `null`.
+ * @property holder who holds a taken code, or `null`.
+ */
+internal data class QrDecision(val code: String?, val error: FieldError?, val holder: QrHolder?)
 
 /**
  * The photos of a form while it is being edited: imported at once, saved as
@@ -236,12 +271,14 @@ class HouseFormViewModel(private val app: AppContainer, private val houseId: Str
  * @param houseId the house of a new container (ignored when editing).
  * @param parentId the parent of a new container, or `null` for the top level (ignored when editing).
  * @param containerId the container to edit, or `null` to create one.
+ * @param scannedCode a scanned code that nothing has, filled in as the new container's code and name.
  */
 class ContainerFormViewModel(
     private val app: AppContainer,
     private val houseId: String,
     private val parentId: String?,
     private val containerId: String?,
+    scannedCode: String? = null,
 ) : ViewModel() {
     private var existing: Container? = null
 
@@ -270,7 +307,15 @@ class ContainerFormViewModel(
     var errors by mutableStateOf<Set<FieldError>>(emptySet())
         private set
 
+    /** Who holds the code the user typed, when it is taken. */
+    var qrHolder by mutableStateOf<QrHolder?>(null)
+        private set
+
     init {
+        if (containerId == null && scannedCode != null) {
+            qrCode = scannedCode
+            name = scannedCode
+        }
         if (containerId != null) {
             viewModelScope.launch {
                 existing = app.database.containers().get(containerId)
@@ -299,12 +344,14 @@ class ContainerFormViewModel(
             val house = old?.houseId ?: houseId
             val currency = app.preferences.currency.first()
             val validName = Validation.name(name)
-            val qr = Validation.optional(qrCode)
             val override = Validation.optional(valueOverride)?.let { Money.parse(it, currency, AppLanguage.current()) ?: -1L }
+            val decision = if (validName == null) QrDecision(null, null, null) else resolveQr(app, house, qrCode, validName, old?.id ?: "", old == null)
+            val qr = decision.code
+            qrHolder = decision.holder
             val found = buildSet {
                 if (validName == null) add(FieldError.NameRequired)
                 if (override == -1L) add(FieldError.PriceInvalid)
-                if (qr != null && app.database.qr().countUses(house, qr, old?.id ?: "") > 0) add(FieldError.QrInUse)
+                decision.error?.let { add(it) }
             }
             errors = found
             if (found.isNotEmpty() || validName == null) return@launch
@@ -337,12 +384,14 @@ class ContainerFormViewModel(
  * @param houseId the house of a new item (ignored when editing).
  * @param containerId the container of a new item, or `null` for the top level (ignored when editing).
  * @param itemId the item to edit, or `null` to create one.
+ * @param scannedCode a scanned code that nothing has, filled in as the new item's code and name.
  */
 class ItemFormViewModel(
     private val app: AppContainer,
     private val houseId: String,
     private val containerId: String?,
     private val itemId: String?,
+    scannedCode: String? = null,
 ) : ViewModel() {
     private var existing: Item? = null
     private val tagStore = TagStore(app.database.tags(), app.clock, app.newId)
@@ -424,11 +473,20 @@ class ItemFormViewModel(
     var errors by mutableStateOf<Set<FieldError>>(emptySet())
         private set
 
+    /** Who holds the code the user typed, when it is taken. */
+    var qrHolder by mutableStateOf<QrHolder?>(null)
+        private set
+
     /** Where the next saved item goes; kept by "Save + new". */
     var location: Pair<String, String?> = houseId to containerId
         private set
 
     init {
+        if (itemId == null && scannedCode != null) {
+            qrCode = scannedCode
+            nameState = scannedCode
+            moreFields = true
+        }
         viewModelScope.launch {
             if (itemId != null) {
                 existing = app.database.items().get(itemId)
@@ -563,12 +621,14 @@ class ItemFormViewModel(
             val validName = Validation.name(nameState)
             val validQuantity = Validation.quantity(quantity)
             val price = Validation.optional(unitPrice)?.let { Money.parse(it, currency, AppLanguage.current()) ?: -1L }
-            val qr = Validation.optional(qrCode)
+            val decision = if (validName == null) QrDecision(null, null, null) else resolveQr(app, location.first, qrCode, validName, old?.id ?: "", old == null)
+            val qr = decision.code
+            qrHolder = decision.holder
             val found = buildSet {
                 if (validName == null) add(FieldError.NameRequired)
                 if (validQuantity == null) add(FieldError.QuantityInvalid)
                 if (price == -1L) add(FieldError.PriceInvalid)
-                if (qr != null && app.database.qr().countUses(location.first, qr, old?.id ?: "") > 0) add(FieldError.QrInUse)
+                decision.error?.let { add(it) }
             }
             errors = found
             if (found.isNotEmpty() || validName == null || validQuantity == null) return@launch
