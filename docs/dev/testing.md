@@ -10,6 +10,7 @@ and Macrobenchmark; set it up with [setup-headless-linux.md](setup-headless-linu
 |---|---|---|---|
 | Unit tests | `app/src/test` (plain JUnit) | JVM | `./gradlew testDebugUnitTest` |
 | Robolectric tests (UI, resources, manifest) | `app/src/test` (`@RunWith(RobolectricTestRunner::class)`) | JVM | `./gradlew testDebugUnitTest` |
+| Migration tests | `app/src/test/.../data/MigrationTest.kt`, `MigrationGuardTest.kt`, against `app/schemas/` | JVM | `./gradlew testDebugUnitTest` |
 | Screenshot tests (Roborazzi) | `app/src/test`, baselines in `app/src/test/screenshots/` | JVM | `./gradlew verifyRoborazziDebug` |
 | Baseline Profile generation | `baselineprofile/` (`BaselineProfileGenerator`) | Emulator or rooted device | `./gradlew :app:generateBaselineProfile` |
 | Startup benchmark | `baselineprofile/` (`StartupBenchmark`) | Device (emulator with a flag, below) | `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest` |

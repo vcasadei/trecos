@@ -63,6 +63,11 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
+
+    // Migration tests (Robolectric, so CI needs no emulator) read the exported
+    // schemas as assets. Unit tests only see the tested variant's assets, so the
+    // schemas go into debug builds; release builds never contain them.
+    sourceSets.getByName("debug").assets.srcDir("$projectDir/schemas")
 }
 
 room {

@@ -57,10 +57,10 @@ run at the end of **every** release group before it is tagged.
 
 ## 3. Database migrations
 
-- [ ] 3.1 Implement the pre-migration safety copy (`pre-migration-v<N>.db` before any migration, restored automatically if the migration fails, deleted after the next successful launch); verify with a test that a deliberately failing migration leaves the database readable at the previous version
+- [x] 3.1 Implement the pre-migration safety copy (`pre-migration-v<N>.db` before any migration, restored automatically if the migration fails, deleted after the next successful launch); verify with a test that a deliberately failing migration leaves the database readable at the previous version
 - [ ] 3.2 Set up the migration test harness (`MigrationTestHelper` over exported schemas, run in CI); verify with a sample v1 → v2 test
-- [ ] 3.3 Document the expand-and-contract rule and the per-release migration checklist in `docs/architecture/data-model.md`
-- [ ] 3.4 Run the down path: restore the pre-migration copy in a test and verify that the prior schema version and row counts are back
+- [x] 3.3 Document the expand-and-contract rule and the per-release migration checklist in `docs/architecture/data-model.md`
+- [x] 3.4 Run the down path: restore the pre-migration copy in a test and verify that the prior schema version and row counts are back
 
 ## 4. Release 0.3 — Categories and tags
 

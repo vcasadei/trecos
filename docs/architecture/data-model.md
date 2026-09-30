@@ -89,7 +89,37 @@ Not in the database and never synced (DataStore, design D13):
 
 ## Migrations
 
-Schema changes follow the migration plan in the design: versioned Room
-migrations checked against the exported schemas, expand-and-contract for
-renames, and a pre-migration copy of the database as the "down" path. The
-per-release checklist is added with the migration harness (tasks 3.1-3.4).
+### Safety copy and the "down" path
+
+Android won't install an older app over a newer one, so rollback is
+data-level (`MigrationGuard`):
+
+| When | What happens |
+|---|---|
+| Opening a database older than the app's schema | The file is copied to `pre-migration-v<N>.db` first |
+| The migration fails | The copy is put back, the failure is logged (no personal data), and `MigrationFailedException` is raised |
+| The next launch that opens without migrating | Every `pre-migration-v*.db` is deleted |
+
+### Expand and contract
+
+A rename or removal is never done in one release, because devices on
+adjacent versions may sync the same house:
+
+1. **Expand** (release N): add the new column or table; write both the old and
+   the new shape; read the new one, falling back to the old.
+2. **Contract** (release N+1 or later): stop reading and writing the old shape,
+   then drop it in a migration.
+
+Adding a nullable column or a new table needs only step 1.
+
+### Checklist for every schema change
+
+1. Bump `version` in `@Database` and `TrecosDatabase.VERSION` together.
+2. Write the `Migration` (or an `AutoMigration` when Room can infer it).
+3. Build once, so Room exports `app/schemas/.../<version>.json`, and commit it.
+4. Add a test in `MigrationTest`: create the previous version with
+   `MigrationTestHelper`, insert rows, run the migration, validate against the
+   new schema and check the rows.
+5. If the change renames or removes something, follow expand and contract.
+6. Bump the sync `formatVersion` if the snapshot shape changes (design D14).
+7. Update the tables on this page.
