@@ -3,6 +3,13 @@
 Este arquivo é a fonte das perguntas frequentes do app (Ajustes > Ajuda). As
 respostas são adicionadas conforme os recursos chegam.
 
+## 1. Como adiciono meu primeiro item?
+
+No Início, toque em **+** e escolha **Item**. Digite um nome e, se quiser, a
+quantidade, o preço, categorias e uma foto. Toque em **Salvar**. Para guardar
+coisas em caixas, gavetas ou cômodos, adicione antes um **Compartimento**, abra-o
+e adicione os itens dentro. Veja [Primeiros passos](getting-started.md).
+
 ## 2. Como funcionam os códigos QR?
 
 Cada item ou compartimento pode ter um código QR, que começa igual ao nome.

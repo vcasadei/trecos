@@ -109,6 +109,10 @@ interface ContainerDao {
 /** Reads and writes items. Deleted items are never returned. */
 @Dao
 interface ItemDao {
+    /** @return how many items there are, not counting the trash. */
+    @Query("SELECT COUNT(*) FROM item WHERE deletedAt IS NULL")
+    suspend fun countActive(): Int
+
     /**
      * @param houseId the house.
      * @param containerId the container, or `null` for the house's top level.

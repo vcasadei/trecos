@@ -189,6 +189,9 @@ class SettingsViewModel(private val app: AppContainer) : ViewModel() {
  * @property openProfile opens the optional profile.
  * @property openBackup opens export and import.
  * @property openSync opens Google Drive sync.
+ * @property openFaq opens the questions and answers.
+ * @property openTips opens the tip jar.
+ * @property openAbout opens About.
  */
 data class SettingsNavigation(
     val openCurrency: () -> Unit,
@@ -199,11 +202,13 @@ data class SettingsNavigation(
     val openProfile: () -> Unit = {},
     val openBackup: () -> Unit = {},
     val openSync: () -> Unit = {},
+    val openFaq: () -> Unit = {},
+    val openTips: () -> Unit = {},
+    val openAbout: () -> Unit = {},
 )
 
 /**
- * The Settings tab, in the spec's section order. Sections whose features
- * haven't shipped yet (sync, Help, Support) arrive with them.
+ * The Settings tab, in the spec's section order.
  *
  * @param nav where the rows lead.
  */
@@ -325,11 +330,23 @@ fun SettingsScreen(nav: SettingsNavigation) {
             item {
                 LinkRow("trash", R.string.setting_open_trash, house?.name ?: stringResource(R.string.no_house_yet), house?.let { { nav.openTrash(it.id) } })
             }
+            item { Section(R.string.settings_help) }
+            item { LinkRow("faq", R.string.setting_faq, stringResource(R.string.faq_title), nav.openFaq) }
+            item {
+                val contact = app.trecos.ui.help.rememberContact()
+                LinkRow("contact", R.string.setting_contact, app.trecos.help.Contact.ADDRESS, contact)
+            }
+            item { Section(R.string.settings_support) }
+            item { LinkRow("tips", R.string.setting_tips, stringResource(R.string.setting_tips_hint), nav.openTips) }
+            item {
+                val context = androidx.compose.ui.platform.LocalContext.current
+                LinkRow("rate", R.string.setting_rate, "Google Play") { app.trecos.help.PlayListing.open(context) }
+            }
             item { Section(R.string.settings_about) }
             item {
                 val context = androidx.compose.ui.platform.LocalContext.current
                 val version = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty() }
-                LinkRow("version", R.string.setting_version, version, null)
+                LinkRow("about", R.string.setting_about, "${stringResource(R.string.setting_version)} $version", nav.openAbout)
             }
         }
     }

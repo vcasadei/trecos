@@ -84,8 +84,9 @@ class SettingsScenariosTest : PlacesTestBase() {
         waitForTextIn("value_language", "English")
         waitForTextIn("value_start", "Home")
         waitForTextIn("value_theme", "Follow system")
-        showRow("version")
-        val tops = listOf("General", "Appearance", "Items & photos", "Custom fields", "Trash", "About").map { title ->
+        showRow("about")
+        val order = listOf("General", "Appearance", "Items & photos", "Custom fields", "Security", "Sync & backup", "Trash", "Help", "Support Trecos", "About")
+        val tops = order.map { title ->
             rule.onAllNodes(androidx.compose.ui.test.hasText(title), useUnmergedTree = true).fetchSemanticsNodes().minOf { it.boundsInRoot.top }
         }
         assertEquals(tops.sorted(), tops)

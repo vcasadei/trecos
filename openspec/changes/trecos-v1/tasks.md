@@ -181,12 +181,12 @@ run at the end of **every** release group before it is tagged.
 
 ## 14. Release 1.0 — Launch
 
-- [ ] 14.1 Build the FAQ accordion with the 10 questions from `docs/user/{en,pt-BR}/faq.md`; test for scenario "Reading an answer"
-- [ ] 14.2 Implement "Contact us" (mailto hello@trecos.app, subject types, version details only, copy fallback); tests for scenarios "Asking for a quote" and "No e-mail app"
-- [ ] 14.3 Implement "Rate Trecos" and the single in-app review prompt (14 days, 20 or more items, 5 or more sessions, never during a flow, once ever); tests for scenarios "The single prompt" and "Too early", with a fake clock
-- [ ] 14.4 Implement the tip jar with Play Billing (three repeatable consumables, thank-you, unlocks nothing, no external payment links); tests for scenarios "Tipping", "Purchase cancelled" and "Google Play unavailable"
-- [ ] 14.5 Build the About screen (version, license note, source, website, privacy policy, contact, rate, open-source licenses through AboutLibraries); test for scenario "Viewing licenses", checking that every shipped library is listed
-- [ ] 14.6 Add a CI dependency allowlist check that fails on any advertising, analytics or crash-reporting SDK; test for scenario "Offline user" by asserting no network calls without sync
+- [x] 14.1 Build the FAQ accordion with the 10 questions from `docs/user/{en,pt-BR}/faq.md`; test for scenario "Reading an answer"
+- [x] 14.2 Implement "Contact us" (mailto hello@trecos.app, subject types, version details only, copy fallback); tests for scenarios "Asking for a quote" and "No e-mail app"
+- [x] 14.3 Implement "Rate Trecos" and the single in-app review prompt (14 days, 20 or more items, 5 or more sessions, never during a flow, once ever); tests for scenarios "The single prompt" and "Too early", with a fake clock
+- [x] 14.4 Implement the tip jar with Play Billing (three repeatable consumables, thank-you, unlocks nothing, no external payment links); tests for scenarios "Tipping", "Purchase cancelled" and "Google Play unavailable"
+- [x] 14.5 Build the About screen (version, license note, source, website, privacy policy, contact, rate, open-source licenses through AboutLibraries); test for scenario "Viewing licenses", checking that every shipped library is listed
+- [x] 14.6 Add a CI dependency allowlist check that fails on any advertising, analytics or crash-reporting SDK; test for scenario "Offline user" by asserting no network calls without sync
 - [ ] 14.7 Remove the `FEATURE_DRIVE_SYNC` and `FEATURE_ENCRYPTION` flags once their removal criteria (design D19) are met; verify that the flags no longer exist in the build and that the related tests still pass
 - [ ] 14.8 Run the performance pass on a 2 GB Android 9 reference phone (Baseline Profile, a median cold start of 1.5 s or less, janky frames under 5% on 1,000 items) and gate the release on it; tests for scenarios "Cold start benchmark" and "Regression blocks a release"
 - [ ] 14.9 Publish the site at trecos.app on GitHub Pages (enforced HTTPS, privacy policy, commercial-license page, links to external donations) and set up forwarding of hello@trecos.app on Porkbun together with the user; verify the site loads over HTTPS and a test e-mail arrives

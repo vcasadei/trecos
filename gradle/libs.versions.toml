@@ -21,6 +21,9 @@ print = "1.1.0"
 biometric = "1.1.0"
 serialization = "1.11.0"
 playServicesAuth = "22.0.0"
+billing = "9.1.0"
+playReview = "2.0.2"
+aboutLibraries = "15.2.0"
 coreKtx = "1.19.1"
 appcompat = "1.8.0"
 profileInstaller = "1.4.1"
@@ -55,6 +58,8 @@ play-services-code-scanner = { module = "com.google.android.gms:play-services-co
 androidx-print = { module = "androidx.print:print", version.ref = "print" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
+play-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "playReview" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
@@ -76,6 +81,7 @@ roborazzi-junit-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-test = { id = "com.android.test", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutLibraries" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }

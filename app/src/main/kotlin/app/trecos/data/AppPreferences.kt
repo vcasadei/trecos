@@ -48,6 +48,16 @@ data class Profile(val name: String?, val email: String?) {
  */
 enum class SyncFrequency(val days: Int?) { Daily(1), Every5Days(5), Every15Days(15), Every30Days(30), Never(null) }
 
+/**
+ * What the rating prompt looks at (design D18).
+ *
+ * @property firstOpen when the app was first opened, or `null` before that.
+ * @property sessions how many separate sessions there were.
+ * @property lastActive when the app was last in use.
+ * @property reviewShown whether the prompt was shown.
+ */
+data class RatingCounters(val firstOpen: Long?, val sessions: Int, val lastActive: Long?, val reviewShown: Boolean)
+
 /** The tab the app opens on. */
 enum class StartScreen { Home, Search }
 
@@ -140,6 +150,42 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
 
     /** Whether photos move only on unmetered networks; on by default. */
     val photosOnlyOnWifi: Flow<Boolean> = store.data.map { it[PHOTOS_WIFI] ?: true }
+
+    /** Counters for the single rating prompt. */
+    val rating: Flow<RatingCounters> = store.data.map {
+        RatingCounters(it[FIRST_OPEN], it[SESSIONS] ?: 0, it[LAST_ACTIVE], it[REVIEW_SHOWN] ?: false)
+    }
+
+    /**
+     * Counts a session when the app comes back after [gap] or more, and records the first open.
+     *
+     * @param now the current time.
+     * @param gap how long away counts as a new session.
+     */
+    suspend fun countSession(now: Long, gap: Long) = store.edit { prefs ->
+        if (prefs[FIRST_OPEN] == null) prefs[FIRST_OPEN] = now
+        val last = prefs[LAST_ACTIVE]
+        if (last == null || now - last >= gap) prefs[SESSIONS] = (prefs[SESSIONS] ?: 0) + 1
+        prefs[LAST_ACTIVE] = now
+    }
+
+    /** @param now when the app was last in use. */
+    suspend fun markActive(now: Long) = store.edit { it[LAST_ACTIVE] = now }
+
+    /**
+     * Sets the rating counters directly, for tests.
+     *
+     * @param firstOpen when the app was first opened.
+     * @param sessions how many sessions there were.
+     */
+    @androidx.annotation.VisibleForTesting
+    suspend fun setRatingCounters(firstOpen: Long, sessions: Int) = store.edit {
+        it[FIRST_OPEN] = firstOpen
+        it[SESSIONS] = sessions
+    }
+
+    /** Records that the rating prompt was shown; it never shows again. */
+    suspend fun markReviewShown() = store.edit { it[REVIEW_SHOWN] = true }
 
     /** The optional profile, or `null` when none was saved. */
     val profile: Flow<Profile?> = store.data.map { prefs ->
@@ -329,6 +375,10 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
         val PROFILE_EMAIL = stringPreferencesKey("profile_email")
         val SYNC_FREQUENCY = stringPreferencesKey("sync_frequency")
         val PHOTOS_WIFI = booleanPreferencesKey("photos_only_on_wifi")
+        val FIRST_OPEN = androidx.datastore.preferences.core.longPreferencesKey("first_open")
+        val SESSIONS = androidx.datastore.preferences.core.intPreferencesKey("sessions")
+        val LAST_ACTIVE = androidx.datastore.preferences.core.longPreferencesKey("last_active")
+        val REVIEW_SHOWN = booleanPreferencesKey("review_shown")
 
         /**
          * @return the currency of the phone's region, or USD when the region has none.
