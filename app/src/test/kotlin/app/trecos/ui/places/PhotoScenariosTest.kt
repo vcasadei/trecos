@@ -136,6 +136,7 @@ class PhotoScenariosTest : PlacesTestBase() {
         runBlocking { app.preferences.setImageSource(ImageSource.Gallery) }
         fake.next = listOf(jpeg(10), jpeg(20), jpeg(30))
         editPi()
+        rule.waitUntil(10_000) { rule.onAllNodes(isPhotoThumb, useUnmergedTree = true).fetchSemanticsNodes().size == 1 }
         click("add_photo")
 
         assertEquals(listOf(2), fake.galleryMax)
