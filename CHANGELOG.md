@@ -6,6 +6,23 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] - Unreleased
+
+### Added
+
+- Up to 3 photos per item, container and house, from the camera app or the photo picker, with no camera or storage permission.
+- First-use Camera or Gallery prompt with "Remember my choice".
+- Photos stored at up to 1920 px as WebP without any metadata (no location), named by SHA-256; 320 px thumbnails, regenerated when missing.
+- Main photo, "Set as main", remove and drag to reorder.
+- Landscape carousels on item, container and house screens, and a full-screen viewer with swipe and pinch zoom.
+- Main photo thumbnails in every list.
+- Photo-first add mode.
+- Copies and duplicates keep their photos; purged things free their photo files.
+
+### Changed
+
+- Database schema 4 (photos).
+
 ## [0.4.0] - Unreleased
 
 ### Added

@@ -3,7 +3,7 @@
 | Folder | Contents | Language |
 |---|---|---|
 | [product/](product/) | [Vision](product/vision.md), [glossary](product/glossary.md), [roadmap](product/roadmap.md), [original draft](product/original-draft.md) | English |
-| [architecture/](architecture/) | [Overview](architecture/overview.md), [data model](architecture/data-model.md); sync protocol, encryption and photos pages arrive with their releases | English |
+| [architecture/](architecture/) | [Overview](architecture/overview.md), [data model](architecture/data-model.md), [photos](architecture/photos.md); sync protocol and encryption pages arrive with their releases | English |
 | [design/](design/) | [Visual review](design/visual-review.md): themes, palette with contrast ratios, bottom bar, text safety | English |
 | [decisions/](decisions/) | [Architecture decision records](decisions/README.md) | English |
 | [dev/](dev/) | [Headless Linux setup](dev/setup-headless-linux.md), [build](dev/build.md), [testing](dev/testing.md), [release](dev/release.md) | English |

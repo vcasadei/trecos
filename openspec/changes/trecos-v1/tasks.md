@@ -99,7 +99,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 6.7 Load thumbnails in every list with Coil, regenerating missing ones; test for scenario "Thumbnail regenerated"
 - [x] 6.8 Implement photo-first add mode; tests for scenarios "Photo first" and "Photo cancelled"
 - [x] 6.9 Include photos in Copy and Duplicate, and delete photo files on purge; tests that a copied item has its own photo rows and that a purge removes orphan files
-- [ ] 6.10 Write `docs/architecture/photos.md` and update the user docs, and add the 0.5 entry to `CHANGELOG.md`
+- [x] 6.10 Write `docs/architecture/photos.md` and update the user docs, and add the 0.5 entry to `CHANGELOG.md`
 
 ## 7. Release 0.6 — Search
 

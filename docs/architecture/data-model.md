@@ -17,7 +17,7 @@ committed in `app/schemas/app.trecos.data.TrecosDatabase/<version>.json`.
 | No foreign keys | Soft deletes and sync merges apply rows in any order; relations are enforced in code |
 | Inserts fail on a clash; updates are explicit | Room's upsert silently drops a row whose unique QR code clashes |
 
-## Tables (schema version 3)
+## Tables (schema version 4)
 
 ### `house`
 
@@ -86,6 +86,12 @@ renamed or deleted.
 | Table | Columns | Notes |
 |---|---|---|
 | `trash_entry` | `id`, `houseId`, `kind` (`item` or `container`), `targetId`, `name`, `parentId?`, `trashedAt` | One undoable delete. The trashed thing and everything trashed with it share `deletedAt = trashedAt`, which separates them from things trashed on their own. Purged after 30 days |
+
+### Photos (added in schema 4)
+
+| Table | Columns | Notes |
+|---|---|---|
+| `photo` | `id`, `houseId`, `ownerType`, `ownerId`, `sha256`, `position`, `createdAt` | Up to 3 per owner; position 0 is the main photo. Files live in `files/photos/<sha256>.webp`; see [photos.md](photos.md) |
 
 Deleting a custom category or a tag removes its rows and its assignments.
 These tables get deletion markers when sync arrives (0.11), by expand and contract.
