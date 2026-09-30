@@ -365,7 +365,8 @@ class SyncScenariosTest : PlacesTestBase() {
         driver.setPeriodDelayMet(info.id)
 
         rule.waitUntil(10_000) { remote.commits["h1"]!!.size == before + 1 }
-        assertEquals(WorkInfo.State.ENQUEUED, work.getWorkInfoById(info.id).get()!!.state)
+        // The worker may still be finishing after the commit is written; a periodic job then waits for its next run.
+        rule.waitUntil(10_000) { work.getWorkInfoById(info.id).get()!!.state == WorkInfo.State.ENQUEUED }
         assertTrue(info.periodicityInfo!!.repeatIntervalMillis >= 24 * 60 * 60 * 1000L)
     }
 
