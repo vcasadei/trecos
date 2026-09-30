@@ -111,7 +111,9 @@ class ItemScenariosTest : PlacesTestBase() {
         type("name", "USB-C cable")
         click("save_new")
 
-        tag(fieldTag("name")).assertTextContains("")
+        rule.waitUntil(10_000) {
+            tag(fieldTag("name")).fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.EditableText].text.isEmpty()
+        }
         type("name", "HDMI cable")
         click("save")
 
