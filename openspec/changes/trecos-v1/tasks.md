@@ -170,13 +170,13 @@ run at the end of **every** release group before it is tagged.
 
 ## 13. Release 0.12 — Encryption (behind `FEATURE_ENCRYPTION`)
 
-- [ ] 13.1 Add the `FEATURE_ENCRYPTION` build flag (default false); verify with a test that the setting is hidden when it's off
-- [ ] 13.2 Implement key generation, Keystore wrapping and upload to `appDataFolder`, requiring a connected account; tests for scenarios "Turning encryption on" and "No Google account", plus a test that the key never appears in logs or exports
-- [ ] 13.3 Implement re-encryption with `sqlcipher_export` and an atomic swap that survives interruption; test for scenario "Interrupted encryption", with fault injection before and after the swap
-- [ ] 13.4 Encrypt Drive snapshots with AES-GCM when on, leaving photos unencrypted; test for scenario "Drive copy"
-- [ ] 13.5 Implement recovery on a new phone; test for scenario "Lost phone" with two emulated installs sharing a fake Drive
-- [ ] 13.6 Implement turning encryption off and block disconnecting Google while it's on; tests for scenarios "Disabling" and "Disconnecting with encryption on"
-- [ ] 13.7 Add the unencrypted-export warning; test for scenario "Export with encryption on"
+- [x] 13.1 Add the `FEATURE_ENCRYPTION` build flag (default false); verify with a test that the setting is hidden when it's off
+- [x] 13.2 Implement key generation, Keystore wrapping and upload to `appDataFolder`, requiring a connected account; tests for scenarios "Turning encryption on" and "No Google account", plus a test that the key never appears in logs or exports
+- [x] 13.3 Implement re-encryption with `sqlcipher_export` and an atomic swap that survives interruption; test for scenario "Interrupted encryption", with fault injection before and after the swap
+- [x] 13.4 Encrypt Drive snapshots with AES-GCM when on, leaving photos unencrypted; test for scenario "Drive copy"
+- [x] 13.5 Implement recovery on a new phone; test for scenario "Lost phone" with two emulated installs sharing a fake Drive
+- [x] 13.6 Implement turning encryption off and block disconnecting Google while it's on; tests for scenarios "Disabling" and "Disconnecting with encryption on"
+- [x] 13.7 Add the unencrypted-export warning; test for scenario "Export with encryption on"
 - [ ] 13.8 Write `docs/architecture/encryption.md`, update `SECURITY.md` and FAQ answer 8 (both languages), and add the 0.12 entry to `CHANGELOG.md`
 
 ## 14. Release 1.0 — Launch
