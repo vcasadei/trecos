@@ -25,6 +25,9 @@ android {
         // for a local build with -Ptrecos.driveSync=true or -Ptrecos.encryption=true.
         buildConfigField("boolean", "FEATURE_DRIVE_SYNC", (findProperty("trecos.driveSync") ?: "false").toString())
         buildConfigField("boolean", "FEATURE_ENCRYPTION", (findProperty("trecos.encryption") ?: "false").toString())
+        // The benchmark seed receiver (task 14.8) is on only in benchmarkRelease; see androidComponents below.
+        buildConfigField("boolean", "BENCHMARK_SEED", "false")
+        manifestPlaceholders["benchmarkSeed"] = "false"
     }
 
     // Release signing reads only these environment variables (design D22); CI sets
@@ -105,7 +108,13 @@ val faqAssets = tasks.register<FaqAssets>("faqAssets") {
 }
 
 androidComponents {
-    onVariants { variant -> variant.sources.assets?.addGeneratedSourceDirectory(faqAssets, FaqAssets::output) }
+    onVariants { variant ->
+        variant.sources.assets?.addGeneratedSourceDirectory(faqAssets, FaqAssets::output)
+        if (variant.name == "benchmarkRelease") {
+            variant.manifestPlaceholders.put("benchmarkSeed", "true")
+            variant.buildConfigFields?.put("BENCHMARK_SEED", com.android.build.api.variant.BuildConfigField("boolean", "true", "Benchmark seeding"))
+        }
+    }
 }
 
 room {

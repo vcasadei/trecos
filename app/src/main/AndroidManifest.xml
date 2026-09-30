@@ -40,6 +40,12 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <!-- Benchmark builds only: stores 1,000 items for the performance pass. Disabled everywhere else. -->
+        <receiver
+            android:name=".BenchmarkSeedReceiver"
+            android:enabled="${benchmarkSeed}"
+            android:exported="${benchmarkSeed}" />
+
         <!-- Stores the in-app language on Android 9-12, where the system has no per-app setting. -->
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

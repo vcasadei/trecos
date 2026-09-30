@@ -98,6 +98,33 @@ added to the repository.
 If Google shows "DEVELOPER_ERROR" or the connect screen closes at once, the
 SHA-1 or the package name of the client doesn't match the installed APK.
 
+## Performance pass (release gate)
+
+Every release is measured on the **reference phone**: Android 9, 2 GB of RAM
+(spec "Performance on low-end phones", task 14.8). It must reach:
+
+- a median cold start to the interactive Home screen of **1.5 s or less** over
+  10 runs, with 1,000 items stored;
+- **janky frames under 5%** while scrolling those items.
+
+1. Connect the phone with USB debugging on. The benchmark build is profileable,
+   not debuggable, so no root is needed on a real phone.
+2. Run `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest`. The
+   benchmarks store 1,000 items through the benchmark-only
+   `BenchmarkSeedReceiver`, which is disabled in every other build.
+3. Gate the release:
+   `scripts/check-benchmark.py baselineprofile/build/outputs/connected_android_test_additional_output/benchmarkRelease/connected/*/app.trecos.baselineprofile-benchmarkData.json`.
+   The script fails, and the release is not published, when the median cold
+   start (time to full display, reported once the Home list has loaded) is over
+   1.5 s, or when the 95th percentile of frame overruns is late.
+
+Regenerate the Baseline Profile after UI changes with
+`./gradlew :app:generateBaselineProfile` on a rooted emulator (`adb root` on a
+Google APIs image). On an emulator, add
+`-Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR`.
+Emulator numbers are not valid for the gate, and the software renderer doesn't
+report frame timings.
+
 ## Publishing a release
 
 `.github/workflows/release.yml` runs when a `v*` tag is pushed:

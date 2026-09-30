@@ -56,6 +56,9 @@ jobs:
       - name: No tracking dependencies
         run: scripts/check-dependencies.sh
 
+      - name: Performance gate logic
+        run: python3 scripts/check-benchmark.py --self-test
+
       - name: Upload reports
         if: failure()
         uses: actions/upload-artifact@v7
