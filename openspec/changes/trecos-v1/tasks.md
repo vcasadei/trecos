@@ -177,7 +177,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 13.5 Implement recovery on a new phone; test for scenario "Lost phone" with two emulated installs sharing a fake Drive
 - [x] 13.6 Implement turning encryption off and block disconnecting Google while it's on; tests for scenarios "Disabling" and "Disconnecting with encryption on"
 - [x] 13.7 Add the unencrypted-export warning; test for scenario "Export with encryption on"
-- [ ] 13.8 Write `docs/architecture/encryption.md`, update `SECURITY.md` and FAQ answer 8 (both languages), and add the 0.12 entry to `CHANGELOG.md`
+- [x] 13.8 Write `docs/architecture/encryption.md`, update `SECURITY.md` and FAQ answer 8 (both languages), and add the 0.12 entry to `CHANGELOG.md`
 
 ## 14. Release 1.0 — Launch
 

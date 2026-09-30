@@ -50,6 +50,17 @@ different: it is permanent right away, so export a backup first.
 
 Settings > **Security** > **App lock**. Trecos uses your phone's own lock (fingerprint, face, PIN, pattern or password), so there is no extra password to remember. Your phone needs a screen lock first. Under **Lock after** choose when Trecos asks again: immediately, after 1 minute (default), 5 or 15 minutes in the background. If you later remove the phone's screen lock, Trecos turns its lock off and tells you.
 
+## 8. Is my data private?
+
+Yes. Trecos has no server, no ads and no tracking; your inventory stays on your
+phone. If you turn on sync, it is copied only to **your own** Google Drive, in
+a Trecos folder that Trecos alone manages. With **Encrypt data** (Settings >
+Security) the database on your phone and its copies in Drive are encrypted.
+Photos aren't encrypted, and backup files never are. The key is protected on
+your phone and kept in your Drive's hidden app folder, so you can recover your
+data on a new phone with the same Google account. If you lose access to that
+account, encrypted data can't be recovered.
+
 ## 9. Do I need an account?
 
 No. Everything except Google Drive sync works without any account, name or e-mail. Sync (when it arrives) uses your own Google account. In Settings you can add an optional name and e-mail to label your sync records; you can change or delete them at any time.

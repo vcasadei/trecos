@@ -6,6 +6,17 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.12.0] - Unreleased
+
+### Added
+
+- Optional database encryption, behind the `FEATURE_ENCRYPTION` build flag (off by default). It needs Google Drive sync: the random 256-bit key is protected by the Android Keystore on the phone and kept in Drive's hidden app folder for recovery.
+- The database is re-encrypted with SQLCipher into a new file and swapped in when the app restarts; an interruption leaves the data unencrypted and intact.
+- Drive data copies are encrypted with AES-GCM when encryption is on; photos stay unencrypted and still sync.
+- A new phone signed in with the same account fetches the key, restores the latest synced data and encrypts itself.
+- Turning encryption off decrypts the phone's data, removes the key from Drive and uploads later copies unencrypted.
+- Disconnecting Google is refused while encryption is on, and exports warn that backup files aren't encrypted.
+
 ## [0.11.0] - Unreleased
 
 ### Added
