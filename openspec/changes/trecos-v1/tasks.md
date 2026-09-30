@@ -103,7 +103,7 @@ run at the end of **every** release group before it is tagged.
 
 ## 7. Release 0.6 — Search
 
-- [ ] 7.1 Migration v4 → v5 (expand): add the FTS4 table (`unicode61`, `remove_diacritics=1`) with sync triggers and backfill; verify with a migration test that existing items are searchable
+- [x] 7.1 Migration v4 → v5 (expand): add the FTS4 table (`unicode61`, `remove_diacritics=1`) with sync triggers and backfill; verify with a migration test that existing items are searchable
 - [ ] 7.2 Build the Search tab (field, QR button, scope and match controls, filters, sort, live count, no automatic keyboard, empty-state message); tests for scenarios "Browsing everything" and "No results"
 - [ ] 7.3 Implement matching (case and accent insensitive, word prefixes, all words required, debounced, no history stored); tests for scenarios "Accent-insensitive" and "Partial words"
 - [ ] 7.4 Implement scope and match fields (Name also covers brand, model, serial and QR); tests for scenarios "Finding by serial number" and "Containers only"
