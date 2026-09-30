@@ -65,7 +65,7 @@ class HouseScenariosTest : PlacesTestBase() {
     fun deletingTheLastHouse() {
         seed()
         tag(EMPTY_HINT_TAG)
-        rule.onNode(androidx.compose.ui.test.hasContentDescription("More options")).performClickAndIdle()
+        clickDescription("More options")
         click("menu_delete")
 
         tag("explanation").assertTextContains("At least one house is required", substring = true)

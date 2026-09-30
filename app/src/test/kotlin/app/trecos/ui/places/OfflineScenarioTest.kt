@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.flow.first
@@ -45,7 +44,7 @@ class OfflineScenarioTest : PlacesTestBase() {
         type("price", "3500")
         click("save")
         click(rowTag(itemId("Laptop")))
-        rule.onNode(hasContentDescription("Edit")).performClick()
+        clickDescription("Edit")
         type("quantity", "2")
         click("save")
 

@@ -90,7 +90,7 @@ class ItemScenariosTest : PlacesTestBase() {
         click(rowTag("pi"))
         detail(R.string.date_changed).assertTextContains(formatDate(newYear, AppLanguage.English), substring = true)
 
-        rule.onNode(androidx.compose.ui.test.hasContentDescription("Edit")).performClick()
+        clickDescription("Edit")
         type("quantity", "5")
         click("save")
 

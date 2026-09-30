@@ -111,6 +111,18 @@ abstract class PlacesTestBase {
         rule.waitForIdle()
     }
 
+    /**
+     * Waits for a node with the content description, then taps it.
+     *
+     * @param description the content description, such as "Edit".
+     */
+    protected fun clickDescription(description: String) {
+        val matcher = androidx.compose.ui.test.hasContentDescription(description)
+        rule.waitUntil(10_000) { rule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty() }
+        rule.onNode(matcher).performClick()
+        rule.waitForIdle()
+    }
+
     /** Presses system back. */
     protected fun pressBack() {
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
