@@ -79,18 +79,21 @@ class CustomFieldScenariosTest : PlacesTestBase() {
     }
 
     /**
-     * Ticks an extra and waits until it is saved. A tap the CI runner drops
-     * (seen once, never locally) is repeated, up to three times.
+     * Ticks an extra and waits until the saved list is exactly [expected]. A tap
+     * the test runner drops or doubles (seen rarely, only in full runs) is
+     * corrected by tapping again, up to three times.
      *
      * @param key the extra.
+     * @param expected the extras after the tap.
      */
-    private fun pickExtra(key: String) {
+    private fun pickExtra(key: String, expected: List<String>) {
         repeat(3) {
+            if (runBlocking { app.preferences.detailExtras.first() } == expected) return
             click("extra_$key")
-            val saved = runCatching { rule.waitUntil(5_000) { key in runBlocking { app.preferences.detailExtras.first() } } }.isSuccess
+            val saved = runCatching { rule.waitUntil(5_000) { runBlocking { app.preferences.detailExtras.first() } == expected } }.isSuccess
             if (saved) return
         }
-        throw AssertionError("$key was not saved")
+        throw AssertionError("extras are ${runBlocking { app.preferences.detailExtras.first() }}, expected $expected")
     }
 
     /** Opens the house's custom fields from Settings. */
@@ -218,9 +221,8 @@ class CustomFieldScenariosTest : PlacesTestBase() {
         }
         click(tabTag(TrecosTab.Settings))
         settingsRow("extras")
-        pickExtra(DetailExtras.TAGS)
-        pickExtra(DetailExtras.BRAND)
-        assertEquals(listOf(DetailExtras.CATEGORIES, DetailExtras.TAGS, DetailExtras.BRAND), runBlocking { app.preferences.detailExtras.first() })
+        pickExtra(DetailExtras.TAGS, listOf(DetailExtras.CATEGORIES, DetailExtras.TAGS))
+        pickExtra(DetailExtras.BRAND, listOf(DetailExtras.CATEGORIES, DetailExtras.TAGS, DetailExtras.BRAND))
         pressBack()
         tag(SETTINGS_LIST_TAG).performScrollToNode(hasTestTag("setting_extras"))
         waitForTextIn("value_extras", "Categories, Tags, Brand")
