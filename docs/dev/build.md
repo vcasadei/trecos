@@ -50,5 +50,7 @@ benchmarks: [testing.md](testing.md).
 `ubuntu-24.04`: build, lint, unit tests, coverage, screenshot verification,
 release build and the release log check. `.github/workflows/secret-scan.yml`
 scans the whole history with gitleaks. `.github/workflows/dependency-graph.yml`
-submits the resolved Gradle dependencies to GitHub on every push to `master`,
-so Dependabot alerts cover transitive libraries too.
+submits the app's runtime dependencies (every `*RuntimeClasspath`) to GitHub on
+every push to `master`, so Dependabot alerts cover every shipped library,
+transitive ones included. Gradle plugin classpaths are not submitted: they
+never ship, and Dependabot can't update them.
