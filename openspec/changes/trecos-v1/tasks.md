@@ -57,22 +57,22 @@ run at the end of **every** release group before it is tagged.
 
 ## 3. Database migrations
 
-- [ ] 3.1 Implement the pre-migration safety copy (`pre-migration-v<N>.db` before any migration, restored automatically if the migration fails, deleted after the next successful launch); verify with a test that a deliberately failing migration leaves the database readable at the previous version
-- [ ] 3.2 Set up the migration test harness (`MigrationTestHelper` over exported schemas, run in CI); verify with a sample v1 → v2 test
-- [ ] 3.3 Document the expand-and-contract rule and the per-release migration checklist in `docs/architecture/data-model.md`
-- [ ] 3.4 Run the down path: restore the pre-migration copy in a test and verify that the prior schema version and row counts are back
+- [x] 3.1 Implement the pre-migration safety copy (`pre-migration-v<N>.db` before any migration, restored automatically if the migration fails, deleted after the next successful launch); verify with a test that a deliberately failing migration leaves the database readable at the previous version
+- [x] 3.2 Set up the migration test harness (`MigrationTestHelper` over exported schemas, run in CI); verify with a sample v1 → v2 test
+- [x] 3.3 Document the expand-and-contract rule and the per-release migration checklist in `docs/architecture/data-model.md`
+- [x] 3.4 Run the down path: restore the pre-migration copy in a test and verify that the prior schema version and row counts are back
 
 ## 4. Release 0.3 — Categories and tags
 
-- [ ] 4.1 Migration v1 → v2 (expand): add `Category`, `ItemCategory` (ordered), `Tag`, `ItemTag` and `TokenCategoryCount`; verify with a migration test that preserves existing items
-- [ ] 4.2 Seed the built-in category tree from a bundled asset (stable keys, icons, English and Portuguese names), matching the full list in the spec; tests that every listed category exists, that built-ins cannot be renamed or deleted, and for scenario "Built-ins in Portuguese"
-- [ ] 4.3 Build the category picker (search box, several categories per item, order, set main); tests for scenarios "Cable with two ends" and "Changing the main category"
-- [ ] 4.4 Implement per-house custom categories (top level or sub, icon picker with empty default, delete removes assignments); tests for scenarios "New subcategory", "Deleting a used custom category" and "Other houses don't see it"
-- [ ] 4.5 Implement category suggestions (keyword dictionary asset in English and Portuguese, normalisation, learned counts, top 3 chips, never automatic); unit tests for scenarios "Keyword match", "Learning my vocabulary" and "Nothing recognised"
-- [ ] 4.6 Implement tags (per house, completion, case- and accent-insensitive dedupe, rename and delete everywhere); tests for scenarios "Reusing a tag" and "Same tag, different case"
-- [ ] 4.7 Offer to copy custom categories and tags when creating a house; test for scenario "Copying from another house" (field definitions are added in 7.6)
-- [ ] 4.8 Show categories with suggestion chips on the item form, and make Save + new keep categories; test for scenario "Cataloguing a box of cables"
-- [ ] 4.9 Write `docs/user/{en,pt-BR}/categories-and-tags.md` and add the 0.3 entry to `CHANGELOG.md`
+- [x] 4.1 Migration v1 → v2 (expand): add `Category`, `ItemCategory` (ordered), `Tag`, `ItemTag` and `TokenCategoryCount`; verify with a migration test that preserves existing items
+- [x] 4.2 Seed the built-in category tree from a bundled asset (stable keys, icons, English and Portuguese names), matching the full list in the spec; tests that every listed category exists, that built-ins cannot be renamed or deleted, and for scenario "Built-ins in Portuguese"
+- [x] 4.3 Build the category picker (search box, several categories per item, order, set main); tests for scenarios "Cable with two ends" and "Changing the main category"
+- [x] 4.4 Implement per-house custom categories (top level or sub, icon picker with empty default, delete removes assignments); tests for scenarios "New subcategory", "Deleting a used custom category" and "Other houses don't see it"
+- [x] 4.5 Implement category suggestions (keyword dictionary asset in English and Portuguese, normalisation, learned counts, top 3 chips, never automatic); unit tests for scenarios "Keyword match", "Learning my vocabulary" and "Nothing recognised"
+- [x] 4.6 Implement tags (per house, completion, case- and accent-insensitive dedupe, rename and delete everywhere); tests for scenarios "Reusing a tag" and "Same tag, different case"
+- [x] 4.7 Offer to copy custom categories and tags when creating a house; test for scenario "Copying from another house" (field definitions are added in 7.6)
+- [x] 4.8 Show categories with suggestion chips on the item form, and make Save + new keep categories; test for scenario "Cataloguing a box of cables"
+- [x] 4.9 Write `docs/user/{en,pt-BR}/categories-and-tags.md` and add the 0.3 entry to `CHANGELOG.md`
 
 ## 5. Release 0.4 — Organize and trash
 

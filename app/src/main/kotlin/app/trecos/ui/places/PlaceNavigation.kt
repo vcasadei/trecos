@@ -14,6 +14,7 @@ package app.trecos.ui.places
  * @property editContainer opens a container's edit form.
  * @property addItem opens the new-item form inside a house and container (or the top level).
  * @property editItem opens an item's edit form.
+ * @property openTags opens a house's tags.
  */
 data class PlaceNavigation(
     val back: () -> Unit,
@@ -26,4 +27,5 @@ data class PlaceNavigation(
     val editContainer: (containerId: String) -> Unit,
     val addItem: (houseId: String, containerId: String?) -> Unit,
     val editItem: (itemId: String) -> Unit,
+    val openTags: (houseId: String) -> Unit,
 )

@@ -1,0 +1,947 @@
+{
+ "version": 1,
+ "keywords": {
+  "computers.desktops": [
+   "pc",
+   "desktop",
+   "gabinete",
+   "computador de mesa",
+   "tower"
+  ],
+  "computers.laptops": [
+   "laptop",
+   "notebook",
+   "macbook",
+   "thinkpad",
+   "chromebook",
+   "ultrabook"
+  ],
+  "computers.sbcs": [
+   "raspberry",
+   "raspberry pi",
+   "raspi",
+   "rpi",
+   "arduino",
+   "esp32",
+   "esp8266",
+   "orange pi",
+   "jetson",
+   "dev board",
+   "placa de desenvolvimento",
+   "microcontrolador",
+   "microcontroller",
+   "pico"
+  ],
+  "computers.components": [
+   "ram",
+   "memoria ram",
+   "cpu",
+   "processador",
+   "processor",
+   "gpu",
+   "placa de video",
+   "graphics card",
+   "placa mae",
+   "motherboard",
+   "cooler",
+   "fonte atx"
+  ],
+  "computers.peripherals": [
+   "mouse",
+   "teclado",
+   "keyboard",
+   "monitor",
+   "webcam",
+   "mousepad",
+   "trackpad",
+   "impressora",
+   "printer",
+   "scanner"
+  ],
+  "storage.pendrives": [
+   "pendrive",
+   "pen drive",
+   "flash drive",
+   "usb stick",
+   "thumb drive"
+  ],
+  "storage.sd_cards": [
+   "microsd",
+   "micro sd",
+   "cartao sd",
+   "sd card",
+   "cartao de memoria",
+   "memory card"
+  ],
+  "storage.ssds": [
+   "ssd",
+   "nvme",
+   "m2",
+   "sata ssd"
+  ],
+  "storage.hdds": [
+   "hd",
+   "hdd",
+   "hd externo",
+   "disco rigido",
+   "hard disk",
+   "hard drive"
+  ],
+  "storage.enclosures": [
+   "case hd",
+   "gaveta",
+   "enclosure",
+   "dock",
+   "case ssd",
+   "adaptador sata"
+  ],
+  "cables.usb_a": [
+   "usb a",
+   "usb-a",
+   "usb tipo a",
+   "usb type a"
+  ],
+  "cables.usb_b": [
+   "usb b",
+   "usb-b",
+   "usb tipo b",
+   "cabo de impressora",
+   "printer cable"
+  ],
+  "cables.usb_c": [
+   "usb c",
+   "usb-c",
+   "usbc",
+   "type c",
+   "type-c",
+   "tipo c",
+   "usb tipo c"
+  ],
+  "cables.micro_usb": [
+   "micro usb",
+   "micro-usb",
+   "microusb",
+   "micro b"
+  ],
+  "cables.mini_usb": [
+   "mini usb",
+   "mini-usb",
+   "miniusb"
+  ],
+  "cables.lightning": [
+   "lightning",
+   "iphone"
+  ],
+  "cables.hdmi": [
+   "hdmi"
+  ],
+  "cables.mini_hdmi": [
+   "mini hdmi",
+   "micro hdmi"
+  ],
+  "cables.displayport": [
+   "displayport",
+   "display port",
+   "dp"
+  ],
+  "cables.mini_displayport": [
+   "mini displayport",
+   "mini dp",
+   "thunderbolt 2"
+  ],
+  "cables.vga": [
+   "vga",
+   "d-sub"
+  ],
+  "cables.dvi": [
+   "dvi"
+  ],
+  "cables.ethernet": [
+   "ethernet",
+   "rj45",
+   "rj-45",
+   "cabo de rede",
+   "network cable",
+   "lan",
+   "cat5",
+   "cat5e",
+   "cat6",
+   "patch cord"
+  ],
+  "cables.serial": [
+   "serial",
+   "uart",
+   "rs232",
+   "ftdi",
+   "ttl",
+   "db9"
+  ],
+  "cables.audio": [
+   "audio",
+   "p2",
+   "p10",
+   "jack",
+   "aux",
+   "auxiliar",
+   "rca",
+   "3.5mm",
+   "optico",
+   "toslink"
+  ],
+  "cables.sd": [
+   "leitor sd",
+   "sd reader"
+  ],
+  "cables.power_cords": [
+   "cabo de forca",
+   "power cord",
+   "cabo de energia",
+   "cabo tripolar"
+  ],
+  "adapters.hubs": [
+   "hub",
+   "hub usb",
+   "usb hub",
+   "dock",
+   "docking",
+   "docking station"
+  ],
+  "power.chargers": [
+   "carregador",
+   "charger",
+   "carregador de celular"
+  ],
+  "power.power_supplies": [
+   "fonte",
+   "psu",
+   "power supply",
+   "fonte de alimentacao",
+   "fonte chaveada",
+   "adaptador ac"
+  ],
+  "power.plug_adapters": [
+   "adaptador de tomada",
+   "plug adapter",
+   "benjamim",
+   "t de tomada",
+   "adaptador universal",
+   "travel adapter"
+  ],
+  "power.power_strips": [
+   "filtro de linha",
+   "extensao",
+   "regua",
+   "power strip",
+   "extension cord",
+   "extension lead"
+  ],
+  "power.batteries": [
+   "pilha",
+   "pilhas",
+   "bateria",
+   "battery",
+   "aa",
+   "aaa",
+   "18650",
+   "9v",
+   "cr2032",
+   "lipo"
+  ],
+  "power.power_banks": [
+   "powerbank",
+   "power bank",
+   "bateria externa",
+   "carregador portatil"
+  ],
+  "electrical.wire_nuts": [
+   "wire nut",
+   "conector de torcao",
+   "wire nuts"
+  ],
+  "electrical.lever_connectors": [
+   "wago",
+   "conector de alavanca",
+   "lever connector",
+   "emenda wago"
+  ],
+  "electrical.heat_shrink": [
+   "heat shrink",
+   "termorretratil",
+   "termoretratil",
+   "espaguete"
+  ],
+  "electrical.terminals": [
+   "terminal",
+   "terminais",
+   "crimp",
+   "olhal",
+   "forquilha",
+   "ilhos"
+  ],
+  "electrical.plugs": [
+   "plugue",
+   "plug",
+   "tomada macho",
+   "tomada femea",
+   "plugue macho",
+   "plugue femea"
+  ],
+  "electrical.outlets": [
+   "tomada",
+   "outlet",
+   "socket",
+   "espelho de tomada"
+  ],
+  "electrical.switches": [
+   "interruptor",
+   "light switch",
+   "dimmer"
+  ],
+  "electrical.wire": [
+   "fio",
+   "fio flexivel",
+   "cabo flexivel",
+   "wire",
+   "cabinho"
+  ],
+  "electrical.tape": [
+   "fita isolante",
+   "electrical tape",
+   "fita de autofusao"
+  ],
+  "electrical.breakers": [
+   "disjuntor",
+   "fusivel",
+   "breaker",
+   "fuse",
+   "dr",
+   "dps"
+  ],
+  "electronics.components": [
+   "resistor",
+   "capacitor",
+   "led",
+   "transistor",
+   "diodo",
+   "diode",
+   "ci",
+   "chip",
+   "potenciometro",
+   "indutor"
+  ],
+  "electronics.modules": [
+   "modulo",
+   "module",
+   "sensor",
+   "rele",
+   "relay",
+   "shield",
+   "display lcd",
+   "oled"
+  ],
+  "electronics.prototyping": [
+   "protoboard",
+   "breadboard",
+   "jumper",
+   "jumpers",
+   "placa perfurada",
+   "perfboard",
+   "dupont"
+  ],
+  "electronics.soldering": [
+   "solda",
+   "estanho",
+   "fluxo",
+   "ferro de solda",
+   "soldering",
+   "solder",
+   "flux",
+   "malha dessoldadora",
+   "estacao de solda"
+  ],
+  "networking.routers": [
+   "roteador",
+   "router",
+   "wifi router"
+  ],
+  "networking.switches": [
+   "switch",
+   "switch de rede",
+   "network switch"
+  ],
+  "networking.access_points": [
+   "access point",
+   "mesh",
+   "repetidor",
+   "repeater",
+   "extender"
+  ],
+  "networking.modems": [
+   "modem",
+   "onu",
+   "fibra"
+  ],
+  "smart_home.plugs": [
+   "tomada inteligente",
+   "smart plug"
+  ],
+  "smart_home.bulbs": [
+   "lampada inteligente",
+   "smart bulb",
+   "lampada wifi"
+  ],
+  "smart_home.sensors": [
+   "sensor de presenca",
+   "sensor de porta",
+   "motion sensor",
+   "zigbee sensor"
+  ],
+  "smart_home.hubs": [
+   "hub zigbee",
+   "bridge",
+   "zigbee",
+   "home assistant",
+   "alexa",
+   "echo",
+   "google home",
+   "nest"
+  ],
+  "smart_home.cameras": [
+   "camera de seguranca",
+   "camera ip",
+   "security camera",
+   "ip camera"
+  ],
+  "lighting.lamps": [
+   "luminaria",
+   "abajur",
+   "lamp",
+   "luz de mesa",
+   "pendente"
+  ],
+  "lighting.bulbs": [
+   "lampada",
+   "bulb",
+   "lampada led"
+  ],
+  "lighting.flashlights": [
+   "lanterna",
+   "flashlight",
+   "torch",
+   "headlamp"
+  ],
+  "lighting.led_strips": [
+   "fita led",
+   "led strip",
+   "fita de led"
+  ],
+  "printing3d.filaments": [
+   "filamento",
+   "filament",
+   "pla",
+   "petg",
+   "abs",
+   "tpu",
+   "asa"
+  ],
+  "printing3d.nozzles": [
+   "bico",
+   "nozzle",
+   "bico 0.4"
+  ],
+  "printing3d.parts": [
+   "hotend",
+   "extrusora",
+   "extruder",
+   "correia",
+   "belt",
+   "polia",
+   "peca de reposicao"
+  ],
+  "printing3d.tools": [
+   "espatula",
+   "spatula"
+  ],
+  "printing3d.maintenance": [
+   "agulha de limpeza",
+   "cleaning needle",
+   "lubrificante",
+   "graxa"
+  ],
+  "printing3d.build_plates": [
+   "mesa",
+   "pei",
+   "build plate",
+   "cama",
+   "bed"
+  ],
+  "devices.phones": [
+   "celular",
+   "smartphone",
+   "iphone",
+   "android",
+   "tablet",
+   "ipad",
+   "galaxy"
+  ],
+  "devices.audio_video": [
+   "fone",
+   "fone de ouvido",
+   "headphone",
+   "earbuds",
+   "caixa de som",
+   "speaker",
+   "tv",
+   "televisao",
+   "soundbar",
+   "projetor",
+   "projector"
+  ],
+  "devices.games": [
+   "console",
+   "playstation",
+   "ps4",
+   "ps5",
+   "xbox",
+   "nintendo",
+   "switch oled",
+   "controle",
+   "joystick",
+   "gamepad",
+   "videogame"
+  ],
+  "devices.cameras": [
+   "camera",
+   "gopro",
+   "dslr",
+   "lente",
+   "lens",
+   "tripe",
+   "tripod"
+  ],
+  "devices.wearables": [
+   "smartwatch",
+   "relogio inteligente",
+   "pulseira",
+   "fitbit",
+   "apple watch",
+   "smartband"
+  ],
+  "tools.hand": [
+   "chave",
+   "chave de fenda",
+   "alicate",
+   "martelo",
+   "screwdriver",
+   "pliers",
+   "hammer",
+   "wrench",
+   "chave inglesa",
+   "estilete"
+  ],
+  "tools.power": [
+   "furadeira",
+   "parafusadeira",
+   "drill",
+   "serra",
+   "saw",
+   "esmerilhadeira",
+   "lixadeira",
+   "tupia"
+  ],
+  "tools.measuring": [
+   "trena",
+   "multimetro",
+   "paquimetro",
+   "tape measure",
+   "multimeter",
+   "caliper",
+   "nivel",
+   "level",
+   "esquadro"
+  ],
+  "tools.hardware": [
+   "parafuso",
+   "porca",
+   "arruela",
+   "prego",
+   "bucha",
+   "screw",
+   "nut",
+   "bolt",
+   "washer",
+   "m3",
+   "m4",
+   "m5",
+   "rebite"
+  ],
+  "tools.safety": [
+   "luva",
+   "luvas",
+   "gloves",
+   "oculos de protecao",
+   "safety glasses",
+   "mascara",
+   "mask",
+   "epi",
+   "ppe",
+   "protetor auricular",
+   "capacete",
+   "luva de latex",
+   "latex"
+  ],
+  "home.kitchen": [
+   "panela",
+   "frigideira",
+   "talher",
+   "prato",
+   "copo",
+   "caneca",
+   "pot",
+   "pan",
+   "cutlery"
+  ],
+  "home.appliances": [
+   "liquidificador",
+   "microondas",
+   "geladeira",
+   "batedeira",
+   "air fryer",
+   "cafeteira",
+   "blender",
+   "microwave",
+   "fridge"
+  ],
+  "home.furniture": [
+   "mesa",
+   "cadeira",
+   "sofa",
+   "armario",
+   "estante",
+   "chair",
+   "table",
+   "shelf"
+  ],
+  "home.decor": [
+   "quadro",
+   "vaso",
+   "decoracao",
+   "enfeite",
+   "poster"
+  ],
+  "home.bedding": [
+   "lencol",
+   "toalha",
+   "travesseiro",
+   "edredom",
+   "sheet",
+   "towel",
+   "pillow"
+  ],
+  "home.cleaning": [
+   "vassoura",
+   "rodo",
+   "aspirador",
+   "vacuum",
+   "mop",
+   "detergente"
+  ],
+  "home.supplies": [
+   "isqueiro",
+   "lighter",
+   "vela",
+   "candle",
+   "pilha",
+   "saco de lixo",
+   "fosforo"
+  ],
+  "personal.clothing": [
+   "camisa",
+   "camiseta",
+   "calca",
+   "jaqueta",
+   "casaco",
+   "roupa",
+   "shirt",
+   "pants",
+   "jacket"
+  ],
+  "personal.shoes": [
+   "tenis",
+   "sapato",
+   "sandalia",
+   "bota",
+   "shoe",
+   "sneaker",
+   "boot"
+  ],
+  "personal.bags": [
+   "mochila",
+   "bolsa",
+   "mala",
+   "backpack",
+   "bag",
+   "suitcase"
+  ],
+  "personal.jewelry": [
+   "relogio",
+   "anel",
+   "colar",
+   "brinco",
+   "watch",
+   "ring",
+   "necklace"
+  ],
+  "documents.manuals": [
+   "manual",
+   "guia",
+   "instructions"
+  ],
+  "documents.warranties": [
+   "garantia",
+   "warranty",
+   "nota fiscal",
+   "receipt",
+   "recibo"
+  ],
+  "documents.personal": [
+   "rg",
+   "cpf",
+   "passaporte",
+   "passport",
+   "certidao",
+   "documento"
+  ],
+  "hobbies.books": [
+   "livro",
+   "book",
+   "revista",
+   "magazine",
+   "hq",
+   "comic"
+  ],
+  "hobbies.music": [
+   "violao",
+   "guitarra",
+   "teclado musical",
+   "bateria musical",
+   "ukulele",
+   "guitar",
+   "piano",
+   "pedal"
+  ],
+  "hobbies.sports": [
+   "bola",
+   "raquete",
+   "bicicleta ergometrica",
+   "halter",
+   "ball",
+   "racket",
+   "dumbbell"
+  ],
+  "hobbies.crafts": [
+   "linha",
+   "agulha",
+   "tecido",
+   "tinta",
+   "pincel",
+   "yarn",
+   "fabric",
+   "paint",
+   "brush"
+  ],
+  "hobbies.collectibles": [
+   "colecao",
+   "figura",
+   "action figure",
+   "moeda",
+   "selo",
+   "funko"
+  ],
+  "hobbies.toys": [
+   "brinquedo",
+   "toy",
+   "lego",
+   "boneca",
+   "doll",
+   "quebra cabeca",
+   "puzzle"
+  ],
+  "outdoor.garden": [
+   "jardim",
+   "mangueira",
+   "vaso de planta",
+   "regador",
+   "hose",
+   "garden"
+  ],
+  "outdoor.camping": [
+   "barraca",
+   "tent",
+   "saco de dormir",
+   "sleeping bag",
+   "fogareiro",
+   "camping"
+  ],
+  "outdoor.vehicles": [
+   "carro",
+   "bicicleta",
+   "bike",
+   "pneu",
+   "capacete de bike",
+   "car",
+   "tire"
+  ],
+  "health.medicine": [
+   "remedio",
+   "medicamento",
+   "medicine",
+   "comprimido",
+   "pill"
+  ],
+  "health.first_aid": [
+   "curativo",
+   "band-aid",
+   "gaze",
+   "atadura",
+   "primeiros socorros",
+   "first aid"
+  ],
+  "adapters.usb_a": [
+   "usb a",
+   "usb-a",
+   "usb tipo a",
+   "usb type a"
+  ],
+  "adapters.usb_b": [
+   "usb b",
+   "usb-b",
+   "usb tipo b",
+   "cabo de impressora",
+   "printer cable"
+  ],
+  "adapters.usb_c": [
+   "usb c",
+   "usb-c",
+   "usbc",
+   "type c",
+   "type-c",
+   "tipo c",
+   "usb tipo c"
+  ],
+  "adapters.micro_usb": [
+   "micro usb",
+   "micro-usb",
+   "microusb",
+   "micro b"
+  ],
+  "adapters.mini_usb": [
+   "mini usb",
+   "mini-usb",
+   "miniusb"
+  ],
+  "adapters.lightning": [
+   "lightning",
+   "iphone"
+  ],
+  "adapters.hdmi": [
+   "hdmi"
+  ],
+  "adapters.mini_hdmi": [
+   "mini hdmi",
+   "micro hdmi"
+  ],
+  "adapters.displayport": [
+   "displayport",
+   "display port",
+   "dp"
+  ],
+  "adapters.mini_displayport": [
+   "mini displayport",
+   "mini dp",
+   "thunderbolt 2"
+  ],
+  "adapters.vga": [
+   "vga",
+   "d-sub"
+  ],
+  "adapters.dvi": [
+   "dvi"
+  ],
+  "adapters.ethernet": [
+   "ethernet",
+   "rj45",
+   "rj-45",
+   "cabo de rede",
+   "network cable",
+   "lan",
+   "cat5",
+   "cat5e",
+   "cat6",
+   "patch cord"
+  ],
+  "adapters.serial": [
+   "serial",
+   "uart",
+   "rs232",
+   "ftdi",
+   "ttl",
+   "db9"
+  ],
+  "adapters.audio": [
+   "audio",
+   "p2",
+   "p10",
+   "jack",
+   "aux",
+   "auxiliar",
+   "rca",
+   "3.5mm",
+   "optico",
+   "toslink"
+  ],
+  "adapters.sd": [
+   "leitor sd",
+   "sd reader"
+  ]
+ },
+ "contexts": {
+  "cables": [
+   "cabo",
+   "cabos",
+   "cable",
+   "cabinho",
+   "fio"
+  ],
+  "adapters": [
+   "adaptador",
+   "adaptadores",
+   "adapter",
+   "conversor",
+   "converter",
+   "dongle"
+  ],
+  "power": [
+   "energia",
+   "power"
+  ],
+  "storage": [
+   "armazenamento",
+   "storage"
+  ],
+  "networking": [
+   "rede",
+   "network"
+  ],
+  "smart_home": [
+   "inteligente",
+   "smart",
+   "wifi"
+  ],
+  "printing3d": [
+   "3d",
+   "impressora 3d",
+   "3d printer"
+  ]
+ }
+}
