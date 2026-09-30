@@ -56,9 +56,15 @@ class DaoTest {
     }
 
     @Test(expected = SQLiteConstraintException::class)
-    fun qrCodeIsUniqueWithinAHouse() = runBlocking {
-        db.items().insert(item("a").copy(qrCode = "Armario#1"))
-        db.items().insert(item("b").copy(qrCode = "Armario#1"))
+    fun insertNeverOverwritesAnExistingId() = runBlocking {
+        db.items().insert(item("a"))
+        db.items().insert(item("a").copy(name = "other"))
+    }
+
+    @Test
+    fun theTrashDoesNotHoldQrCodes() = runBlocking {
+        db.items().insert(item("old").copy(qrCode = "Armario#1", deletedAt = Fixtures.NOW))
+        assertEquals(0, db.qr().countUses("h1", "Armario#1", exceptId = "new"))
     }
 
     @Test

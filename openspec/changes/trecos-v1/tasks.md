@@ -80,7 +80,7 @@ run at the end of **every** release group before it is tagged.
 - [ ] 5.2 Implement moving between houses (creating missing categories and tags, and edit/remove/cancel on a QR clash); tests for scenarios "Carrying custom categories along" and "QR code clash"
 - [ ] 5.3 Implement Copy (new identities, no QR, containers with their contents) and Duplicate (" (copy)" suffix, opens the edit form); tests for scenarios "Copying a labelled box" and "Duplicating an item"
 - [ ] 5.4 Implement multi-select (long press, count, Select all, bulk Move, Copy and Delete, back clears); tests for scenarios "Moving several items" and "Leaving selection"
-- [ ] 5.5 Migration v2 → v3 (expand): add `TrashEntry`; verify with a migration test
+- [x] 5.5 Migration v2 → v3 (expand): add `TrashEntry`; verify with a migration test
 - [ ] 5.6 Implement delete confirmation, Undo for at least 5 s, and the per-house trash screen (from the house menu and Settings), hiding trashed things from lists and values; tests for scenarios "Deleting an item", "Cancelling", "Undoing a delete" and "Trashed items hidden"
 - [ ] 5.7 Implement restore (original location or a picker, QR removed when taken, with a notice); tests for scenarios "Normal restore" and "Original location gone"
 - [ ] 5.8 Add the daily purge job (older than 30 days, including photo files later); test for scenario "Automatic purge" with a fake clock

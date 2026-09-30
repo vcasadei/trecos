@@ -32,8 +32,8 @@ interface HouseDao {
     suspend fun count(): Int
 
     /**
-     * Inserts a new house. Fails if its id or QR code is already taken, so
-     * nothing is ever overwritten silently.
+     * Inserts a new house. Fails if its id is already taken, so nothing is
+     * ever overwritten silently.
      *
      * @param house the house to add.
      * @throws android.database.sqlite.SQLiteConstraintException if the id or QR code is taken.
@@ -87,8 +87,8 @@ interface ContainerDao {
     suspend fun get(id: String): Container?
 
     /**
-     * Inserts a new container. Fails if its id or QR code is already taken, so
-     * nothing is ever overwritten silently.
+     * Inserts a new container. Fails if its id is already taken, so nothing
+     * is ever overwritten silently; QR codes are checked by [QrDao] first.
      *
      * @param container the container to add.
      * @throws android.database.sqlite.SQLiteConstraintException if the id or QR code is taken.
@@ -148,8 +148,8 @@ interface ItemDao {
     fun observeTotals(houseId: String): Flow<List<ContainerTotal>>
 
     /**
-     * Inserts a new item. Fails if its id or QR code is already taken, so
-     * nothing is ever overwritten silently.
+     * Inserts a new item. Fails if its id is already taken, so nothing is
+     * ever overwritten silently; QR codes are checked by [QrDao] first.
      *
      * @param item the item to add.
      * @throws android.database.sqlite.SQLiteConstraintException if the id or QR code is taken.
@@ -174,11 +174,12 @@ interface QrDao {
      * @param houseId the house.
      * @param code the code to check.
      * @param exceptId the record being edited, which may keep its own code.
-     * @return how many other items or containers in the house use the code, trash included.
+     * @return how many other items or containers in the house use the code, not counting the trash
+     *   (a trashed thing keeps its code, but loses it on restore if it was taken meanwhile).
      */
     @Query(
-        "SELECT (SELECT COUNT(*) FROM item WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId) + " +
-            "(SELECT COUNT(*) FROM container WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId)",
+        "SELECT (SELECT COUNT(*) FROM item WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId AND deletedAt IS NULL) + " +
+            "(SELECT COUNT(*) FROM container WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId AND deletedAt IS NULL)",
     )
     suspend fun countUses(houseId: String, code: String, exceptId: String): Int
 }

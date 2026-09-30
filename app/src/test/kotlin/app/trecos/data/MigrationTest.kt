@@ -47,8 +47,21 @@ class MigrationTest {
     }
 
     @Test
+    fun version2To3AddsTheTrashAndKeepsData() {
+        helper.createDatabase(DB, 2).use { db ->
+            db.execSQL("INSERT INTO house (id, name, icon, createdAt, updatedAt) VALUES ('h1', 'Apartment', 'house', 1, 1)")
+            db.execSQL("INSERT INTO item (id, houseId, name, quantity, createdAt, updatedAt) VALUES ('i1', 'h1', 'Mouse', 1, 1, 1)")
+            db.execSQL("INSERT INTO tag (id, houseId, name, normalized, createdAt, updatedAt) VALUES ('t1', 'h1', 'borrowed', 'borrowed', 1, 1)")
+        }
+        helper.runMigrationsAndValidate(DB, 3, true).use { db ->
+            db.query("SELECT (SELECT COUNT(*) FROM item) + (SELECT COUNT(*) FROM tag)").use { it.moveToFirst(); assertEquals(2, it.getInt(0)) }
+            db.query("SELECT COUNT(*) FROM trash_entry").use { it.moveToFirst(); assertEquals(0, it.getInt(0)) }
+        }
+    }
+
+    @Test
     fun theCurrentVersionIsTheLatestExportedSchema() {
-        assertEquals(2, TrecosDatabase.VERSION)
+        assertEquals(3, TrecosDatabase.VERSION)
     }
 
     private companion object {
