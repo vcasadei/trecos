@@ -1,13 +1,17 @@
 package app.trecos.ui.places
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.trecos.R
@@ -69,6 +74,8 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
     val item = current.item
     val language = AppLanguage.current()
     var fullPathOpen by rememberSaveable { mutableStateOf(false) }
+    var menuOpen by rememberSaveable { mutableStateOf(false) }
+    var comingLater by rememberSaveable { mutableStateOf(false) }
     val path = current.tree.path(item.containerId)
     val levels = listOf(current.house.name) + path.map { it.name } + item.name
     val fields = listOfNotNull(
@@ -87,6 +94,22 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
         TrecosTopBar(title = item.name, onBack = nav.back) {
             IconButton(onClick = { nav.editItem(item.id) }) {
                 Icon(painterResource(R.drawable.ic_edit), contentDescription = stringResource(R.string.action_edit))
+            }
+            Box {
+                IconButton(onClick = { menuOpen = true }) {
+                    Icon(painterResource(R.drawable.ic_more), contentDescription = stringResource(R.string.action_more))
+                }
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    listOf(R.string.action_move, R.string.action_copy, R.string.action_duplicate, R.string.action_delete).forEach { label ->
+                        DropdownMenuItem(
+                            text = { Text(stringResource(label)) },
+                            onClick = {
+                                menuOpen = false
+                                comingLater = true
+                            },
+                        )
+                    }
+                }
             }
         }
         LazyColumn(
@@ -109,12 +132,24 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
                 )
             }
             items(fields) { (label, value) ->
-                Column(Modifier.testTag(detailTag(label))) {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .semantics(mergeDescendants = true) {}
+                        .testTag(detailTag(label)),
+                ) {
                     Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     SafeText(value, maxLines = if (label == R.string.field_description) 20 else 2, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
+    }
+    if (comingLater) {
+        AlertDialog(
+            onDismissRequest = { comingLater = false },
+            confirmButton = { TextButton(onClick = { comingLater = false }) { Text(stringResource(R.string.close)) } },
+            text = { Text(stringResource(R.string.coming_later)) },
+        )
     }
     if (fullPathOpen) {
         AlertDialog(

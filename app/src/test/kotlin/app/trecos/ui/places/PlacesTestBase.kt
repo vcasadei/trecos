@@ -59,6 +59,18 @@ abstract class PlacesTestBase {
     }
 
     /**
+     * Waits for a field on the item screen and returns it with its label and
+     * value merged, as a screen reader reads it.
+     *
+     * @param label the field's label resource.
+     * @return the merged node.
+     */
+    protected fun detail(label: Int): SemanticsNodeInteraction {
+        tag(detailTag(label))
+        return rule.onNodeWithTag(detailTag(label))
+    }
+
+    /**
      * Waits until a node with exactly this text exists.
      *
      * @param text the text.
