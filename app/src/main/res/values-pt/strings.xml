@@ -298,4 +298,26 @@
         <item quantity="many">%1$d itens têm valor em “%2$s”. Excluir o campo remove esses valores.</item>
         <item quantity="other">%1$d itens têm valor em “%2$s”. Excluir o campo remove esses valores.</item>
     </plurals>
+    <!-- App lock and profile (0.9) -->
+    <string name="action_ok">OK</string>
+    <string name="lock_turned_off">O bloqueio do app foi desligado porque este celular não tem mais bloqueio de tela.</string>
+    <string name="unlock_title">Desbloquear o Trecos</string>
+    <string name="locked_message">O Trecos está bloqueado</string>
+    <string name="action_unlock">Desbloquear</string>
+    <string name="settings_security">Segurança</string>
+    <string name="setting_app_lock">Bloqueio do app</string>
+    <string name="app_lock_hint">Desbloqueie com a digital, o rosto, o PIN, o padrão ou a senha do celular.</string>
+    <string name="setting_lock_timeout">Bloquear depois de</string>
+    <string name="timeout_immediately">Imediatamente</string>
+    <string name="timeout_1">1 minuto</string>
+    <string name="timeout_5">5 minutos</string>
+    <string name="timeout_15">15 minutos</string>
+    <string name="screen_lock_needed">O bloqueio do app usa o bloqueio de tela do celular. Defina antes um PIN, padrão, senha ou digital nas configurações do celular.</string>
+    <string name="confirm_app_lock">Ligar o bloqueio do app</string>
+    <string name="setting_profile">Perfil (opcional)</string>
+    <string name="profile_none">Não definido</string>
+    <string name="profile_intro">Seu nome e e-mail são opcionais. Eles só identificam seus registros de sincronização e, no futuro, casas compartilhadas. Ficam neste celular (e no seu próprio Drive quando a sincronização estiver ligada) até você apagá-los.</string>
+    <string name="field_email">E-mail</string>
+    <string name="delete_profile">Apagar perfil</string>
+    <string name="delete_profile_confirm">Apagar seu nome e e-mail deste celular?</string>
 </resources>

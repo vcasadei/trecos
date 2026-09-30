@@ -18,6 +18,7 @@ coil = "3.6.3"
 zxing = "3.5.4"
 codeScanner = "16.1.0"
 print = "1.1.0"
+biometric = "1.1.0"
 coreKtx = "1.19.1"
 appcompat = "1.8.0"
 profileInstaller = "1.4.1"
@@ -49,6 +50,7 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" 
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 play-services-code-scanner = { module = "com.google.android.gms:play-services-code-scanner", version.ref = "codeScanner" }
 androidx-print = { module = "androidx.print:print", version.ref = "print" }
+androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileInstaller" }

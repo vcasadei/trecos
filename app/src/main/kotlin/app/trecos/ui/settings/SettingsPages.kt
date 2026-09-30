@@ -46,6 +46,7 @@ import app.trecos.ui.places.BottomBarClearance
 import app.trecos.ui.shell.TrecosTopBar
 import app.trecos.ui.text.SafeText
 import java.util.Currency
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
@@ -324,5 +325,70 @@ fun TypePicker(selected: FieldType, onSelect: (FieldType) -> Unit) {
                 )
             }
         }
+    }
+}
+
+/**
+ * The optional profile (spec "Optional profile"): a name and an e-mail,
+ * editable and deletable. Nothing else in the app asks for them.
+ *
+ * @param onBack leaves the screen.
+ */
+@Composable
+fun ProfileScreen(onBack: () -> Unit) {
+    val app = appContainer()
+    val scope = rememberCoroutineScope()
+    val profile by app.preferences.profile.collectAsStateWithLifecycle(null)
+    var loaded by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var confirmDelete by remember { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        app.preferences.profile.first()?.let {
+            name = it.name.orEmpty()
+            email = it.email.orEmpty()
+        }
+        loaded = true
+    }
+    Column(Modifier.fillMaxSize()) {
+        TrecosTopBar(title = stringResource(R.string.setting_profile), onBack = onBack)
+        if (!loaded) return@Column
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(stringResource(R.string.profile_intro), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            OutlinedTextField(name, { name = it }, singleLine = true, label = { Text(stringResource(R.string.field_name)) }, modifier = Modifier.fillMaxWidth().testTag("profile_name"))
+            OutlinedTextField(
+                email, { email = it }, singleLine = true, label = { Text(stringResource(R.string.field_email)) },
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Email),
+                modifier = Modifier.fillMaxWidth().testTag("profile_email"),
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = {
+                    scope.launch {
+                        app.preferences.setProfile(name, email)
+                        onBack()
+                    }
+                }, modifier = Modifier.testTag("save_profile")) { Text(stringResource(R.string.action_save)) }
+                if (profile != null) {
+                    OutlinedButton(onClick = { confirmDelete = true }, modifier = Modifier.testTag("delete_profile")) { Text(stringResource(R.string.delete_profile)) }
+                }
+            }
+        }
+    }
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            text = { Text(stringResource(R.string.delete_profile_confirm)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDelete = false
+                    scope.launch {
+                        app.preferences.deleteProfile()
+                        name = ""
+                        email = ""
+                    }
+                }, modifier = Modifier.testTag("confirm_delete_profile")) { Text(stringResource(R.string.action_delete)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 }

@@ -147,6 +147,7 @@ dependencies {
     implementation(libs.zxing.core)
     implementation(libs.play.services.code.scanner)
     implementation(libs.androidx.print)
+    implementation(libs.androidx.biometric)
     baselineProfile(project(":baselineprofile"))
 
     testImplementation(libs.junit)

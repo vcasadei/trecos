@@ -293,4 +293,26 @@
         <item quantity="one">%1$d item has a value for “%2$s”. Deleting the field removes it.</item>
         <item quantity="other">%1$d items have a value for “%2$s”. Deleting the field removes them.</item>
     </plurals>
+    <!-- App lock and profile (0.9) -->
+    <string name="action_ok">OK</string>
+    <string name="lock_turned_off">App lock was turned off because this phone no longer has a screen lock.</string>
+    <string name="unlock_title">Unlock Trecos</string>
+    <string name="locked_message">Trecos is locked</string>
+    <string name="action_unlock">Unlock</string>
+    <string name="settings_security">Security</string>
+    <string name="setting_app_lock">App lock</string>
+    <string name="app_lock_hint">Unlock with your phone\'s fingerprint, face, PIN, pattern or password.</string>
+    <string name="setting_lock_timeout">Lock after</string>
+    <string name="timeout_immediately">Immediately</string>
+    <string name="timeout_1">1 minute</string>
+    <string name="timeout_5">5 minutes</string>
+    <string name="timeout_15">15 minutes</string>
+    <string name="screen_lock_needed">App lock uses your phone\'s screen lock. Set a PIN, pattern, password or fingerprint in the phone\'s settings first.</string>
+    <string name="confirm_app_lock">Turn on app lock</string>
+    <string name="setting_profile">Profile (optional)</string>
+    <string name="profile_none">Not set</string>
+    <string name="profile_intro">Your name and e-mail are optional. They only label your sync records and, later, shared houses. They stay on this phone (and in your own Drive when sync is on) until you delete them.</string>
+    <string name="field_email">E-mail</string>
+    <string name="delete_profile">Delete profile</string>
+    <string name="delete_profile_confirm">Delete your name and e-mail from this phone?</string>
 </resources>
