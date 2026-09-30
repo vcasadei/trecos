@@ -155,7 +155,10 @@ dependencies {
     implementation(libs.androidx.print)
     implementation(libs.androidx.biometric)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.play.services.auth)
     baselineProfile(project(":baselineprofile"))
+
+    testImplementation(libs.androidx.work.testing)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

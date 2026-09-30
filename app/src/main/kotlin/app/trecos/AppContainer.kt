@@ -14,6 +14,7 @@ import app.trecos.lock.SystemDeviceSecurity
 import app.trecos.places.FieldStore
 import app.trecos.places.OrganizeStore
 import app.trecos.places.PhotoStore
+import app.trecos.sync.SyncManager
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 
@@ -32,6 +33,9 @@ class AppContainer(
     val clock: () -> Long = System::currentTimeMillis,
     val newId: () -> String = { UUID.randomUUID().toString() },
 ) {
+    /** The application context. */
+    val appContext: Context = context
+
     /** The database, opened on first access. */
     val database: TrecosDatabase by lazy(openDatabase)
 
@@ -86,6 +90,12 @@ class AppContainer(
 
     /** Whether the app is locked right now. */
     val lock: AppLock = AppLock(clock)
+
+    /** Work that outlives any screen, such as "Sync now". */
+    val scope: kotlinx.coroutines.CoroutineScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
+
+    /** Google Drive sync. */
+    val sync: SyncManager by lazy { SyncManager(appContext, database, photoStore, preferences, resources, clock) }
 
     /** Device preferences. */
     val preferences: AppPreferences = AppPreferences(

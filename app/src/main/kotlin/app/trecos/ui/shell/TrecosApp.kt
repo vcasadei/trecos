@@ -8,6 +8,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import app.trecos.data.StartScreen
 import app.trecos.ui.settings.SettingsScreen
 import app.trecos.ui.backup.BackupScreen
+import app.trecos.ui.sync.ConflictsScreen
+import app.trecos.ui.sync.HistoryScreen
+import app.trecos.ui.sync.SyncNavigation
+import app.trecos.ui.sync.SyncScreen
 import app.trecos.ui.settings.ProfileScreen
 import app.trecos.ui.settings.SettingsNavigation
 import app.trecos.ui.settings.HouseFieldsScreen
@@ -102,6 +106,9 @@ private object Routes {
     const val FIELDS = "settings/fields/{house}"
     const val PROFILE = "settings/profile"
     const val BACKUP = "settings/backup"
+    const val SYNC = "settings/sync"
+    const val CONFLICTS = "settings/sync/conflicts"
+    const val HISTORY = "settings/sync/history"
     const val HOUSE_FORM = "form/house?id={id}"
     const val CONTAINER_FORM = "form/container?house={house}&parent={parent}&id={id}&qr={qr}"
     const val ITEM_FORM = "form/item?house={house}&container={container}&id={id}&qr={qr}"
@@ -173,11 +180,20 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                                 openTrash = nav.openTrash,
                                 openProfile = { navController.navigate(Routes.PROFILE) },
                                 openBackup = { navController.navigate(Routes.BACKUP) },
+                                openSync = { navController.navigate(Routes.SYNC) },
                             ),
                         )
                     }
                 }
                 composable(Routes.CURRENCY) { CurrencyScreen { navController.popBackStack() } }
+                composable(Routes.SYNC) {
+                    SyncScreen(
+                        SyncNavigation(openConflicts = { navController.navigate(Routes.CONFLICTS) }, openHistory = { navController.navigate(Routes.HISTORY) }),
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+                composable(Routes.CONFLICTS) { ConflictsScreen { navController.popBackStack() } }
+                composable(Routes.HISTORY) { HistoryScreen { navController.popBackStack() } }
                 composable(Routes.BACKUP) { BackupScreen { navController.popBackStack() } }
                 composable(Routes.PROFILE) { ProfileScreen { navController.popBackStack() } }
                 composable(Routes.EXTRAS) { ExtrasScreen { navController.popBackStack() } }

@@ -41,6 +41,13 @@ data class Profile(val name: String?, val email: String?) {
     override fun toString(): String = "Profile(name=${if (name == null) "none" else "set"}, email=${if (email == null) "none" else "set"})"
 }
 
+/**
+ * How often sync runs by itself (spec "Schedule").
+ *
+ * @property days the interval, or `null` for never.
+ */
+enum class SyncFrequency(val days: Int?) { Daily(1), Every5Days(5), Every15Days(15), Every30Days(30), Never(null) }
+
 /** The tab the app opens on. */
 enum class StartScreen { Home, Search }
 
@@ -125,6 +132,14 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
     val lockTimeout: Flow<LockTimeout> = store.data.map { prefs ->
         prefs[LOCK_TIMEOUT]?.let { runCatching { LockTimeout.valueOf(it) }.getOrNull() } ?: LockTimeout.OneMinute
     }
+
+    /** How often sync runs by itself; every day by default. */
+    val syncFrequency: Flow<SyncFrequency> = store.data.map { prefs ->
+        prefs[SYNC_FREQUENCY]?.let { runCatching { SyncFrequency.valueOf(it) }.getOrNull() } ?: SyncFrequency.Daily
+    }
+
+    /** Whether photos move only on unmetered networks; on by default. */
+    val photosOnlyOnWifi: Flow<Boolean> = store.data.map { it[PHOTOS_WIFI] ?: true }
 
     /** The optional profile, or `null` when none was saved. */
     val profile: Flow<Profile?> = store.data.map { prefs ->
@@ -272,6 +287,12 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
         email.trim().ifEmpty { null }?.let { prefs[PROFILE_EMAIL] = it } ?: prefs.remove(PROFILE_EMAIL)
     }
 
+    /** @param frequency how often sync runs by itself. */
+    suspend fun setSyncFrequency(frequency: SyncFrequency) = store.edit { it[SYNC_FREQUENCY] = frequency.name }
+
+    /** @param on whether photos move only on unmetered networks. */
+    suspend fun setPhotosOnlyOnWifi(on: Boolean) = store.edit { it[PHOTOS_WIFI] = on }
+
     /** Deletes the profile from the device. */
     suspend fun deleteProfile() = store.edit { prefs ->
         prefs.remove(PROFILE_NAME)
@@ -306,6 +327,8 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
         val LOCK_TIMEOUT = stringPreferencesKey("lock_timeout")
         val PROFILE_NAME = stringPreferencesKey("profile_name")
         val PROFILE_EMAIL = stringPreferencesKey("profile_email")
+        val SYNC_FREQUENCY = stringPreferencesKey("sync_frequency")
+        val PHOTOS_WIFI = booleanPreferencesKey("photos_only_on_wifi")
 
         /**
          * @return the currency of the phone's region, or USD when the region has none.

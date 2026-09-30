@@ -305,7 +305,11 @@ fun BackupScreen(onBack: () -> Unit) {
     if (confirmReplace) {
         AlertDialog(
             onDismissRequest = { confirmReplace = false },
-            text = { Text(stringResource(R.string.import_replace_confirm), modifier = Modifier.testTag("replace_confirm")) },
+            text = {
+                val synced = syncConnected()
+                val warning = stringResource(R.string.import_replace_confirm) + if (synced) " " + stringResource(R.string.import_replace_sync_warning) else ""
+                Text(warning, modifier = Modifier.testTag("replace_confirm"))
+            },
             confirmButton = {
                 TextButton(onClick = {
                     confirmReplace = false
@@ -315,4 +319,13 @@ fun BackupScreen(onBack: () -> Unit) {
             dismissButton = { TextButton(onClick = { confirmReplace = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
+}
+
+/** @return whether Google Drive sync is connected, so "Replace everything" reaches other devices (spec "Import with sync on"). */
+@Composable
+private fun syncConnected(): Boolean {
+    val app = app.trecos.ui.appContainer()
+    if (!app.features.driveSync) return false
+    val status by app.sync.status.collectAsStateWithLifecycle()
+    return status.state.connected
 }

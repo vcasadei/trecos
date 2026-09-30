@@ -159,6 +159,18 @@ class SyncEngine(
             .sortedByDescending { it.time }
     }
 
+    /**
+     * Changes a house's rows, as resolving a conflict does, repairing broken links.
+     *
+     * @param houseId the house.
+     * @param change builds the new rows from the current ones.
+     */
+    suspend fun edit(houseId: String, change: (Rows) -> Rows) {
+        val rows = localRows(houseId)
+        val changed = repair(change(rows))
+        if (changed != rows) apply(houseId, rows, changed)
+    }
+
     /** Reads a house's rows from the database, or none when it isn't on this device. */
     private suspend fun localRows(houseId: String): Rows {
         val house = db.houses().get(houseId) ?: return emptyMap()
