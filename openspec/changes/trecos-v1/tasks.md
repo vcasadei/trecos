@@ -68,7 +68,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 4.2 Seed the built-in category tree from a bundled asset (stable keys, icons, English and Portuguese names), matching the full list in the spec; tests that every listed category exists, that built-ins cannot be renamed or deleted, and for scenario "Built-ins in Portuguese"
 - [ ] 4.3 Build the category picker (search box, several categories per item, order, set main); tests for scenarios "Cable with two ends" and "Changing the main category"
 - [ ] 4.4 Implement per-house custom categories (top level or sub, icon picker with empty default, delete removes assignments); tests for scenarios "New subcategory", "Deleting a used custom category" and "Other houses don't see it"
-- [ ] 4.5 Implement category suggestions (keyword dictionary asset in English and Portuguese, normalisation, learned counts, top 3 chips, never automatic); unit tests for scenarios "Keyword match", "Learning my vocabulary" and "Nothing recognised"
+- [x] 4.5 Implement category suggestions (keyword dictionary asset in English and Portuguese, normalisation, learned counts, top 3 chips, never automatic); unit tests for scenarios "Keyword match", "Learning my vocabulary" and "Nothing recognised"
 - [ ] 4.6 Implement tags (per house, completion, case- and accent-insensitive dedupe, rename and delete everywhere); tests for scenarios "Reusing a tag" and "Same tag, different case"
 - [ ] 4.7 Offer to copy custom categories and tags when creating a house; test for scenario "Copying from another house" (field definitions are added in 7.6)
 - [ ] 4.8 Show categories with suggestion chips on the item form, and make Save + new keep categories; test for scenario "Cataloguing a box of cables"

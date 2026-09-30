@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
 import app.trecos.categories.BuiltInCategories
 import app.trecos.categories.Category
+import app.trecos.categories.CategorySuggester
 import app.trecos.data.AppPreferences
 import app.trecos.data.TrecosDatabase
 import java.util.UUID
@@ -30,6 +31,11 @@ class AppContainer(
     /** The built-in category tree, read once from the bundled asset. */
     val builtInCategories: List<Category> by lazy {
         BuiltInCategories.parse(context.assets.open("categories.json").bufferedReader().use { it.readText() })
+    }
+
+    /** Category suggestions, with the bundled keyword dictionary read once. */
+    val suggester: CategorySuggester by lazy {
+        CategorySuggester.parse(context.assets.open("category-keywords.json").bufferedReader().use { it.readText() })
     }
 
     /** Device preferences. */
