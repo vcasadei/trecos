@@ -570,7 +570,8 @@ class ItemFormViewModel(
                     location = it.houseId to it.containerId
                     categories = app.database.categories().forItem(it.id)
                     tags = app.database.tags().forItem(it.id).map { tag -> tag.name }
-                    moreFields = listOf(brand, model, serial, qrCode, descriptionState).any(String::isNotEmpty) || tags.isNotEmpty()
+                    // Only ever opens "More fields": the user may already have opened it while this loaded.
+                    if (listOf(brand, model, serial, qrCode, descriptionState).any(String::isNotEmpty) || tags.isNotEmpty()) moreFields = true
                 }
             }
             fields = app.fields.drafts(location.first, existing?.id, AppLanguage.current())
