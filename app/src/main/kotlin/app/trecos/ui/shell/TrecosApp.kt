@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import app.trecos.data.StartScreen
 import app.trecos.ui.settings.SettingsScreen
+import app.trecos.ui.settings.ProfileScreen
 import app.trecos.ui.settings.SettingsNavigation
 import app.trecos.ui.settings.HouseFieldsScreen
 import app.trecos.ui.settings.ExtrasScreen
@@ -98,6 +99,7 @@ private object Routes {
     const val CURRENCY = "settings/currency"
     const val EXTRAS = "settings/extras"
     const val FIELDS = "settings/fields/{house}"
+    const val PROFILE = "settings/profile"
     const val HOUSE_FORM = "form/house?id={id}"
     const val CONTAINER_FORM = "form/container?house={house}&parent={parent}&id={id}&qr={qr}"
     const val ITEM_FORM = "form/item?house={house}&container={container}&id={id}&qr={qr}"
@@ -167,11 +169,13 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                                 openFields = { house -> navController.navigate("settings/fields/$house") },
                                 openTags = nav.openTags,
                                 openTrash = nav.openTrash,
+                                openProfile = { navController.navigate(Routes.PROFILE) },
                             ),
                         )
                     }
                 }
                 composable(Routes.CURRENCY) { CurrencyScreen { navController.popBackStack() } }
+                composable(Routes.PROFILE) { ProfileScreen { navController.popBackStack() } }
                 composable(Routes.EXTRAS) { ExtrasScreen { navController.popBackStack() } }
                 composable(Routes.FIELDS, listOf(stringArg("house"))) { entry -> HouseFieldsScreen(entry.string("house")!!) { navController.popBackStack() } }
                 composable(rootRoute(TrecosTab.Home)) {

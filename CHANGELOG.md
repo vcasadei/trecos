@@ -6,6 +6,15 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.9.0] - Unreleased
+
+### Added
+
+- App lock, off by default, using the phone's own fingerprint, face, PIN, pattern or password; turning it on needs a phone screen lock and a successful unlock.
+- Lock timing: at start and after Immediately, 1 minute (default), 5 or 15 minutes in the background; while locked only an Unlock button shows, and the recent-apps preview hides content.
+- The lock turns itself off, with a note, when the phone's screen lock is removed.
+- An optional profile (name and e-mail) in Settings, editable and deletable, never written to logs.
+
 ## [0.8.0] - Unreleased
 
 ### Added

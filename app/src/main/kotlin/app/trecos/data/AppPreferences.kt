@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import app.trecos.lock.LockTimeout
 import app.trecos.places.MatchIn
 import app.trecos.places.SearchFilters
 import app.trecos.places.SearchScope
@@ -27,6 +28,18 @@ enum class AddFlow { FormFirst, PhotoFirst }
 
 /** When the house colour band is drawn behind the status bar. */
 enum class HouseBand { Automatic, Always, Never }
+
+/**
+ * The optional profile (spec "Optional profile"): used only to label sync
+ * records and, later, house sharing. Never logged.
+ *
+ * @property name the name, or `null`.
+ * @property email the e-mail address, or `null`.
+ */
+data class Profile(val name: String?, val email: String?) {
+    /** Keeps the values out of logs and crash reports. */
+    override fun toString(): String = "Profile(name=${if (name == null) "none" else "set"}, email=${if (email == null) "none" else "set"})"
+}
 
 /** The tab the app opens on. */
 enum class StartScreen { Home, Search }
@@ -103,6 +116,21 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
     /** The detailed view's extra fields, in order; categories by default. */
     val detailExtras: Flow<List<String>> = store.data.map { prefs ->
         prefs[DETAIL_EXTRAS]?.let { stored -> stored.split(',').filter(String::isNotEmpty) } ?: DetailExtras.default
+    }
+
+    /** Whether the app lock is on; off by default. */
+    val appLock: Flow<Boolean> = store.data.map { it[APP_LOCK] ?: false }
+
+    /** How long the app may be in the background before locking; 1 minute by default. */
+    val lockTimeout: Flow<LockTimeout> = store.data.map { prefs ->
+        prefs[LOCK_TIMEOUT]?.let { runCatching { LockTimeout.valueOf(it) }.getOrNull() } ?: LockTimeout.OneMinute
+    }
+
+    /** The optional profile, or `null` when none was saved. */
+    val profile: Flow<Profile?> = store.data.map { prefs ->
+        val name = prefs[PROFILE_NAME]
+        val email = prefs[PROFILE_EMAIL]
+        if (name == null && email == null) null else Profile(name, email)
     }
 
     /** The search filters and order, kept until "Clear all" (the typed text is never stored). */
@@ -220,6 +248,37 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
     }
 
     /**
+     * Turns the app lock on or off.
+     *
+     * @param on whether it is on.
+     */
+    suspend fun setAppLock(on: Boolean) = store.edit { it[APP_LOCK] = on }
+
+    /**
+     * Saves the lock timeout.
+     *
+     * @param timeout the chosen timeout.
+     */
+    suspend fun setLockTimeout(timeout: LockTimeout) = store.edit { it[LOCK_TIMEOUT] = timeout.name }
+
+    /**
+     * Saves the profile; blank fields are removed.
+     *
+     * @param name the name, or blank.
+     * @param email the e-mail address, or blank.
+     */
+    suspend fun setProfile(name: String, email: String) = store.edit { prefs ->
+        name.trim().ifEmpty { null }?.let { prefs[PROFILE_NAME] = it } ?: prefs.remove(PROFILE_NAME)
+        email.trim().ifEmpty { null }?.let { prefs[PROFILE_EMAIL] = it } ?: prefs.remove(PROFILE_EMAIL)
+    }
+
+    /** Deletes the profile from the device. */
+    suspend fun deleteProfile() = store.edit { prefs ->
+        prefs.remove(PROFILE_NAME)
+        prefs.remove(PROFILE_EMAIL)
+    }
+
+    /**
      * Saves the display currency. Amounts are relabelled, never converted.
      *
      * @param code an ISO 4217 code such as `BRL`.
@@ -243,6 +302,10 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
         val THEME = stringPreferencesKey("theme")
         val START_SCREEN = stringPreferencesKey("start_screen")
         val DETAIL_EXTRAS = stringPreferencesKey("detail_extras")
+        val APP_LOCK = booleanPreferencesKey("app_lock")
+        val LOCK_TIMEOUT = stringPreferencesKey("lock_timeout")
+        val PROFILE_NAME = stringPreferencesKey("profile_name")
+        val PROFILE_EMAIL = stringPreferencesKey("profile_email")
 
         /**
          * @return the currency of the phone's region, or USD when the region has none.

@@ -140,11 +140,11 @@ run at the end of **every** release group before it is tagged.
 
 ## 10. Release 0.9 — App lock and profile
 
-- [ ] 10.1 Implement the app lock with the phone's biometrics or credential, requiring a screen lock to enable; tests for scenarios "Turning it on" and "Phone without a screen lock"
-- [ ] 10.2 Implement lock timing (Immediately, 1 minute default, 5 or 15 minutes), the locked screen, and hiding content from recent apps; tests for scenarios "Returning quickly", "Failed unlock" and "Recent-apps preview"
-- [ ] 10.3 Turn the lock off automatically when the phone's screen lock is removed; test for scenario "User removed their phone PIN"
-- [ ] 10.4 Implement the optional profile (name and e-mail, editable, deletable) with a log-redaction check that no e-mail or name reaches logs; tests for scenarios "No profile" and "Deleting the profile"
-- [ ] 10.5 Update `SECURITY.md`, write FAQ answers 7 and 9 (both languages), and add the 0.9 entry to `CHANGELOG.md`
+- [x] 10.1 Implement the app lock with the phone's biometrics or credential, requiring a screen lock to enable; tests for scenarios "Turning it on" and "Phone without a screen lock"
+- [x] 10.2 Implement lock timing (Immediately, 1 minute default, 5 or 15 minutes), the locked screen, and hiding content from recent apps; tests for scenarios "Returning quickly", "Failed unlock" and "Recent-apps preview"
+- [x] 10.3 Turn the lock off automatically when the phone's screen lock is removed; test for scenario "User removed their phone PIN"
+- [x] 10.4 Implement the optional profile (name and e-mail, editable, deletable) with a log-redaction check that no e-mail or name reaches logs; tests for scenarios "No profile" and "Deleting the profile"
+- [x] 10.5 Update `SECURITY.md`, write FAQ answers 7 and 9 (both languages), and add the 0.9 entry to `CHANGELOG.md`
 
 ## 11. Release 0.10 — Local backup
 
