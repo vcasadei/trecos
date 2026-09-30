@@ -4,6 +4,8 @@ import androidx.room.withTransaction
 import app.trecos.backup.HouseSnapshot
 import app.trecos.backup.SnapshotFormat
 import app.trecos.backup.deleteHouseRows
+import app.trecos.crypto.MissingKeyException
+import app.trecos.crypto.SnapshotCipher
 import app.trecos.data.Photo
 import app.trecos.data.TrecosDatabase
 import app.trecos.places.PhotoStore
@@ -38,12 +40,16 @@ class ChangedDuringSyncException : Exception("Local data changed during sync")
  * @param photos the stored photos.
  * @param store this device's sync state.
  * @param clock the current time.
+ * @param writeKey the key new commits are encrypted with, or `null` when encryption is off.
+ * @param readKeys every key that may decrypt older commits.
  */
 class SyncEngine(
     private val db: TrecosDatabase,
     private val photos: PhotoStore,
     private val store: SyncStore,
     private val clock: () -> Long,
+    private val writeKey: () -> ByteArray? = { null },
+    private val readKeys: () -> List<ByteArray> = { emptyList() },
 ) {
 
     /**
@@ -133,7 +139,8 @@ class SyncEngine(
                 userName = user.displayName, userEmail = user.emailAddress, formatVersion = SnapshotFormat.VERSION,
                 changes = changes(headRows.orEmpty(), merged), conflicts = result.conflicts.size,
             )
-            val bytes = CommitCodec.encode(meta, merged)
+            val plain = CommitCodec.encode(meta, merged)
+            val bytes = writeKey()?.let { SnapshotCipher.encrypt(plain, it) } ?: plain
             remote.putCommit(houseId, id, bytes)
             cache(houseId, id, bytes)
             remote.putRef(houseId, state.deviceId, Ref(id, meta.time, SnapshotFormat.VERSION))
@@ -154,7 +161,7 @@ class SyncEngine(
      */
     fun history(): List<CommitMeta> {
         return store.cachedCommits()
-            .mapNotNull { runCatching { CommitCodec.meta(it.readBytes()) }.getOrNull() }
+            .mapNotNull { runCatching { CommitCodec.meta(plain(it.readBytes())) }.getOrNull() }
             .distinctBy { it.id }
             .sortedByDescending { it.time }
     }
@@ -231,7 +238,18 @@ class SyncEngine(
 
     /** @return a commit's rows, from the cache or Drive, or `null` when it no longer exists. */
     private suspend fun rowsOf(remote: SyncRemote, houseId: String, commitId: String): Rows? =
-        bytesOf(remote, houseId, commitId)?.let { CommitCodec.decode(it).second }
+        bytesOf(remote, houseId, commitId)?.let { CommitCodec.decode(plain(it)).second }
+
+    /**
+     * @param bytes a commit file as stored, encrypted or not.
+     * @return the plain file.
+     * @throws MissingKeyException when it is encrypted and no known key opens it.
+     */
+    private fun plain(bytes: ByteArray): ByteArray {
+        if (!SnapshotCipher.isEncrypted(bytes)) return bytes
+        for (key in readKeys()) runCatching { return SnapshotCipher.decrypt(bytes, key) }
+        throw MissingKeyException()
+    }
 
     /** @return a commit's file, from the cache or Drive (then cached). */
     private suspend fun bytesOf(remote: SyncRemote, houseId: String, commitId: String): ByteArray? {
@@ -259,7 +277,7 @@ class SyncEngine(
         while (queue.isNotEmpty()) {
             val id = queue.removeFirst()
             if (!ancestors.add(id)) continue
-            bytesOf(remote, houseId, id)?.let { queue += CommitCodec.meta(it).parents }
+            bytesOf(remote, houseId, id)?.let { queue += CommitCodec.meta(plain(it)).parents }
         }
         val visited = HashSet<String>()
         val search = ArrayDeque(listOf(theirs))
@@ -267,7 +285,7 @@ class SyncEngine(
             val id = search.removeFirst()
             if (id in ancestors) return id
             if (!visited.add(id)) continue
-            bytesOf(remote, houseId, id)?.let { search += CommitCodec.meta(it).parents }
+            bytesOf(remote, houseId, id)?.let { search += CommitCodec.meta(plain(it)).parents }
         }
         return null
     }
@@ -276,7 +294,7 @@ class SyncEngine(
     private suspend fun collectGarbage(remote: SyncRemote, houseId: String, keep: String) {
         val deviceId = store.load().deviceId
         val mine = store.cachedCommits(houseId)
-            .mapNotNull { file -> runCatching { CommitCodec.meta(file.readBytes()) }.getOrNull() }
+            .mapNotNull { file -> runCatching { CommitCodec.meta(plain(file.readBytes())) }.getOrNull() }
             .filter { it.deviceId == deviceId }
             .sortedByDescending { it.time }
         mine.drop(KEEP).filter { it.id != keep }.forEach { old ->

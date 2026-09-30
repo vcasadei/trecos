@@ -424,4 +424,24 @@
         <item quantity="other">%1$d conflitos</item>
     </plurals>
     <string name="import_replace_sync_warning">A sincronização está ligada, então seus outros aparelhos vão receber estes dados na próxima sincronização.</string>
+    <string name="sync_error_key">Seus dados no Drive estão criptografados e não foi possível buscar a chave. Conecte o Google Drive de novo.</string>
+    <!-- Encryption (0.12) -->
+    <string name="setting_encryption">Criptografar dados</string>
+    <string name="encryption_on">Ligada</string>
+    <string name="encryption_off">Desligada</string>
+    <string name="encryption_account_only">Ligada na sua conta Google. Toque para criptografar este celular também.</string>
+    <string name="encryption_needs_account">A criptografia guarda a chave na sua conta Google, para você recuperar os dados num celular novo. Conecte o Google Drive antes.</string>
+    <string name="encryption_enable_title">Criptografar seus dados?</string>
+    <string name="encryption_enable_body">Seu inventário neste celular e as cópias no Drive serão criptografados. As fotos não são criptografadas. O Trecos reinicia quando terminar.</string>
+    <string name="encryption_enable_action">Criptografar</string>
+    <string name="encryption_disable_title">Desligar a criptografia?</string>
+    <string name="encryption_disable_body">Seus dados neste celular são descriptografados, a chave é removida do seu Drive, e as próximas cópias no Drive não são criptografadas. O Trecos reinicia quando terminar.</string>
+    <string name="encryption_disable_action">Desligar</string>
+    <string name="encryption_working">Criptografando… Mantenha o Trecos aberto.</string>
+    <string name="decryption_working">Descriptografando… Mantenha o Trecos aberto.</string>
+    <string name="encryption_failed">A criptografia não terminou. Seus dados não mudaram e não estão criptografados.</string>
+    <string name="decryption_failed">O desligamento da criptografia não terminou. Seus dados não mudaram e continuam criptografados.</string>
+    <string name="disconnect_blocked">Desligue a criptografia antes de desconectar: a cópia de recuperação da chave está nesta conta Google.</string>
+    <string name="export_unencrypted_title">Este backup não será criptografado</string>
+    <string name="export_unencrypted_body">A criptografia está ligada, mas arquivos de backup nunca são criptografados. Qualquer pessoa com o arquivo pode lê-lo. Continuar?</string>
 </resources>

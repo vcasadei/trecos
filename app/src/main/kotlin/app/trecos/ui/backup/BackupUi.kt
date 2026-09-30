@@ -239,6 +239,8 @@ fun BackupScreen(onBack: () -> Unit) {
     val files = LocalBackupFiles.current
     var excluded by remember { mutableStateOf(setOf<String>()) }
     var confirmReplace by remember { mutableStateOf(false) }
+    var warnUnencrypted by remember { mutableStateOf(false) }
+    val encrypted = encryptedHere()
     val version = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty() }
     val (create, open) = files.rememberPickers(
         onCreated = { uri -> uri?.let { vm.export(context, files, it, houses.map { h -> h.id }.toSet() - excluded, version) } },
@@ -264,7 +266,7 @@ fun BackupScreen(onBack: () -> Unit) {
             }
             item {
                 Button(
-                    onClick = { create(vm.fileName()) },
+                    onClick = { if (encrypted) warnUnencrypted = true else create(vm.fileName()) },
                     enabled = !vm.busy && houses.any { it.id !in excluded },
                     modifier = Modifier.padding(vertical = 8.dp).testTag("export"),
                 ) { Text(stringResource(R.string.action_export)) }
@@ -302,6 +304,20 @@ fun BackupScreen(onBack: () -> Unit) {
             },
         )
     }
+    if (warnUnencrypted) {
+        AlertDialog(
+            onDismissRequest = { warnUnencrypted = false },
+            title = { Text(stringResource(R.string.export_unencrypted_title)) },
+            text = { Text(stringResource(R.string.export_unencrypted_body), modifier = Modifier.testTag("export_unencrypted")) },
+            confirmButton = {
+                TextButton(onClick = {
+                    warnUnencrypted = false
+                    create(vm.fileName())
+                }, modifier = Modifier.testTag("export_anyway")) { Text(stringResource(R.string.action_continue)) }
+            },
+            dismissButton = { TextButton(onClick = { warnUnencrypted = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
     if (confirmReplace) {
         AlertDialog(
             onDismissRequest = { confirmReplace = false },
@@ -328,4 +344,13 @@ private fun syncConnected(): Boolean {
     if (!app.features.driveSync) return false
     val status by app.sync.status.collectAsStateWithLifecycle()
     return status.state.connected
+}
+
+/** @return whether this device's database is encrypted, so exports need a warning (spec "Export"). */
+@Composable
+private fun encryptedHere(): Boolean {
+    val app = app.trecos.ui.appContainer()
+    if (!app.features.encryption) return false
+    val status by app.encryption.status.collectAsStateWithLifecycle()
+    return status.on
 }

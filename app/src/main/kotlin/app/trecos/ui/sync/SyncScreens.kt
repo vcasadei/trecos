@@ -168,7 +168,10 @@ class SyncViewModel(private val app: AppContainer) : ViewModel() {
 
     /** Stops syncing; the data stays. */
     fun disconnect() {
-        sync.disconnect()
+        if (!sync.disconnect()) {
+            app.messages.tryEmit(AppMessage(app.resources.getString(R.string.disconnect_blocked)))
+            return
+        }
         SyncWorker.cancel(app.appContext)
         app.messages.tryEmit(AppMessage(app.resources.getString(R.string.sync_disconnected)))
     }
@@ -189,6 +192,8 @@ class SyncViewModel(private val app: AppContainer) : ViewModel() {
     /** Schedules background syncs after connecting. */
     private suspend fun connected() {
         SyncWorker.schedule(app.appContext, app.preferences.syncFrequency.first())
+        // Recovery on a new phone: the account's data was encrypted, so this phone's database is too.
+        app.encryption.accountKeyOnly()?.let { key -> app.encryption.enable(vault = null, existing = key) }
     }
 }
 
