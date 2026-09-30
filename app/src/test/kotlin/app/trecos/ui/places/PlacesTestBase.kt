@@ -155,3 +155,9 @@ abstract class PlacesTestBase {
         rule.waitForIdle()
     }
 }
+
+
+/** Matches photo thumbnails: test tags that are exactly `photo_` followed by a SHA-256. */
+val isPhotoThumb = androidx.compose.ui.test.SemanticsMatcher("is a photo thumbnail") { node ->
+    node.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.TestTag) { "" }.matches(Regex("photo_[0-9a-f]{64}"))
+}

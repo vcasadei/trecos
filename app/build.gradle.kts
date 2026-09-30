@@ -143,6 +143,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.work.runtime)
+    implementation(libs.coil.compose)
     baselineProfile(project(":baselineprofile"))
 
     testImplementation(libs.junit)

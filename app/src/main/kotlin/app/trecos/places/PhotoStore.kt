@@ -111,10 +111,12 @@ class PhotoStore(root: File, private val resolver: ContentResolver) {
      * Deletes stored photos and thumbnails no row refers to any more.
      *
      * @param referenced every SHA-256 still used by a photo row.
+     * @param olderThan only files last written before this time (epoch ms) are deleted, so photos
+     *   just added in a form that isn't saved yet are kept; everything by default.
      * @return how many photos were deleted.
      */
-    suspend fun deleteUnreferenced(referenced: Set<String>): Int = withContext(Dispatchers.IO) {
-        val orphans = photos.listFiles().orEmpty().filter { it.nameWithoutExtension !in referenced }
+    suspend fun deleteUnreferenced(referenced: Set<String>, olderThan: Long = Long.MAX_VALUE): Int = withContext(Dispatchers.IO) {
+        val orphans = photos.listFiles().orEmpty().filter { it.nameWithoutExtension !in referenced && it.lastModified() < olderThan }
         orphans.forEach { File(thumbs, it.name).delete(); it.delete() }
         thumbs.listFiles().orEmpty().filter { it.nameWithoutExtension !in referenced }.forEach { it.delete() }
         orphans.size

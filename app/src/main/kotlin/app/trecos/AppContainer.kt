@@ -41,11 +41,26 @@ class AppContainer(
         CategorySuggester.parse(context.assets.open("category-keywords.json").bufferedReader().use { it.readText() })
     }
 
+    /** Where the camera app writes captures; emptied after each import. */
+    val cameraDir: java.io.File = java.io.File(context.cacheDir, "camera")
+
+    /** For message texts outside screens. */
+    val resources: android.content.res.Resources = context.resources
+
     /** Stored photos and thumbnails in app-private storage. */
     val photoStore: PhotoStore = PhotoStore(context.filesDir, context.contentResolver)
 
     /** Moving, copying, the trash and house deletion. */
     val organize: OrganizeStore by lazy { OrganizeStore(database, clock, newId) }
+
+    /**
+     * Deletes photo files nothing refers to any more, keeping the last hour's
+     * (they may belong to a form that isn't saved yet).
+     *
+     * @return how many photos were deleted.
+     */
+    suspend fun freeUnusedPhotos(): Int =
+        photoStore.deleteUnreferenced(database.photos().referencedHashes().toSet(), olderThan = clock() - 60 * 60 * 1000)
 
     /** Short messages shown app-wide, such as "Deleted" with Undo. */
     val messages = MutableSharedFlow<AppMessage>(extraBufferCapacity = 8)

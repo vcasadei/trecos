@@ -172,4 +172,18 @@
         <item quantity="one">%1$d day left</item>
         <item quantity="other">%1$d days left</item>
     </plurals>
+
+    <!-- Photos (0.5) -->
+    <string name="field_photos">Photos</string>
+    <string name="add_photo">Add photo</string>
+    <string name="photo_limit">3 photos is the maximum.</string>
+    <string name="source_title">Add a photo from</string>
+    <string name="source_camera">Camera</string>
+    <string name="source_gallery">Gallery</string>
+    <string name="remember_choice">Remember my choice</string>
+    <string name="photo_n">Photo %1$d of %2$d</string>
+    <plurals name="photos_failed">
+        <item quantity="one">%1$d photo could not be added.</item>
+        <item quantity="other">%1$d photos could not be added.</item>
+    </plurals>
 </resources>

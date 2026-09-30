@@ -92,13 +92,13 @@ run at the end of **every** release group before it is tagged.
 
 - [x] 6.1 Migration v3 → v4 (expand): add `Photo` (owner, sha256, position); verify with a migration test
 - [x] 6.2 Implement the photo store (decode to at most 1920 px with orientation corrected, WebP q80 without metadata, sha256 file names, 320 px square thumbnail, original discarded); tests for scenarios "Photo from a 12-megapixel camera" (no GPS in the output) and "Unreadable file"
-- [ ] 6.3 Integrate the camera app through `FileProvider` (never saving into the gallery) and the Photo Picker (multi-select up to the remaining slots), with no permissions requested; tests for scenarios "Picking from the gallery" and "Limit reached", plus a manifest test that no camera or storage permission is declared
-- [ ] 6.4 Implement the first-use image source prompt ("Remember my choice" checked by default); tests for scenarios "Remembering" and "Keep asking"
-- [ ] 6.5 Implement main photo, drag reorder, "Set as main" and remove; test for scenario "Setting the main photo"
-- [ ] 6.6 Build the landscape carousels and the full-screen viewer (pinch zoom, swipe, zoom-from-thumbnail transition); tests for scenarios "Zooming into a serial label" and "Opening a photo"
-- [ ] 6.7 Load thumbnails in every list with Coil, regenerating missing ones; test for scenario "Thumbnail regenerated"
-- [ ] 6.8 Implement photo-first add mode; tests for scenarios "Photo first" and "Photo cancelled"
-- [ ] 6.9 Include photos in Copy and Duplicate, and delete photo files on purge; tests that a copied item has its own photo rows and that a purge removes orphan files
+- [x] 6.3 Integrate the camera app through `FileProvider` (never saving into the gallery) and the Photo Picker (multi-select up to the remaining slots), with no permissions requested; tests for scenarios "Picking from the gallery" and "Limit reached", plus a manifest test that no camera or storage permission is declared
+- [x] 6.4 Implement the first-use image source prompt ("Remember my choice" checked by default); tests for scenarios "Remembering" and "Keep asking"
+- [x] 6.5 Implement main photo, drag reorder, "Set as main" and remove; test for scenario "Setting the main photo"
+- [x] 6.6 Build the landscape carousels and the full-screen viewer (pinch zoom, swipe, zoom-from-thumbnail transition); tests for scenarios "Zooming into a serial label" and "Opening a photo"
+- [x] 6.7 Load thumbnails in every list with Coil, regenerating missing ones; test for scenario "Thumbnail regenerated"
+- [x] 6.8 Implement photo-first add mode; tests for scenarios "Photo first" and "Photo cancelled"
+- [x] 6.9 Include photos in Copy and Duplicate, and delete photo files on purge; tests that a copied item has its own photo rows and that a purge removes orphan files
 - [ ] 6.10 Write `docs/architecture/photos.md` and update the user docs, and add the 0.5 entry to `CHANGELOG.md`
 
 ## 7. Release 0.6 — Search
