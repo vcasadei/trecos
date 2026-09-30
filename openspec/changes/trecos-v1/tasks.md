@@ -41,10 +41,10 @@ run at the end of **every** release group before it is tagged.
 - [x] 2.11 Build the item form (essentials, "More fields", Save, Save + new keeping the location); verify with a UI test that Save + new keeps the container
 - [x] 2.12 Build the item screen, with price formatting by app language and currency symbol; tests for scenarios "Price formatting in Portuguese" and "Price formatting in English"
 - [x] 2.13 Show the location path on item and container screens, with tappable levels and the collapse rule; tests for scenarios "Jumping up the hierarchy", "Deep path on a small screen" and "Leaving a container"
-- [ ] 2.14 Implement the container value fold (recursive sum, override counting upward, auto/manual label, clear override, unpriced count); unit tests for scenarios "Override counts upward" and "Unpriced items"
-- [ ] 2.15 Implement colours (header tint, row stripe, inheritance) and the house indicator (status bar band with Automatic/Always/Never, house pill); tests for scenarios "Inherited colour", "Own colour wins", "Two houses" and "Single house"
-- [ ] 2.16 Show icons for places without photos; test for scenario "Container without photos"
-- [ ] 2.17 Implement condensed and detailed list views with an app-wide persisted toggle, hiding empty fields; tests for scenarios "Switching to detailed view" and "Item without price"
+- [x] 2.14 Implement the container value fold (recursive sum, override counting upward, auto/manual label, clear override, unpriced count); unit tests for scenarios "Override counts upward" and "Unpriced items"
+- [x] 2.15 Implement colours (header tint, row stripe, inheritance) and the house indicator (status bar band with Automatic/Always/Never, house pill); tests for scenarios "Inherited colour", "Own colour wins", "Two houses" and "Single house"
+- [x] 2.16 Show icons for places without photos; test for scenario "Container without photos"
+- [x] 2.17 Implement condensed and detailed list views with an app-wide persisted toggle, hiding empty fields; tests for scenarios "Switching to detailed view" and "Item without price"
 - [ ] 2.18 Test scenario "Using the app in airplane mode" for everything shipped so far
 - [ ] 2.19 Install SOPS and age, generate the age identity at `~/.config/sops/age/keys.txt` (mode 600), and back it up offline (printed and on a USB drive), never next to the encrypted file; verify with `sops --version`, `age --version` and a decrypt using only the backup copy
 - [ ] 2.20 Generate the release keystore (PKCS12, RSA 4096, 30-year validity) and random passwords in `/dev/shm`, encrypt them into `release-signing.sops.yaml` (`keystore_base64`, `store_password`, `key_alias`, `key_password`), commit it with `.sops.yaml` to the private repository `vcasadei/trecos-signing`, copy it to the Google Drive folder, then shred the plaintext; verify that `sops -d` works from both copies and that no plaintext keystore is left (`find / -xdev -name '*.p12' -o -name '*.jks' 2>/dev/null`)
