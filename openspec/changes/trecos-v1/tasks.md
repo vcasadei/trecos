@@ -104,13 +104,13 @@ run at the end of **every** release group before it is tagged.
 ## 7. Release 0.6 — Search
 
 - [x] 7.1 Migration v4 → v5 (expand): add the FTS4 table (`unicode61`, `remove_diacritics=1`) with sync triggers and backfill; verify with a migration test that existing items are searchable
-- [ ] 7.2 Build the Search tab (field, QR button, scope and match controls, filters, sort, live count, no automatic keyboard, empty-state message); tests for scenarios "Browsing everything" and "No results"
-- [ ] 7.3 Implement matching (case and accent insensitive, word prefixes, all words required, debounced, no history stored); tests for scenarios "Accent-insensitive" and "Partial words"
-- [ ] 7.4 Implement scope and match fields (Name also covers brand, model, serial and QR); tests for scenarios "Finding by serial number" and "Containers only"
-- [ ] 7.5 Implement filters (house, categories including subcategories, tags; any within a filter, all across filters; persisted until "Clear all"); tests for scenarios "Any within, all across" and "Top-level includes subcategories"
-- [ ] 7.6 Implement sorting (name, date added, unit price, direction toggle, unpriced items last); test for scenario "Most expensive first"
-- [ ] 7.7 Show result paths starting with the house pill, collapsed between the pill and the last level; test for scenario "Same box name in two houses"
-- [ ] 7.8 Implement "Search in this container" with a removable chip; test for scenario "Searching inside a box"
+- [x] 7.2 Build the Search tab (field, QR button, scope and match controls, filters, sort, live count, no automatic keyboard, empty-state message); tests for scenarios "Browsing everything" and "No results"
+- [x] 7.3 Implement matching (case and accent insensitive, word prefixes, all words required, debounced, no history stored); tests for scenarios "Accent-insensitive" and "Partial words"
+- [x] 7.4 Implement scope and match fields (Name also covers brand, model, serial and QR); tests for scenarios "Finding by serial number" and "Containers only"
+- [x] 7.5 Implement filters (house, categories including subcategories, tags; any within a filter, all across filters; persisted until "Clear all"); tests for scenarios "Any within, all across" and "Top-level includes subcategories"
+- [x] 7.6 Implement sorting (name, date added, unit price, direction toggle, unpriced items last); test for scenario "Most expensive first"
+- [x] 7.7 Show result paths starting with the house pill, collapsed between the pill and the last level; test for scenario "Same box name in two houses"
+- [x] 7.8 Implement "Search in this container" with a removable chip; test for scenario "Searching inside a box"
 - [ ] 7.9 Write the search user docs (both languages), and add the 0.6 entry to `CHANGELOG.md`
 
 ## 8. Release 0.7 — QR codes

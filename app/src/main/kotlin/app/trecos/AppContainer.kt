@@ -62,6 +62,9 @@ class AppContainer(
     suspend fun freeUnusedPhotos(): Int =
         photoStore.deleteUnreferenced(database.photos().referencedHashes().toSet(), olderThan = clock() - 60 * 60 * 1000)
 
+    /** The container "Search in this container" limits the Search tab to, or `null`. */
+    val searchWithin = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
     /** Short messages shown app-wide, such as "Deleted" with Undo. */
     val messages = MutableSharedFlow<AppMessage>(extraBufferCapacity = 8)
 

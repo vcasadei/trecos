@@ -3,7 +3,13 @@ package app.trecos.data
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
+import app.trecos.places.MatchIn
+import app.trecos.places.SearchFilters
+import app.trecos.places.SearchScope
+import app.trecos.places.SortBy
 import java.util.Currency
 import java.util.Locale
 import kotlinx.coroutines.flow.Flow
@@ -52,6 +58,26 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
         prefs[ADD_FLOW]?.let { runCatching { AddFlow.valueOf(it) }.getOrNull() } ?: AddFlow.FormFirst
     }
 
+    /** The search filters and order, kept until "Clear all" (the typed text is never stored). */
+    val searchFilters: Flow<SearchFilters> = store.data.map(::readSearchFilters)
+
+    /**
+     * Reads the search filters from stored preferences.
+     *
+     * @param prefs the stored preferences.
+     * @return the filters, with defaults for missing values.
+     */
+    private fun readSearchFilters(prefs: Preferences): SearchFilters =
+        SearchFilters(
+            scope = prefs[SEARCH_SCOPE]?.let { runCatching { SearchScope.valueOf(it) }.getOrNull() } ?: SearchScope.Items,
+            matchIn = prefs[SEARCH_MATCH]?.let { runCatching { MatchIn.valueOf(it) }.getOrNull() } ?: MatchIn.NameAndDescription,
+            houses = prefs[SEARCH_HOUSES].orEmpty(),
+            categories = prefs[SEARCH_CATEGORIES].orEmpty(),
+            tags = prefs[SEARCH_TAGS].orEmpty(),
+            sortBy = prefs[SEARCH_SORT]?.let { runCatching { SortBy.valueOf(it) }.getOrNull() } ?: SortBy.Name,
+            descending = prefs[SEARCH_DESCENDING] ?: false,
+        )
+
     /** The ISO 4217 display currency; the phone region's currency by default. */
     val currency: Flow<String> = store.data.map { it[CURRENCY] ?: defaultCurrency }
 
@@ -91,6 +117,30 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
     suspend fun setAddFlow(flow: AddFlow) = store.edit { it[ADD_FLOW] = flow.name }
 
     /**
+     * Saves the search filters and order.
+     *
+     * @param filters the filters.
+     */
+    suspend fun setSearchFilters(filters: SearchFilters) = updateSearchFilters { filters }
+
+    /**
+     * Changes the search filters from their current stored value, in one
+     * edit, so quick successive changes never overwrite each other.
+     *
+     * @param change builds the new filters from the current ones.
+     */
+    suspend fun updateSearchFilters(change: (SearchFilters) -> SearchFilters) = store.edit {
+        val filters = change(readSearchFilters(it))
+        it[SEARCH_SCOPE] = filters.scope.name
+        it[SEARCH_MATCH] = filters.matchIn.name
+        it[SEARCH_HOUSES] = filters.houses
+        it[SEARCH_CATEGORIES] = filters.categories
+        it[SEARCH_TAGS] = filters.tags
+        it[SEARCH_SORT] = filters.sortBy.name
+        it[SEARCH_DESCENDING] = filters.descending
+    }
+
+    /**
      * Saves the display currency. Amounts are relabelled, never converted.
      *
      * @param code an ISO 4217 code such as `BRL`.
@@ -104,6 +154,13 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
         val CURRENCY = stringPreferencesKey("currency")
         val IMAGE_SOURCE = stringPreferencesKey("image_source")
         val ADD_FLOW = stringPreferencesKey("add_flow")
+        val SEARCH_SCOPE = stringPreferencesKey("search_scope")
+        val SEARCH_MATCH = stringPreferencesKey("search_match")
+        val SEARCH_HOUSES = stringSetPreferencesKey("search_houses")
+        val SEARCH_CATEGORIES = stringSetPreferencesKey("search_categories")
+        val SEARCH_TAGS = stringSetPreferencesKey("search_tags")
+        val SEARCH_SORT = stringPreferencesKey("search_sort")
+        val SEARCH_DESCENDING = booleanPreferencesKey("search_descending")
 
         /**
          * @return the currency of the phone's region, or USD when the region has none.
