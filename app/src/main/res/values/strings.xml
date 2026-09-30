@@ -266,7 +266,6 @@
     <string name="setting_house_fields">Fields for every item</string>
     <string name="setting_open_trash">Trash</string>
     <string name="setting_version">Version</string>
-    <string name="setting_licenses_later">Open-source licenses arrive in a later version.</string>
     <string name="no_house_yet">Add a house first.</string>
     <string name="currency_search">Search currencies</string>
     <string name="currency_warning_title">Change the currency to %1$s?</string>
@@ -433,4 +432,35 @@
     <string name="disconnect_blocked">Turn encryption off before disconnecting: the key\'s recovery copy is in this Google account.</string>
     <string name="export_unencrypted_title">This backup won\'t be encrypted</string>
     <string name="export_unencrypted_body">Encryption is on, but backup files are never encrypted. Anyone with the file can read it. Continue?</string>
+    <!-- Help, support and about (1.0) -->
+    <string name="settings_help">Help</string>
+    <string name="settings_support">Support Trecos</string>
+    <string name="setting_faq">Questions and answers</string>
+    <string name="setting_contact">Contact us</string>
+    <string name="setting_tips">Leave a tip</string>
+    <string name="setting_tips_hint">Everything in Trecos is free; tips help keep it going.</string>
+    <string name="setting_rate">Rate Trecos</string>
+    <string name="setting_about">About Trecos</string>
+    <string name="faq_title">Questions and answers</string>
+    <string name="contact_title">What is it about?</string>
+    <string name="subject_question">Question</string>
+    <string name="subject_quote">License quote</string>
+    <string name="subject_suggestion">Suggestion</string>
+    <string name="subject_problem">Problem</string>
+    <string name="contact_no_app">No e-mail app was found. Write to us at:</string>
+    <string name="tips_title">Leave a tip</string>
+    <string name="tips_intro">Tips are one-off payments through Google Play. They unlock nothing: every feature is free for everyone.</string>
+    <string name="tip_small">Small tip</string>
+    <string name="tip_medium">Medium tip</string>
+    <string name="tip_large">Large tip</string>
+    <string name="tips_unavailable">Tips need Google Play, which isn\'t available on this phone.</string>
+    <string name="tips_thanks">Thank you for supporting Trecos!</string>
+    <string name="tips_failed">The tip didn\'t go through. Nothing was charged.</string>
+    <string name="about_title">About Trecos</string>
+    <string name="about_license">Trecos is source-available under the PolyForm Noncommercial License 1.0.0. Commercial use requires a license from the author.</string>
+    <string name="about_source">Source code</string>
+    <string name="about_website">Website</string>
+    <string name="about_privacy">Privacy policy</string>
+    <string name="about_licenses">Open-source licenses</string>
+    <string name="setting_faq_hint">Answers to the most common questions</string>
 </resources>

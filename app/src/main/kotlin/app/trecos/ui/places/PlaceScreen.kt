@@ -86,6 +86,8 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
         if (state != null) loaded = true else if (loaded && containerId != null) nav.back()
     }
     val current = state ?: return
+    // The Home list is interactive: what the cold-start benchmark measures (task 14.8).
+    if (isTabRoot) androidx.activity.compose.ReportDrawn()
     val dark = LocalDarkTheme.current
     val language = AppLanguage.current()
     val colour = current.container?.let { PaletteColor.fromKey(current.tree.colorKey(it.id)) }

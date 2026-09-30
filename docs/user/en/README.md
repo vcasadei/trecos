@@ -11,4 +11,5 @@ The guide is written as each feature ships:
 | [qr-labels.md](qr-labels.md) | 0.7 |
 | [custom-fields-and-settings.md](custom-fields-and-settings.md) | 0.8 |
 | [backup.md](backup.md) | 0.10 |
-| [faq.md](faq.md) (also shown in the app) | 1.0 (answers 2 to 10 drafted) |
+| [security-and-privacy.md](security-and-privacy.md) | 1.0 |
+| [faq.md](faq.md) (also shown in the app) | 1.0 (all 10 answers) |

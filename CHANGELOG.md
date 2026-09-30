@@ -6,6 +6,16 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - Unreleased
+
+### Added
+
+- Settings > Help: the ten questions and answers as an accordion (from the user guide) and "Contact us", with a subject type and version details, or the address with a copy button when there is no e-mail app.
+- Settings > Support Trecos: three repeatable tips through Google Play (they unlock nothing) and "Rate Trecos"; a single in-app rating prompt, at most once, after 14 days, 20 items and 5 sessions, and never inside a flow.
+- Settings > About: version, the PolyForm Noncommercial license and the commercial-license note, links to the source, the website and the privacy policy, and every open-source library with its license text.
+- A CI check that keeps advertising, analytics and crash-reporting SDKs out of the app.
+- The security and privacy guide, and FAQ answer 1.
+
 ## [0.12.0] - Unreleased
 
 ### Added

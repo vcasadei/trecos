@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
+import app.trecos.help.RatingPolicy
 import app.trecos.ui.lock.LockGate
 import app.trecos.ui.shell.TrecosApp
 import app.trecos.ui.theme.TrecosTheme
@@ -58,13 +59,19 @@ class MainActivity : AppCompatActivity() {
         val prefs = container.preferences
         val (enabled, timeout) = runBlocking { prefs.appLock.first() to prefs.lockTimeout.first() }
         val screenLockGone = container.lock.onForeground(enabled, timeout, container.security.isScreenLockSet())
-        if (screenLockGone) lifecycleScope.launch { prefs.setAppLock(false) }
+        // App-wide scope: the setting must flip even if the activity stops again right away.
+        if (screenLockGone) container.scope.launch { prefs.setAppLock(false) }
+        lifecycleScope.launch { prefs.countSession(container.clock(), RatingPolicy.SESSION_GAP) }
     }
 
     /** Starts the background timer, except for a rotation or other configuration change. */
     override fun onStop() {
         super.onStop()
-        if (!isChangingConfigurations) container.lock.onBackground()
+        if (!isChangingConfigurations) {
+            container.lock.onBackground()
+            val now = container.clock()
+            container.scope.launch { container.preferences.markActive(now) }
+        }
     }
 
     /**

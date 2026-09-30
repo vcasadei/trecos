@@ -1,5 +1,6 @@
 package app.trecos.ui.settings
 
+import app.trecos.ui.places.PREFERENCE_WRITE_MS
 import androidx.activity.compose.setContent
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertTextContains
@@ -84,8 +85,9 @@ class SettingsScenariosTest : PlacesTestBase() {
         waitForTextIn("value_language", "English")
         waitForTextIn("value_start", "Home")
         waitForTextIn("value_theme", "Follow system")
-        showRow("version")
-        val tops = listOf("General", "Appearance", "Items & photos", "Custom fields", "Trash", "About").map { title ->
+        showRow("about")
+        val order = listOf("General", "Appearance", "Items & photos", "Custom fields", "Security", "Sync & backup", "Trash", "Help", "Support Trecos", "About")
+        val tops = order.map { title ->
             rule.onAllNodes(androidx.compose.ui.test.hasText(title), useUnmergedTree = true).fetchSemanticsNodes().minOf { it.boundsInRoot.top }
         }
         assertEquals(tops.sorted(), tops)
@@ -98,7 +100,7 @@ class SettingsScenariosTest : PlacesTestBase() {
         click("setting_theme")
         click("option_theme_${ThemeMode.Dark}")
 
-        eventually(10_000) { runBlocking { app.preferences.theme.first() } == ThemeMode.Dark }
+        eventually(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.theme.first() } == ThemeMode.Dark }
         rule.waitForIdle()
         val image = rule.onRoot().captureToImage().asAndroidBitmap()
         assertEquals(android.graphics.Color.BLACK, image.getPixel(image.width / 2, image.height / 3))
@@ -118,7 +120,7 @@ class SettingsScenariosTest : PlacesTestBase() {
         tag("currency_warning")
         click("confirm_currency")
 
-        eventually(10_000) { runBlocking { app.preferences.currency.first() } == "USD" }
+        eventually(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.currency.first() } == "USD" }
         click(tabTag(TrecosTab.Home))
         val row = hasTestTag(rowTag("tv")).and(androidx.compose.ui.test.hasText("$3,500.00", substring = true))
         eventually(10_000) { rule.onAllNodes(row).fetchSemanticsNodes().isNotEmpty() }
@@ -144,7 +146,7 @@ class SettingsScenariosTest : PlacesTestBase() {
         openSettings()
         click("setting_start")
         click("option_start_${StartScreen.Search}")
-        eventually(10_000) { runBlocking { app.preferences.startScreen.first() } == StartScreen.Search }
+        eventually(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.startScreen.first() } == StartScreen.Search }
 
         rule.runOnUiThread { rule.activity.setContent { TrecosTheme { TrecosApp() } } }
         tag(rootScreenTag(TrecosTab.Search))

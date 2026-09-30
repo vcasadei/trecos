@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.aboutlibraries)
     alias(libs.plugins.baselineprofile)
     alias(libs.plugins.roborazzi)
     alias(libs.plugins.ksp)
@@ -24,6 +25,9 @@ android {
         // for a local build with -Ptrecos.driveSync=true or -Ptrecos.encryption=true.
         buildConfigField("boolean", "FEATURE_DRIVE_SYNC", (findProperty("trecos.driveSync") ?: "false").toString())
         buildConfigField("boolean", "FEATURE_ENCRYPTION", (findProperty("trecos.encryption") ?: "false").toString())
+        // The benchmark seed receiver (task 14.8) is on only in benchmarkRelease; see androidComponents below.
+        buildConfigField("boolean", "BENCHMARK_SEED", "false")
+        manifestPlaceholders["benchmarkSeed"] = "false"
     }
 
     // Release signing reads only these environment variables (design D22); CI sets
@@ -74,6 +78,43 @@ android {
     // schemas as assets. Unit tests only see the tested variant's assets, so the
     // schemas go into debug builds; release builds never contain them.
     sourceSets.getByName("debug").assets.directories.add("$projectDir/schemas")
+}
+
+/**
+ * Bundles the user FAQ (`docs/user/<language>/faq.md`, design D18) as
+ * `assets/faq/<language>.md`, so the in-app FAQ and the published guide share one source.
+ */
+abstract class FaqAssets : DefaultTask() {
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val docs: DirectoryProperty
+
+    @get:OutputDirectory
+    abstract val output: DirectoryProperty
+
+    @TaskAction
+    fun copy() {
+        val out = output.get().asFile.resolve("faq")
+        out.deleteRecursively()
+        out.mkdirs()
+        docs.get().asFile.listFiles().orEmpty().filter { it.resolve("faq.md").exists() }.forEach { language ->
+            language.resolve("faq.md").copyTo(out.resolve("${language.name}.md"), overwrite = true)
+        }
+    }
+}
+
+val faqAssets = tasks.register<FaqAssets>("faqAssets") {
+    docs.set(rootProject.layout.projectDirectory.dir("docs/user"))
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.sources.assets?.addGeneratedSourceDirectory(faqAssets, FaqAssets::output)
+        if (variant.name == "benchmarkRelease") {
+            variant.manifestPlaceholders.put("benchmarkSeed", "true")
+            variant.buildConfigFields?.put("BENCHMARK_SEED", com.android.build.api.variant.BuildConfigField("boolean", "true", "Benchmark seeding"))
+        }
+    }
 }
 
 room {
@@ -156,6 +197,8 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.play.services.auth)
+    implementation(libs.billing.ktx)
+    implementation(libs.play.review.ktx)
     baselineProfile(project(":baselineprofile"))
 
     testImplementation(libs.androidx.work.testing)
