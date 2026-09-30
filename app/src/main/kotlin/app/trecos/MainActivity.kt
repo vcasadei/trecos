@@ -59,7 +59,8 @@ class MainActivity : AppCompatActivity() {
         val prefs = container.preferences
         val (enabled, timeout) = runBlocking { prefs.appLock.first() to prefs.lockTimeout.first() }
         val screenLockGone = container.lock.onForeground(enabled, timeout, container.security.isScreenLockSet())
-        if (screenLockGone) lifecycleScope.launch { prefs.setAppLock(false) }
+        // App-wide scope: the setting must flip even if the activity stops again right away.
+        if (screenLockGone) container.scope.launch { prefs.setAppLock(false) }
         lifecycleScope.launch { prefs.countSession(container.clock(), RatingPolicy.SESSION_GAP) }
     }
 
