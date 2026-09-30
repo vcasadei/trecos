@@ -78,6 +78,9 @@ class AppContainer(
     /** Short messages shown app-wide, such as "Deleted" with Undo. */
     val messages = MutableSharedFlow<AppMessage>(extraBufferCapacity = 8)
 
+    /** Which unfinished features are switched on (design D19); tests turn them on. */
+    var features: Features = Features(driveSync = BuildConfig.FEATURE_DRIVE_SYNC, encryption = BuildConfig.FEATURE_ENCRYPTION)
+
     /** The phone's own lock; tests replace it with a fake. */
     var security: DeviceSecurity = SystemDeviceSecurity(context)
 
@@ -97,3 +100,11 @@ class AppContainer(
  * @property undoEntries trash entries restored when the user taps Undo; empty for no Undo.
  */
 data class AppMessage(val text: String, val undoEntries: List<String> = emptyList())
+
+/**
+ * Feature flags (design D19).
+ *
+ * @property driveSync Google Drive sync (release 0.11).
+ * @property encryption database encryption (release 0.12).
+ */
+data class Features(val driveSync: Boolean = false, val encryption: Boolean = false)
