@@ -9,6 +9,7 @@ import app.trecos.categories.CategorySuggester
 import app.trecos.data.AppPreferences
 import app.trecos.data.TrecosDatabase
 import app.trecos.places.OrganizeStore
+import app.trecos.places.PhotoStore
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 
@@ -39,6 +40,9 @@ class AppContainer(
     val suggester: CategorySuggester by lazy {
         CategorySuggester.parse(context.assets.open("category-keywords.json").bufferedReader().use { it.readText() })
     }
+
+    /** Stored photos and thumbnails in app-private storage. */
+    val photoStore: PhotoStore = PhotoStore(context.filesDir, context.contentResolver)
 
     /** Moving, copying, the trash and house deletion. */
     val organize: OrganizeStore by lazy { OrganizeStore(database, clock, newId) }
