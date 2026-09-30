@@ -29,7 +29,7 @@ run at the end of **every** release group before it is tagged.
 ## 2. Release 0.2 — Places and items
 
 - [x] 2.1 Create the Room database on the SQLCipher engine (no key) with `House`, `Container` and `Item` (UUID ids, `houseId`, created/updated/deleted timestamps, a per-house unique `qrCode` index, money as minor units), and export schema v1; verify with DAO unit tests and the committed schema JSON
-- [ ] 2.2 Add `AppContainer` wiring (database, stores) and ViewModel factories; verify that the app starts in a Robolectric smoke test
+- [x] 2.2 Add `AppContainer` wiring (database, stores) and ViewModel factories; verify that the app starts in a Robolectric smoke test
 - [ ] 2.3 Implement the first-run house prompt ("My home" pre-filled); test for scenario "First run"
 - [ ] 2.4 Implement house create/edit (name required, address, description, icon from the place set, colour); tests for scenarios "Creating a second house", "House without a name" and "Deleting the last house"
 - [ ] 2.5 Implement the Home tab entry point (single house opens directly, house list at 2 or more, last-used house, switcher with "Add house"); tests for scenarios "Single house" and "Several houses"
