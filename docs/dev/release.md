@@ -20,8 +20,10 @@ repository and not in the Drive folder. Together they are the plaintext key.
 
 ## CI secrets
 
-The release workflow reads only these four environment variables; Gradle's
-release `signingConfig` reads nothing else.
+The release workflow reads only these four secrets. It decodes the keystore
+into `$RUNNER_TEMP` and passes its path as `TRECOS_KEYSTORE_FILE`; Gradle's
+release `signingConfig` reads only `TRECOS_KEYSTORE_FILE`,
+`TRECOS_KEYSTORE_PASSWORD`, `TRECOS_KEY_ALIAS` and `TRECOS_KEY_PASSWORD`.
 
 | Secret | Contents | Placeholder |
 |---|---|---|
@@ -65,6 +67,20 @@ On compromise only. Android 9+ supports APK Signature Scheme v3 key rotation
 
 ## Publishing a release
 
-Planned for task 2.23: pushing a `v*` tag builds per-ABI and universal APKs,
-checks them with `apksigner verify --print-certs`, and publishes them on GitHub
-Releases with a `SHA256SUMS` file and the certificate fingerprint in the notes.
+`.github/workflows/release.yml` runs when a `v*` tag is pushed:
+
+| Step | What it does |
+|---|---|
+| Decode the keystore | `TRECOS_KEYSTORE_BASE64` into `$RUNNER_TEMP/release.p12`, removed at the end |
+| Build | `./gradlew assembleRelease` with the four variables: one APK per ABI (`arm64-v8a`, `armeabi-v7a`, `x86_64`) plus a universal one |
+| Check | Debug logs stripped; `apksigner verify --print-certs` on every APK |
+| Publish | `trecos-<version>-<abi>.apk`, `SHA256SUMS` and the certificate fingerprint in the notes, as a pre-release |
+
+```sh
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+The workflow has not run yet: it needs the secrets (tasks 2.20-2.22). The
+signing path itself was tested locally with a throwaway key: the release build
+signs when `TRECOS_KEYSTORE_FILE` and the three other variables are set, and
+stays unsigned otherwise.

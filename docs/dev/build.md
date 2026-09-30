@@ -23,7 +23,7 @@ A new library needs the maintainer's approval first (see `CONTRIBUTING.md`).
 | Goal | Command | Output |
 |---|---|---|
 | Debug APK | `./gradlew assembleDebug` | `app/build/outputs/apk/debug/app-debug.apk` |
-| Release APK (unsigned until signing is set up in 0.2) | `./gradlew assembleRelease` | `app/build/outputs/apk/release/app-release-unsigned.apk` |
+| Release APKs (unsigned locally; CI signs them) | `./gradlew assembleRelease` | `app/build/outputs/apk/release/app-<abi>-release-unsigned.apk`, one per ABI plus `universal` |
 | Lint | `./gradlew lintDebug` | `app/build/reports/lint-results-debug.html` |
 | Unit, Robolectric and screenshot tests | `./gradlew testDebugUnitTest` | `app/build/reports/tests/testDebugUnitTest/` |
 | Screenshot verification | `./gradlew verifyRoborazziDebug` | fails on any change from `app/src/test/screenshots/` |

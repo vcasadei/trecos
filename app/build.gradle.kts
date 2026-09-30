@@ -21,11 +21,35 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Release signing reads only these environment variables (design D22); CI sets
+    // them from the release secrets. Without them the release build is unsigned.
+    val keystoreFile = System.getenv("TRECOS_KEYSTORE_FILE")
+    if (keystoreFile != null) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(keystoreFile)
+                storePassword = System.getenv("TRECOS_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("TRECOS_KEY_ALIAS")
+                keyPassword = System.getenv("TRECOS_KEY_PASSWORD")
+            }
+        }
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
     buildTypes {
         debug {
             enableUnitTestCoverage = true
         }
         release {
+            if (keystoreFile != null) signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
