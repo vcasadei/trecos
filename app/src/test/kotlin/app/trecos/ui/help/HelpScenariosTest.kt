@@ -23,7 +23,9 @@ import app.trecos.help.TipOutcome
 import app.trecos.ui.places.PlacesTestBase
 import app.trecos.ui.settings.SETTINGS_LIST_TAG
 import app.trecos.ui.shell.TrecosTab
+import app.trecos.ui.shell.rootScreenTag
 import app.trecos.ui.shell.tabTag
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
@@ -152,15 +154,19 @@ class HelpScenariosTest : PlacesTestBase() {
     private fun returnHomeAfter(days: Int, items: Int, sessions: Int) {
         seed(items = (1..items).map { item("i$it") })
         runBlocking { app.preferences.setRatingCounters(app.clock() - days * RatingPolicy.DAY, sessions) }
-        click(tabTag(TrecosTab.Settings))
-        click(tabTag(TrecosTab.Home))
+        clickUntil(tabTag(TrecosTab.Settings)) { exists(SETTINGS_LIST_TAG) }
+        clickUntil(tabTag(TrecosTab.Home)) { exists(rootScreenTag(TrecosTab.Home)) && !exists(SETTINGS_LIST_TAG) }
         rule.waitForIdle()
     }
+
+    /** @return what the prompt looks at, for failure messages. */
+    private fun ratingState() = runBlocking { "${app.preferences.rating.first()} items=${app.database.items().countActive()} now=${app.clock()}" }
 
     @Test
     fun theSinglePrompt() {
         returnHomeAfter(days = 15, items = 20, sessions = 5)
-        rule.waitUntil(10_000) { reviews == 1 }
+        val shown = runCatching { rule.waitUntil(10_000) { reviews == 1 } }.isSuccess
+        assertTrue("no prompt: ${ratingState()}", shown)
 
         click(tabTag(TrecosTab.Settings))
         click(tabTag(TrecosTab.Home))
