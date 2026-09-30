@@ -9,11 +9,19 @@ import app.trecos.AppContainer
 import app.trecos.data.Container
 import app.trecos.data.House
 import app.trecos.data.Item
+import app.trecos.data.ItemCategory
+import app.trecos.data.CustomCategory
+import app.trecos.categories.CategoryCatalog
+import app.trecos.categories.CategorySuggester
+import app.trecos.categories.TagStore
+import app.trecos.categories.TextNormalizer
 import app.trecos.places.FieldError
 import app.trecos.places.Money
 import app.trecos.places.Validation
 import app.trecos.ui.language.AppLanguage
 import app.trecos.ui.theme.PaletteColor
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -49,10 +57,18 @@ class HouseFormViewModel(private val app: AppContainer, private val houseId: Str
     var loaded by mutableStateOf(false)
         private set
 
+    /** Other houses a new house can copy custom categories and tags from. */
+    var otherHouses by mutableStateOf<List<House>>(emptyList())
+        private set
+
+    /** The house to copy from, or `null` for built-in categories only. */
+    var copyFrom by mutableStateOf<String?>(null)
+
     init {
         viewModelScope.launch {
             val houses = app.database.houses().observeAll().first()
             existing = houseId?.let { app.database.houses().get(it) }
+            if (houseId == null) otherHouses = houses
             existing?.let {
                 name = it.name
                 address = it.address.orEmpty()
@@ -64,6 +80,27 @@ class HouseFormViewModel(private val app: AppContainer, private val houseId: Str
                 colour = (PaletteColor.entries.firstOrNull { it.key !in used } ?: PaletteColor.entries.first()).key
             }
             loaded = true
+        }
+    }
+
+    /**
+     * Copies a house's custom categories (keeping subcategories under their
+     * copied parents) and tags into another house. Items are never copied.
+     *
+     * @param from the house to copy from.
+     * @param to the new house.
+     */
+    private suspend fun copyCategoriesAndTags(from: String, to: String) {
+        val now = app.clock()
+        val categories = app.database.categories().custom(from)
+        val newIds = categories.associate { it.id to app.newId() }
+        categories.sortedBy { it.parentId in newIds }.forEach { category ->
+            app.database.categories().insertCustom(
+                category.copy(id = newIds.getValue(category.id), houseId = to, parentId = category.parentId?.let { newIds[it] ?: it }, createdAt = now, updatedAt = now),
+            )
+        }
+        app.database.tags().all(from).forEach { tag ->
+            app.database.tags().insert(tag.copy(id = app.newId(), houseId = to, createdAt = now, updatedAt = now))
         }
     }
 
@@ -91,6 +128,7 @@ class HouseFormViewModel(private val app: AppContainer, private val houseId: Str
             )
             if (old == null) {
                 app.database.houses().insert(house)
+                copyFrom?.let { copyCategoriesAndTags(from = it, to = house.id) }
                 app.preferences.setLastHouse(house.id)
             } else {
                 app.database.houses().update(house)
@@ -196,7 +234,8 @@ class ContainerFormViewModel(
 }
 
 /**
- * Edits a new or existing item. "Save + new" keeps the location.
+ * Edits a new or existing item, with its categories and tags. "Save + new"
+ * keeps the location and the categories.
  *
  * @param app the app's container.
  * @param houseId the house of a new item (ignored when editing).
@@ -210,9 +249,18 @@ class ItemFormViewModel(
     private val itemId: String?,
 ) : ViewModel() {
     private var existing: Item? = null
+    private val tagStore = TagStore(app.database.tags(), app.clock, app.newId)
+    private var suggestionJob: Job? = null
+    private var completionJob: Job? = null
 
-    /** The typed name. */
-    var name by mutableStateOf("")
+    /** The typed name; changing it refreshes the suggestions. */
+    var name: String
+        get() = nameState
+        set(value) {
+            nameState = value
+            refreshSuggestions()
+        }
+    private var nameState by mutableStateOf("")
 
     /** The typed quantity; starts at 1. */
     var quantity by mutableStateOf("1")
@@ -232,11 +280,46 @@ class ItemFormViewModel(
     /** The typed QR code. */
     var qrCode by mutableStateOf("")
 
-    /** The typed description. */
-    var description by mutableStateOf("")
+    /** The typed description; changing it refreshes the suggestions. */
+    var description: String
+        get() = descriptionState
+        set(value) {
+            descriptionState = value
+            refreshSuggestions()
+        }
+    private var descriptionState by mutableStateOf("")
 
     /** Whether "More fields" is open. */
     var moreFields by mutableStateOf(false)
+
+    /** The item's categories, main first. */
+    var categories by mutableStateOf<List<String>>(emptyList())
+        private set
+
+    /** The item's tag names. */
+    var tags by mutableStateOf<List<String>>(emptyList())
+        private set
+
+    /** The tag being typed; changing it refreshes the completions. */
+    var tagInput: String
+        get() = tagInputState
+        set(value) {
+            tagInputState = value
+            refreshCompletions()
+        }
+    private var tagInputState by mutableStateOf("")
+
+    /** Existing tags offered for [tagInput]. */
+    var tagCompletions by mutableStateOf<List<String>>(emptyList())
+        private set
+
+    /** The house's categories: built-ins plus its custom ones. */
+    var catalog by mutableStateOf(CategoryCatalog(app.builtInCategories, emptyList()))
+        private set
+
+    /** Up to three suggested categories not yet on the item. */
+    var suggestions by mutableStateOf<List<String>>(emptyList())
+        private set
 
     /** Field errors of the last rejected save. */
     var errors by mutableStateOf<Set<FieldError>>(emptySet())
@@ -247,37 +330,137 @@ class ItemFormViewModel(
         private set
 
     init {
-        if (itemId != null) {
-            viewModelScope.launch {
+        viewModelScope.launch {
+            if (itemId != null) {
                 existing = app.database.items().get(itemId)
                 val currency = app.preferences.currency.first()
                 existing?.let {
-                    name = it.name
+                    nameState = it.name
                     quantity = it.quantity.toString()
                     unitPrice = it.unitPrice?.let { p -> Money.formatInput(p, currency, AppLanguage.current()) }.orEmpty()
                     brand = it.brand.orEmpty()
                     model = it.model.orEmpty()
                     serial = it.serial.orEmpty()
                     qrCode = it.qrCode.orEmpty()
-                    description = it.description.orEmpty()
-                    moreFields = listOf(brand, model, serial, qrCode, description).any(String::isNotEmpty)
+                    descriptionState = it.description.orEmpty()
                     location = it.houseId to it.containerId
+                    categories = app.database.categories().forItem(it.id)
+                    tags = app.database.tags().forItem(it.id).map { tag -> tag.name }
+                    moreFields = listOf(brand, model, serial, qrCode, descriptionState).any(String::isNotEmpty) || tags.isNotEmpty()
                 }
+            }
+            app.database.categories().observeCustom(location.first).collect { custom ->
+                catalog = CategoryCatalog(app.builtInCategories, custom)
+                categories = categories.filter { catalog[it] != null }
             }
         }
     }
 
     /**
-     * Validates and saves the item.
+     * Adds a category, or removes it if the item already has it. The first
+     * category added becomes the main one.
      *
-     * @param andNew whether to open an empty form in the same location afterwards.
+     * @param id the category id or key.
+     */
+    fun toggleCategory(id: String) {
+        categories = if (id in categories) categories - id else categories + id
+        refreshSuggestions()
+    }
+
+    /**
+     * Makes an assigned category the main one.
+     *
+     * @param id the category id or key.
+     */
+    fun setMain(id: String) {
+        if (id in categories) categories = listOf(id) + (categories - id)
+    }
+
+    /**
+     * Creates a custom category in the item's house and assigns it.
+     *
+     * @param name the name, shown as typed.
+     * @param parentId a top-level category to put it under, or `null` for a new top level.
+     * @param icon an icon key, or `null` for the empty default.
+     */
+    fun createCategory(name: String, parentId: String?, icon: String?) {
+        val trimmed = name.trim().ifEmpty { return }
+        viewModelScope.launch {
+            val now = app.clock()
+            val category = CustomCategory(app.newId(), location.first, parentId, trimmed, icon, now, now)
+            app.database.categories().insertCustom(category)
+            categories = categories + category.id
+        }
+    }
+
+    /**
+     * @param id a custom category id.
+     * @return how many items have it, for the delete confirmation.
+     */
+    suspend fun usage(id: String): Int = app.database.categories().usage(id)
+
+    /**
+     * Deletes a custom category everywhere; items keep their other categories.
+     *
+     * @param id the custom category id.
+     */
+    fun deleteCategory(id: String) {
+        viewModelScope.launch {
+            app.database.categories().deleteCustom(id)
+            categories = categories - id
+        }
+    }
+
+    /**
+     * Adds a tag by name; an existing tag differing only in case or accents is reused on save.
+     *
+     * @param name the tag name.
+     */
+    fun addTag(name: String) {
+        val trimmed = name.trim().ifEmpty { return }
+        val key = TextNormalizer.normalize(trimmed)
+        if (tags.none { TextNormalizer.normalize(it) == key }) tags = tags + trimmed
+        tagInput = ""
+    }
+
+    /**
+     * @param name a tag name on the item.
+     */
+    fun removeTag(name: String) {
+        tags = tags - name
+    }
+
+    private fun refreshSuggestions() {
+        suggestionJob?.cancel()
+        suggestionJob = viewModelScope.launch {
+            delay(300)
+            val text = "$nameState $descriptionState"
+            val learned = CategorySuggester.learned(app.database.categories(), location.first, text)
+            suggestions = app.suggester.suggest(text, catalog, categories, learned)
+        }
+    }
+
+    private fun refreshCompletions() {
+        completionJob?.cancel()
+        completionJob = viewModelScope.launch {
+            val onItem = tags.map(TextNormalizer::normalize).toSet()
+            tagCompletions = tagStore.complete(location.first, tagInputState)
+                .map { it.name }
+                .filter { TextNormalizer.normalize(it) !in onItem }
+        }
+    }
+
+    /**
+     * Validates and saves the item with its categories and tags.
+     *
+     * @param andNew whether to open an empty form in the same location, keeping the categories.
      * @param onSaved called after a successful save when [andNew] is `false`.
      */
     fun save(andNew: Boolean, onSaved: () -> Unit) {
         viewModelScope.launch {
             val old = existing
             val currency = app.preferences.currency.first()
-            val validName = Validation.name(name)
+            val validName = Validation.name(nameState)
             val validQuantity = Validation.quantity(quantity)
             val price = Validation.optional(unitPrice)?.let { Money.parse(it, currency, AppLanguage.current()) ?: -1L }
             val qr = Validation.optional(qrCode)
@@ -301,20 +484,28 @@ class ItemFormViewModel(
                 model = Validation.optional(model),
                 serial = Validation.optional(serial),
                 qrCode = qr,
-                description = Validation.optional(description),
+                description = Validation.optional(descriptionState),
                 createdAt = old?.createdAt ?: now,
                 updatedAt = now,
             )
             if (old == null) app.database.items().insert(item) else app.database.items().update(item)
+            app.database.categories().replaceForItem(
+                item.id,
+                categories.mapIndexed { i, id -> ItemCategory(app.newId(), item.houseId, item.id, id, i, now) },
+            )
+            CategorySuggester.learn(app.database.categories(), item.houseId, "${item.name} ${item.description.orEmpty()}", categories)
+            tagStore.setForItem(item.houseId, item.id, tags)
             if (andNew && old == null) {
-                name = ""
+                nameState = ""
                 quantity = "1"
                 unitPrice = ""
                 brand = ""
                 model = ""
                 serial = ""
                 qrCode = ""
-                description = ""
+                descriptionState = ""
+                tags = emptyList()
+                suggestions = emptyList()
             } else {
                 onSaved()
             }

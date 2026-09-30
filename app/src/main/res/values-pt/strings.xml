@@ -78,4 +78,32 @@
         <item quantity="many">%1$d itens</item>
         <item quantity="other">%1$d itens</item>
     </plurals>
+
+    <!-- Categories and tags (0.3) -->
+    <string name="field_categories">Categorias</string>
+    <string name="add_category">Adicionar categoria</string>
+    <string name="main_category">Principal</string>
+    <string name="set_main">Tornar principal</string>
+    <string name="action_remove">Remover</string>
+    <string name="search_categories">Buscar categorias</string>
+    <string name="new_category">Nova categoria</string>
+    <string name="category_parent">Colocar dentro de</string>
+    <string name="category_top_level">Categoria principal própria</string>
+    <string name="delete_category">Excluir categoria</string>
+    <string name="suggestions">Sugestões</string>
+    <string name="field_tags">Etiquetas</string>
+    <string name="add_tag">Adicionar etiqueta</string>
+    <string name="tags_title">Etiquetas</string>
+    <string name="action_rename">Renomear</string>
+    <string name="delete_tag_confirm">Remover esta etiqueta de todos os itens?</string>
+    <string name="no_tags">Nenhuma etiqueta ainda. Adicione em um item.</string>
+    <string name="copy_from">Copiar categorias e etiquetas de</string>
+    <string name="copy_none">Não copiar</string>
+    <string name="action_done">Concluir</string>
+    <string name="no_categories">Sem categorias</string>
+    <plurals name="delete_category_confirm">
+        <item quantity="one">Ela será removida de %1$d item, que mantém suas outras categorias.</item>
+        <item quantity="many">Ela será removida de %1$d itens, que mantêm suas outras categorias.</item>
+        <item quantity="other">Ela será removida de %1$d itens, que mantêm suas outras categorias.</item>
+    </plurals>
 </resources>

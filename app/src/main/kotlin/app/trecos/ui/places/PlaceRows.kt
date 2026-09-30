@@ -25,6 +25,7 @@ import app.trecos.R
 import app.trecos.data.Container
 import app.trecos.data.Item
 import app.trecos.data.ListView
+import app.trecos.categories.CategoryIcons
 import app.trecos.places.Money
 import app.trecos.places.PlaceValue
 import app.trecos.ui.language.AppLanguage
@@ -46,6 +47,9 @@ fun rowTag(id: String): String = "row_$id"
  * @return the tag, such as `badge_drawer`.
  */
 fun badgeTag(iconKey: String): String = "badge_$iconKey"
+
+/** Marks an item without categories, which shows the generic item icon. */
+const val NO_CATEGORY = "\u0000none"
 
 /** Test tag of a row's colour stripe. */
 const val STRIPE_TAG = "stripe"
@@ -89,13 +93,23 @@ fun ContainerRow(container: Container, colour: PaletteColor?, value: PlaceValue?
  * @param item the item.
  * @param listView condensed or detailed.
  * @param currency the display currency code.
+ * @param mainIcon the main category's icon key, `null` for the empty icon, or absent without categories.
+ * @param categoryLabels the item's category labels, main first, shown in the detailed view.
  * @param onClick opens the item.
  */
 @Composable
-fun ItemRow(item: Item, listView: ListView, currency: String, onClick: () -> Unit) {
+fun ItemRow(
+    item: Item,
+    listView: ListView,
+    currency: String,
+    mainIcon: String? = NO_CATEGORY,
+    categoryLabels: List<String> = emptyList(),
+    onClick: () -> Unit,
+) {
     val language = AppLanguage.current()
     val details = if (listView == ListView.Detailed) {
         buildList {
+            if (categoryLabels.isNotEmpty()) add(categoryLabels.joinToString(" · ") to 1)
             item.description?.let { add(it to 2) }
             val numbers = listOfNotNull(
                 "${stringResource(R.string.field_quantity)}: ${item.quantity}",
@@ -106,7 +120,9 @@ fun ItemRow(item: Item, listView: ListView, currency: String, onClick: () -> Uni
     } else {
         emptyList()
     }
-    PlaceRow(id = item.id, stripe = null, icon = R.drawable.ic_item, iconKey = "item", name = item.name, listView = listView, onClick = onClick, details = details)
+    val icon = if (mainIcon == NO_CATEGORY) R.drawable.ic_item else CategoryIcons.drawable(mainIcon)
+    val iconKey = if (mainIcon == NO_CATEGORY) "item" else mainIcon ?: CategoryIcons.EMPTY
+    PlaceRow(id = item.id, stripe = null, icon = icon, iconKey = iconKey, name = item.name, listView = listView, onClick = onClick, details = details)
 }
 
 /**

@@ -79,6 +79,9 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
     val path = current.tree.path(item.containerId)
     val levels = listOf(current.house.name) + path.map { it.name } + item.name
     val fields = listOfNotNull(
+        current.categories.takeIf { it.isNotEmpty() }?.let { ids ->
+            R.string.field_categories to ids.mapNotNull { current.catalog.label(it, language) }.joinToString("\n")
+        },
         R.string.field_quantity to item.quantity.toString(),
         item.unitPrice?.let { R.string.field_unit_price to Money.format(it, current.currency, language) },
         totalValue(item.quantity, item.unitPrice)?.let { R.string.total_value to Money.format(it, current.currency, language) },
@@ -87,6 +90,7 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
         item.serial?.let { R.string.field_serial to it },
         item.qrCode?.let { R.string.field_qr to it },
         item.description?.let { R.string.field_description to it },
+        current.tags.takeIf { it.isNotEmpty() }?.let { R.string.field_tags to it.joinToString(", ") },
         R.string.date_added to formatDate(item.createdAt, language),
         R.string.date_changed to formatDate(item.updatedAt, language),
     )
@@ -139,7 +143,7 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
                         .testTag(detailTag(label)),
                 ) {
                     Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    SafeText(value, maxLines = if (label == R.string.field_description) 20 else 2, style = MaterialTheme.typography.bodyLarge)
+                    SafeText(value, maxLines = if (label == R.string.field_description || label == R.string.field_categories) 20 else 2, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }

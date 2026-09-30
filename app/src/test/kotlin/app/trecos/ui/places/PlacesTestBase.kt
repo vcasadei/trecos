@@ -5,6 +5,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
@@ -93,12 +94,13 @@ abstract class PlacesTestBase {
     /**
      * Replaces the text of a form field.
      *
-     * @param field the field's short name.
+     * @param field the field's short name, or a raw test tag followed by `_raw`.
      * @param value the new text.
      */
     protected fun type(field: String, value: String) {
-        tag(fieldTag(field)).performTextClearance()
-        rule.onNodeWithTag(fieldTag(field)).performTextInput(value)
+        val tag = if (field.endsWith("_raw")) field.removeSuffix("_raw") else fieldTag(field)
+        tag(tag).performTextClearance()
+        rule.onNodeWithTag(tag, useUnmergedTree = true).performTextInput(value)
     }
 
     /**
@@ -107,7 +109,9 @@ abstract class PlacesTestBase {
      * @param tag the test tag.
      */
     protected fun click(tag: String) {
-        tag(tag).performClick()
+        val node = tag(tag)
+        runCatching { node.performScrollTo() }
+        node.performClick()
         rule.waitForIdle()
     }
 
