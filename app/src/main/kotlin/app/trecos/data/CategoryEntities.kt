@@ -178,3 +178,38 @@ data class Photo(
         const val MAX_PER_OWNER = 3
     }
 }
+
+/**
+ * The full-text search index (design D6): one row per item or container that
+ * is not in the trash, kept up to date by SQLite triggers ([SearchIndex]).
+ * Matching ignores case and accents.
+ *
+ * @property rowId the FTS row id.
+ * @property kind [KIND_ITEM] or [KIND_CONTAINER]; not indexed.
+ * @property refId the item or container id; not indexed.
+ * @property houseId its house; not indexed.
+ * @property name the name plus brand, model, serial number and QR code.
+ * @property description the description.
+ */
+@androidx.room.Fts4(
+    tokenizer = androidx.room.FtsOptions.TOKENIZER_UNICODE61,
+    tokenizerArgs = ["remove_diacritics=1"],
+    notIndexed = ["kind", "refId", "houseId"],
+)
+@Entity(tableName = "search_index")
+data class SearchEntry(
+    @PrimaryKey(autoGenerate = true) @androidx.room.ColumnInfo(name = "rowid") val rowId: Int = 0,
+    val kind: String,
+    val refId: String,
+    val houseId: String,
+    val name: String,
+    val description: String,
+) {
+    companion object {
+        /** An item. */
+        const val KIND_ITEM = "item"
+
+        /** A container. */
+        const val KIND_CONTAINER = "container"
+    }
+}

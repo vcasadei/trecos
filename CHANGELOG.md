@@ -6,6 +6,22 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] - Unreleased
+
+### Added
+
+- The Search tab: with nothing typed it lists every item, with a live count; the keyboard opens only when the field is tapped.
+- Accent- and case-insensitive matching on word beginnings, all words required, updating as you type; typed text is never stored.
+- Scope (Items, Containers, Both) and match (Name and description, Name, Description); Name covers brand, model, serial number and QR code.
+- Filters by house, category (a group includes its subcategories) and tag: any within a filter, all across filters, kept until "Clear all", even across restarts.
+- Sorting by name, date added or unit price, reversible, with unpriced items last.
+- Result paths start with a pill in the house's colour.
+- "Search in this container" with a removable chip.
+
+### Changed
+
+- Database schema 5: a full-text index kept up to date by triggers.
+
 ## [0.5.0] - Unreleased
 
 ### Added

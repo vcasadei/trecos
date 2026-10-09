@@ -73,8 +73,28 @@ class MigrationTest {
     }
 
     @Test
+    fun version4To5MakesExistingThingsSearchable() {
+        helper.createDatabase(DB, 4).use { db ->
+            db.execSQL("INSERT INTO house (id, name, icon, createdAt, updatedAt) VALUES ('h1', 'Apartment', 'house', 1, 1)")
+            db.execSQL("INSERT INTO item (id, houseId, name, quantity, serial, createdAt, updatedAt) VALUES ('i1', 'h1', 'Cabeça de impressão', 1, 'SN4478X21', 1, 1)")
+            db.execSQL("INSERT INTO item (id, houseId, name, quantity, createdAt, updatedAt, deletedAt) VALUES ('i2', 'h1', 'Cabeça velha', 1, 1, 1, 5)")
+            db.execSQL("INSERT INTO container (id, houseId, name, icon, createdAt, updatedAt) VALUES ('c1', 'h1', 'Box A', 'box', 1, 1)")
+        }
+        helper.runMigrationsAndValidate(DB, 5, true).use { db ->
+            fun match(q: String) = db.query("SELECT refId FROM search_index WHERE search_index MATCH '$q'").use { c -> buildList { while (c.moveToNext()) add(c.getString(0)) } }
+            assertEquals(listOf("i1"), match("cabeca*"))
+            assertEquals(listOf("i1"), match("name:sn4478*"))
+            assertEquals(listOf("c1"), match("box*"))
+            db.execSQL("INSERT INTO item (id, houseId, name, quantity, createdAt, updatedAt) VALUES ('i3', 'h1', 'Raspberry Pi 4', 1, 1, 1)")
+            assertEquals(listOf("i3"), match("rasp* 4*"))
+            db.execSQL("UPDATE item SET deletedAt = 9 WHERE id = 'i3'")
+            assertEquals(emptyList<String>(), match("rasp*"))
+        }
+    }
+
+    @Test
     fun theCurrentVersionIsTheLatestExportedSchema() {
-        assertEquals(4, TrecosDatabase.VERSION)
+        assertEquals(5, TrecosDatabase.VERSION)
     }
 
     private companion object {

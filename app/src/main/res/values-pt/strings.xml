@@ -188,4 +188,29 @@
         <item quantity="many">%1$d fotos não puderam ser adicionadas.</item>
         <item quantity="other">%1$d fotos não puderam ser adicionadas.</item>
     </plurals>
+
+    <!-- Search (0.6) -->
+    <string name="search_hint">Buscar itens e compartimentos</string>
+    <string name="scope_items">Itens</string>
+    <string name="scope_containers">Compartimentos</string>
+    <string name="scope_both">Ambos</string>
+    <string name="match_label">Buscar em</string>
+    <string name="match_name_desc">Nome e descrição</string>
+    <string name="match_name">Nome</string>
+    <string name="match_desc">Descrição</string>
+    <string name="filters">Filtros</string>
+    <string name="clear_all">Limpar tudo</string>
+    <string name="sort_name">Nome</string>
+    <string name="sort_date">Data de inclusão</string>
+    <string name="sort_price">Preço unitário</string>
+    <string name="sort_direction">Inverter ordem</string>
+    <string name="no_results">Nenhum resultado</string>
+    <string name="clear_filters">Limpar filtros</string>
+    <string name="scan_qr">Ler um código QR</string>
+    <string name="filter_houses">Casas</string>
+    <plurals name="result_count">
+        <item quantity="one">%1$d resultado</item>
+        <item quantity="many">%1$d resultados</item>
+        <item quantity="other">%1$d resultados</item>
+    </plurals>
 </resources>

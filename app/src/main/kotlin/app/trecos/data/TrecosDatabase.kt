@@ -15,11 +15,14 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
     entities = [
         House::class, Container::class, Item::class,
         CustomCategory::class, ItemCategory::class, Tag::class, ItemTag::class, TokenCategoryCount::class,
-        TrashEntry::class, Photo::class,
+        TrashEntry::class, Photo::class, SearchEntry::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4)],
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4),
+        AutoMigration(from = 4, to = 5, spec = SearchIndex.Migration4To5::class),
+    ],
 )
 abstract class TrecosDatabase : RoomDatabase() {
     /** @return houses. */
@@ -40,6 +43,9 @@ abstract class TrecosDatabase : RoomDatabase() {
     /** @return tags. */
     abstract fun tags(): TagDao
 
+    /** @return full-text search. */
+    abstract fun search(): SearchDao
+
     /** @return photo rows. */
     abstract fun photos(): PhotoDao
 
@@ -51,7 +57,7 @@ abstract class TrecosDatabase : RoomDatabase() {
         const val FILE_NAME = "trecos.db"
 
         /** The schema version of this build; keep in step with [Database.version]. */
-        const val VERSION = 4
+        const val VERSION = 5
 
         /**
          * Opens the database file on the SQLCipher engine, unencrypted, running
@@ -72,6 +78,7 @@ abstract class TrecosDatabase : RoomDatabase() {
             return guard.open {
                 val db = Room.databaseBuilder(context.applicationContext, TrecosDatabase::class.java, FILE_NAME)
                     .openHelperFactory(SupportOpenHelperFactory(ByteArray(0)))
+                    .addCallback(SearchIndex.onCreate)
                     .build()
                 try {
                     db.openHelper.writableDatabase
