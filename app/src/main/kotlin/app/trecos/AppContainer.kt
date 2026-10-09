@@ -48,6 +48,9 @@ class AppContainer(
     /** Where the camera app writes captures; emptied after each import. */
     val cameraDir: java.io.File = java.io.File(context.cacheDir, "camera")
 
+    /** A private scratch folder, such as for unpacking a backup before importing it. */
+    val workDir: java.io.File = java.io.File(context.cacheDir, "work")
+
     /** For message texts outside screens. */
     val resources: android.content.res.Resources = context.resources
 

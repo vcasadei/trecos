@@ -1,6 +1,7 @@
 package app.trecos.data
 
 import androidx.room.Entity
+import kotlinx.serialization.Serializable
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
@@ -17,6 +18,7 @@ import androidx.room.PrimaryKey
  * @property createdAt creation time, epoch milliseconds.
  * @property updatedAt last change time, epoch milliseconds.
  */
+@Serializable
 @Entity(tableName = "category", indices = [Index(value = ["houseId", "parentId"])])
 data class CustomCategory(
     @PrimaryKey val id: String,
@@ -38,6 +40,7 @@ data class CustomCategory(
  * @property position the order on the item; 0 is the main category.
  * @property createdAt creation time, epoch milliseconds.
  */
+@Serializable
 @Entity(
     tableName = "item_category",
     indices = [Index(value = ["itemId", "categoryId"], unique = true), Index(value = ["houseId", "categoryId"])],
@@ -62,6 +65,7 @@ data class ItemCategory(
  * @property createdAt creation time, epoch milliseconds.
  * @property updatedAt last change time, epoch milliseconds.
  */
+@Serializable
 @Entity(tableName = "tag", indices = [Index(value = ["houseId", "normalized"], unique = true)])
 data class Tag(
     @PrimaryKey val id: String,
@@ -81,6 +85,7 @@ data class Tag(
  * @property tagId the tag.
  * @property createdAt creation time, epoch milliseconds.
  */
+@Serializable
 @Entity(
     tableName = "item_tag",
     indices = [Index(value = ["itemId", "tagId"], unique = true), Index(value = ["houseId", "tagId"])],
@@ -102,6 +107,7 @@ data class ItemTag(
  * @property categoryId a built-in key or a custom category id.
  * @property count how many saved items had both.
  */
+@Serializable
 @Entity(tableName = "token_category_count", primaryKeys = ["houseId", "token", "categoryId"])
 data class TokenCategoryCount(
     val houseId: String,
@@ -123,6 +129,7 @@ data class TokenCategoryCount(
  * @property parentId where it was: its container, or `null` for the house's top level.
  * @property trashedAt when it was trashed, epoch milliseconds.
  */
+@Serializable
 @Entity(tableName = "trash_entry", indices = [Index(value = ["houseId", "trashedAt"])])
 data class TrashEntry(
     @PrimaryKey val id: String,
@@ -154,6 +161,7 @@ data class TrashEntry(
  * @property position the order on the owner; 0 is the main photo.
  * @property createdAt when it was added, epoch milliseconds.
  */
+@Serializable
 @Entity(tableName = "photo", indices = [Index(value = ["ownerId", "position"]), Index(value = ["sha256"]), Index(value = ["houseId"])])
 data class Photo(
     @PrimaryKey val id: String,

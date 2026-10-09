@@ -2,6 +2,7 @@ plugins {
     jacoco
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.baselineprofile)
     alias(libs.plugins.roborazzi)
     alias(libs.plugins.ksp)
@@ -148,6 +149,7 @@ dependencies {
     implementation(libs.play.services.code.scanner)
     implementation(libs.androidx.print)
     implementation(libs.androidx.biometric)
+    implementation(libs.kotlinx.serialization.json)
     baselineProfile(project(":baselineprofile"))
 
     testImplementation(libs.junit)

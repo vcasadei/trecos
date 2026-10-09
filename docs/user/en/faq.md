@@ -24,6 +24,14 @@ the image). To print many, long-press one row, select the others and tap the
 print icon: they all go in one print job, 12 labels per page. Things without a
 code are skipped.
 
+## 5. How do backup and sync work?
+
+**Backup**: Settings > **Sync & backup** > **Backup** saves one `.zip` file
+with your houses and photos wherever you choose. Import it on any phone, adding
+its houses as new ones or replacing everything. It needs no account, and the
+file is not encrypted. See [Backup](backup.md). Sync with your own Google Drive
+arrives in a later version; this answer will cover it then.
+
 ## 6. What happens when I delete something?
 
 It goes to the house's trash for 30 days, and you can tap **Undo** right away.

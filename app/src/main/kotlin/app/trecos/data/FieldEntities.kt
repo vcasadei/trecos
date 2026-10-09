@@ -1,6 +1,7 @@
 package app.trecos.data
 
 import androidx.room.Entity
+import kotlinx.serialization.Serializable
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
@@ -21,6 +22,7 @@ enum class FieldType { Text, Number, Date, YesNo }
  * @property createdAt creation time, epoch milliseconds.
  * @property updatedAt last change time, epoch milliseconds.
  */
+@Serializable
 @Entity(tableName = "field_def", indices = [Index(value = ["houseId", "itemId"])])
 data class FieldDef(
     @PrimaryKey val id: String,
@@ -50,6 +52,7 @@ data class FieldDef(
  * @property createdAt creation time, epoch milliseconds.
  * @property updatedAt last change time, epoch milliseconds.
  */
+@Serializable
 @Entity(
     tableName = "field_value",
     indices = [Index(value = ["itemId", "fieldId"], unique = true), Index(value = ["fieldId"])],
