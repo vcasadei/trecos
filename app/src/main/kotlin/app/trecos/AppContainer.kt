@@ -99,6 +99,12 @@ class AppContainer(
     /** Which unfinished features are switched on (design D19); tests turn them on. */
     var features: Features = Features(driveSync = BuildConfig.FEATURE_DRIVE_SYNC, encryption = BuildConfig.FEATURE_ENCRYPTION)
 
+    /** Google Play's in-app review; tests replace it. */
+    var review: app.trecos.help.ReviewPrompter = app.trecos.help.PlayReviewPrompter
+
+    /** The tip jar; tests replace it. */
+    var tips: app.trecos.help.TipJar = app.trecos.help.PlayTipJar()
+
     /** The phone's own lock; tests replace it with a fake. */
     var security: DeviceSecurity = SystemDeviceSecurity(context)
 

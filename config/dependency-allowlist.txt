@@ -1,0 +1,26 @@
+# Dependency groups allowed in the release runtime classpath (task 14.6).
+# A group not listed here fails CI until it is reviewed and added.
+# Advertising, analytics and crash-reporting SDKs are never allowed (help-and-support spec,
+# "No tracking"); scripts/check-dependencies.sh also denies known ones by name.
+androidx.*
+org.jetbrains
+org.jetbrains.*
+com.google.android.gms
+com.google.android.play
+com.android.billingclient
+com.google.mlkit
+com.google.android.odml
+com.google.zxing
+com.google.guava
+com.google.accompanist
+com.mikepenz
+com.squareup.okio
+io.coil-kt.coil3
+javax.inject
+org.jspecify
+net.zetetic
+# Pulled in by the Google code scanner (ML Kit): Google's transport for ML Kit's
+# own diagnostics, and the Firebase encoders it depends on. No Firebase product
+# SDK (Analytics, Crashlytics, ...) is included; see the deny list.
+com.google.android.datatransport
+com.google.firebase

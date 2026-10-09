@@ -53,6 +53,12 @@ jobs:
       - name: No debug logs in release
         run: scripts/check-release-logs.sh
 
+      - name: No tracking dependencies
+        run: scripts/check-dependencies.sh
+
+      - name: Performance gate logic
+        run: python3 scripts/check-benchmark.py --self-test
+
       - name: Upload reports
         if: failure()
         uses: actions/upload-artifact@v7

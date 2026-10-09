@@ -19,3 +19,18 @@ fun MacrobenchmarkScope.visitEveryTab() {
         device.waitForIdle()
     }
 }
+
+/** Flings the Home list down and back up a few times. */
+fun MacrobenchmarkScope.scrollTheList() {
+    val x = device.displayWidth / 2
+    val low = device.displayHeight * 3 / 4
+    val high = device.displayHeight / 4
+    repeat(3) {
+        device.swipe(x, low, x, high, 8)
+        device.waitForIdle()
+    }
+    repeat(3) {
+        device.swipe(x, high, x, low, 8)
+        device.waitForIdle()
+    }
+}

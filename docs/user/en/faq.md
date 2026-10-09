@@ -3,6 +3,13 @@
 This file is the source of the in-app FAQ (Settings > Help). Answers are added
 as their features ship.
 
+## 1. How do I add my first item?
+
+On Home, tap **+** and choose **Item**. Type a name, and optionally a quantity,
+a price, categories and a photo. Tap **Save**. To keep things in boxes, drawers
+or rooms, add a **Container** first, open it and add items inside. See
+[Getting started](getting-started.md).
+
 ## 2. How do QR labels work?
 
 Each item or container can have a QR code, which starts as its name. Print it,

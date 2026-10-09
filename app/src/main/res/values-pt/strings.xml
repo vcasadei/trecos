@@ -270,7 +270,6 @@
     <string name="setting_house_fields">Campos para todos os itens</string>
     <string name="setting_open_trash">Lixeira</string>
     <string name="setting_version">Versão</string>
-    <string name="setting_licenses_later">As licenças de código aberto chegam numa versão futura.</string>
     <string name="no_house_yet">Adicione uma casa primeiro.</string>
     <string name="currency_search">Buscar moedas</string>
     <string name="currency_warning_title">Mudar a moeda para %1$s?</string>
@@ -444,4 +443,35 @@
     <string name="disconnect_blocked">Desligue a criptografia antes de desconectar: a cópia de recuperação da chave está nesta conta Google.</string>
     <string name="export_unencrypted_title">Este backup não será criptografado</string>
     <string name="export_unencrypted_body">A criptografia está ligada, mas arquivos de backup nunca são criptografados. Qualquer pessoa com o arquivo pode lê-lo. Continuar?</string>
+    <!-- Help, support and about (1.0) -->
+    <string name="settings_help">Ajuda</string>
+    <string name="settings_support">Apoie o Trecos</string>
+    <string name="setting_faq">Perguntas e respostas</string>
+    <string name="setting_contact">Fale conosco</string>
+    <string name="setting_tips">Deixar uma gorjeta</string>
+    <string name="setting_tips_hint">Tudo no Trecos é gratuito; as gorjetas ajudam a mantê-lo.</string>
+    <string name="setting_rate">Avaliar o Trecos</string>
+    <string name="setting_about">Sobre o Trecos</string>
+    <string name="faq_title">Perguntas e respostas</string>
+    <string name="contact_title">Sobre o que é?</string>
+    <string name="subject_question">Dúvida</string>
+    <string name="subject_quote">Orçamento de licença</string>
+    <string name="subject_suggestion">Sugestão</string>
+    <string name="subject_problem">Problema</string>
+    <string name="contact_no_app">Nenhum app de e-mail foi encontrado. Escreva para:</string>
+    <string name="tips_title">Deixar uma gorjeta</string>
+    <string name="tips_intro">As gorjetas são pagamentos avulsos pelo Google Play. Elas não liberam nada: todos os recursos são gratuitos para todos.</string>
+    <string name="tip_small">Gorjeta pequena</string>
+    <string name="tip_medium">Gorjeta média</string>
+    <string name="tip_large">Gorjeta grande</string>
+    <string name="tips_unavailable">As gorjetas precisam do Google Play, que não está disponível neste celular.</string>
+    <string name="tips_thanks">Obrigado por apoiar o Trecos!</string>
+    <string name="tips_failed">A gorjeta não foi concluída. Nada foi cobrado.</string>
+    <string name="about_title">Sobre o Trecos</string>
+    <string name="about_license">O Trecos tem código aberto para consulta sob a PolyForm Noncommercial License 1.0.0. O uso comercial exige uma licença do autor.</string>
+    <string name="about_source">Código-fonte</string>
+    <string name="about_website">Site</string>
+    <string name="about_privacy">Política de privacidade</string>
+    <string name="about_licenses">Licenças de código aberto</string>
+    <string name="setting_faq_hint">Respostas para as dúvidas mais comuns</string>
 </resources>

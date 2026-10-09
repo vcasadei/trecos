@@ -8,6 +8,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import app.trecos.data.StartScreen
 import app.trecos.ui.settings.SettingsScreen
 import app.trecos.ui.backup.BackupScreen
+import app.trecos.help.RatingPolicy
+import app.trecos.ui.help.AboutScreen
+import app.trecos.ui.help.FaqScreen
+import app.trecos.ui.help.LicensesScreen
+import app.trecos.ui.help.TipsScreen
 import app.trecos.ui.sync.ConflictsScreen
 import app.trecos.ui.sync.HistoryScreen
 import app.trecos.ui.sync.SyncNavigation
@@ -107,6 +112,10 @@ private object Routes {
     const val PROFILE = "settings/profile"
     const val BACKUP = "settings/backup"
     const val SYNC = "settings/sync"
+    const val FAQ = "settings/faq"
+    const val TIPS = "settings/tips"
+    const val ABOUT = "settings/about"
+    const val LICENSES = "settings/about/licenses"
     const val CONFLICTS = "settings/sync/conflicts"
     const val HISTORY = "settings/sync/history"
     const val HOUSE_FORM = "form/house?id={id}"
@@ -154,6 +163,20 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
             if (app.preferences.startScreen.first() == StartScreen.Search) navController.navigateToTab(TrecosTab.Search)
         }
     }
+    val activity = androidx.activity.compose.LocalActivity.current
+    LaunchedEffect(route) {
+        // The single rating prompt, only on the Home root: never during an add, edit, delete or conflict flow.
+        if (route == rootRoute(TrecosTab.Home) && activity != null) {
+            val counters = app.preferences.rating.first()
+            val first = counters.firstOpen ?: return@LaunchedEffect
+            if (RatingPolicy.shouldPrompt(first, app.clock(), app.database.items().countActive(), counters.sessions, counters.reviewShown, inFlow = false)) {
+                // Show before recording, and record on the app scope: leaving Home can cancel this effect,
+                // and the prompt must never be marked as shown without having been shown.
+                app.review.show(activity)
+                app.scope.launch { app.preferences.markReviewShown() }
+            }
+        }
+    }
     LaunchedEffect(app) {
         app.messages.collect { message ->
             scope.launch {
@@ -185,6 +208,9 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                                 openProfile = { navController.navigate(Routes.PROFILE) },
                                 openBackup = { navController.navigate(Routes.BACKUP) },
                                 openSync = { navController.navigate(Routes.SYNC) },
+                                openFaq = { navController.navigate(Routes.FAQ) },
+                                openTips = { navController.navigate(Routes.TIPS) },
+                                openAbout = { navController.navigate(Routes.ABOUT) },
                             ),
                         )
                     }
@@ -196,6 +222,10 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                         onBack = { navController.popBackStack() },
                     )
                 }
+                composable(Routes.FAQ) { FaqScreen { navController.popBackStack() } }
+                composable(Routes.TIPS) { TipsScreen { navController.popBackStack() } }
+                composable(Routes.ABOUT) { AboutScreen(onLicenses = { navController.navigate(Routes.LICENSES) }, onBack = { navController.popBackStack() }) }
+                composable(Routes.LICENSES) { LicensesScreen { navController.popBackStack() } }
                 composable(Routes.CONFLICTS) { ConflictsScreen { navController.popBackStack() } }
                 composable(Routes.HISTORY) { HistoryScreen { navController.popBackStack() } }
                 composable(Routes.BACKUP) { BackupScreen { navController.popBackStack() } }

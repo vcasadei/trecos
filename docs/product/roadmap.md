@@ -3,6 +3,14 @@
 Trecos v1.0 is delivered through incremental releases, each independently
 testable. The task-level plan is `openspec/changes/trecos-v1/tasks.md`.
 
+**Status (2026-09-30):** 0.1 has been merged. 0.2 to 1.0 are implemented as
+stacked pull requests (#3 to #14), waiting for review and for the owner's
+tasks: the release key and secrets (2.19–2.23), the Play account and testers
+(8.7, 8.8), the Google OAuth client (12.2), the reference phone for the
+performance pass (14.8), the site and e-mail (14.9) and the Play listing
+(14.10). Sync and encryption stay behind their build flags until a real
+sign-in has been verified (14.7).
+
 ## To 1.0
 
 | Release | Scope | Distribution |

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToString
 import androidx.test.core.app.ApplicationProvider
 import app.trecos.AppContainer
 import app.trecos.MainActivity
@@ -25,8 +26,21 @@ import org.junit.Rule
  */
 abstract class PlacesTestBase {
 
-    @get:Rule
+    @get:Rule(order = 1)
     val rule = createAndroidComposeRule<MainActivity>()
+
+    /** On failure, prints every window's semantics tree, to diagnose failures seen only on CI. */
+    @get:Rule(order = 2)
+    val dumpOnFailure = object : org.junit.rules.TestWatcher() {
+        override fun failed(e: Throwable?, description: org.junit.runner.Description?) {
+            runCatching {
+                val roots = rule.onAllNodes(androidx.compose.ui.test.isRoot(), useUnmergedTree = true)
+                val count = roots.fetchSemanticsNodes().size
+                println("SEMANTICS on failure of ${description?.methodName}: $count window(s)")
+                (0 until count).forEach { println(roots[it].printToString(maxDepth = Int.MAX_VALUE)) }
+            }.onFailure { println("SEMANTICS dump failed: $it") }
+        }
+    }
 
     /** The app's container, with its in-memory database. */
     protected val app: AppContainer get() = ApplicationProvider.getApplicationContext<TrecosApplication>().container
@@ -167,8 +181,9 @@ abstract class PlacesTestBase {
     }
 
     /**
-     * Taps until [done] holds, at most three times. For taps whose effect is
-     * checked in stored data: CI's test runner very rarely drops a tap.
+     * Taps until [done] holds, at most three times, waiting long enough for a
+     * slow preference write on CI before tapping again. Only for taps that
+     * are safe to repeat, such as navigation (never for toggles).
      *
      * @param tag the test tag.
      * @param done whether the tap took effect.
@@ -177,7 +192,7 @@ abstract class PlacesTestBase {
         repeat(3) {
             if (done()) return
             click(tag)
-            if (runCatching { eventually(5_000) { done() } }.isSuccess) return
+            if (runCatching { eventually(PREFERENCE_WRITE_MS) { done() } }.isSuccess) return
         }
         throw AssertionError("Tapping $tag had no effect")
     }
@@ -211,3 +226,6 @@ abstract class PlacesTestBase {
 val isPhotoThumb = androidx.compose.ui.test.SemanticsMatcher("is a photo thumbnail") { node ->
     node.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.TestTag) { "" }.matches(Regex("photo_[0-9a-f]{64}"))
 }
+
+/** How long tests wait for stored data to change. */
+const val PREFERENCE_WRITE_MS = 30_000L
