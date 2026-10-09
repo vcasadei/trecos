@@ -273,10 +273,7 @@ fun ContainerFormScreen(
         PhotoEditor(vm.photos.photos, vm.photos::import, vm.photos::setMain, vm.photos::remove, vm.photos::move)
         Field(R.string.field_name, vm.name, { vm.name = it }, "name", R.string.error_name_required.takeIf { FieldError.NameRequired in vm.errors })
         Field(R.string.field_description, vm.description, { vm.description = it }, "description", singleLine = false)
-        QrField(vm.qrCode, { vm.qrCode = it }, vm.errors, vm.qrHolder, onOpenHolder) { code ->
-            vm.qrCode = code
-            if (vm.name.isBlank()) vm.name = code
-        }
+        QrField(vm.qrCode, { vm.qrCode = it }, vm.errors, vm.qrHolder, onOpenHolder) { code -> vm.fillFromScan(code) }
         Field(
             R.string.field_value_override, vm.valueOverride, { vm.valueOverride = it }, "override",
             R.string.error_price.takeIf { FieldError.PriceInvalid in vm.errors }, KeyboardType.Decimal,
@@ -361,12 +358,10 @@ fun ItemFormScreen(
             Field(R.string.field_brand, vm.brand, { vm.brand = it }, "brand")
             Field(R.string.field_model, vm.model, { vm.model = it }, "model")
             Field(R.string.field_serial, vm.serial, { vm.serial = it }, "serial")
-            QrField(vm.qrCode, { vm.qrCode = it }, vm.errors, vm.qrHolder, onOpenHolder) { code ->
-            vm.qrCode = code
-            if (vm.name.isBlank()) vm.name = code
-        }
+            QrField(vm.qrCode, { vm.qrCode = it }, vm.errors, vm.qrHolder, onOpenHolder) { code -> vm.fillFromScan(code) }
             Field(R.string.field_description, vm.description, { vm.description = it }, "description", singleLine = false)
             TagsField(vm)
+            CustomFieldsEditor(vm.fields, vm.fieldErrors, vm::setField, vm::removeField, vm::addItemField)
         }
     }
 }
