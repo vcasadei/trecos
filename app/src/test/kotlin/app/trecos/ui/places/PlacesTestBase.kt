@@ -149,9 +149,30 @@ abstract class PlacesTestBase {
         rule.waitUntil(10_000) { rule.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
     }
 
+    /**
+     * Waits until a form field shows exactly [expected]; forms load their
+     * values after they open.
+     *
+     * @param field the field's short name.
+     * @param expected the text to wait for.
+     */
+    protected fun waitForField(field: String, expected: String) {
+        rule.waitUntil(10_000) {
+            rule.onAllNodes(androidx.compose.ui.test.hasTestTag(fieldTag(field)), useUnmergedTree = true).fetchSemanticsNodes().any {
+                it.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.EditableText) { androidx.compose.ui.text.AnnotatedString("") }.text == expected
+            }
+        }
+    }
+
     /** Presses system back. */
     protected fun pressBack() {
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
         rule.waitForIdle()
     }
+}
+
+
+/** Matches photo thumbnails: test tags that are exactly `photo_` followed by a SHA-256. */
+val isPhotoThumb = androidx.compose.ui.test.SemanticsMatcher("is a photo thumbnail") { node ->
+    node.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.TestTag) { "" }.matches(Regex("photo_[0-9a-f]{64}"))
 }

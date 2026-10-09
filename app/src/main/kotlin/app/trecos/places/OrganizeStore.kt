@@ -7,6 +7,7 @@ import app.trecos.data.CustomCategory
 import app.trecos.data.Item
 import app.trecos.data.ItemCategory
 import app.trecos.data.ItemTag
+import app.trecos.data.Photo
 import app.trecos.data.TrashEntry
 import androidx.room.withTransaction
 import app.trecos.data.TrecosDatabase
@@ -178,6 +179,9 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
                 ),
             )
         }
+        val crossingOwners = containers.filter { it.houseId != destination.houseId }.map { it.id } +
+            items.filter { it.houseId != destination.houseId }.map { it.id }
+        if (crossingOwners.isNotEmpty()) db.photos().moveOwners(crossingOwners, destination.houseId)
         for (item in items) {
             val crossing = item.houseId != destination.houseId
             val isRoot = item.id in roots
@@ -224,6 +228,7 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
                     updatedAt = now,
                 ),
             )
+            copyPhotos(from = container.id, to = newIds.getValue(container.id), houseId = destination.houseId, ownerType = Photo.OWNER_CONTAINER)
             if (isRoot) result += newIds.getValue(container.id)
         }
         for (item in items.filter { it.deletedAt == null }) {
@@ -240,6 +245,7 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
             )
             db.items().insert(copy)
             copyCategoriesAndTags(from = item, to = copy)
+            copyPhotos(from = item.id, to = copy.id, houseId = copy.houseId, ownerType = Photo.OWNER_ITEM)
             if (isRoot) result += copy.id
         }
         result
@@ -353,6 +359,7 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
             else -> below(entry.houseId, listOf(entry.targetId)).let { (below, inside) -> (listOfNotNull(dao.containerAnyState(entry.targetId)) + below) to inside }
         }
         val itemIds = items.filter { it.deletedAt == entry.trashedAt }.map { it.id }
+        db.photos().deleteOwners(itemIds + containers.filter { it.deletedAt == entry.trashedAt }.map { it.id })
         dao.deleteCategoriesOf(itemIds)
         dao.deleteTagsOf(itemIds)
         dao.hardDeleteItems(itemIds)
@@ -387,6 +394,7 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
      */
     suspend fun deleteHouse(houseId: String) = db.withTransaction {
         check(db.houses().count() > 1) { "The last house can't be deleted" }
+        db.photos().deleteHouse(houseId)
         with(dao) {
             deleteHouseItemCategories(houseId)
             deleteHouseItemTags(houseId)
@@ -432,6 +440,20 @@ class OrganizeStore(private val db: TrecosDatabase, private val clock: () -> Lon
         val names = dao.tagsOf(from.id).map { it.name }
         val tags = names.mapNotNull { tagStore.findOrCreate(to.houseId, it) }.distinctBy { it.id }
         db.tags().insertAssignments(tags.map { ItemTag(newId(), to.houseId, to.id, it.id, now) })
+    }
+
+    /**
+     * Gives a copy its own photo rows, sharing the original's files.
+     *
+     * @param from the original owner.
+     * @param to the copy.
+     * @param houseId the copy's house.
+     * @param ownerType the owner type.
+     */
+    private suspend fun copyPhotos(from: String, to: String, houseId: String, ownerType: String) {
+        val now = clock()
+        val photos = db.photos().forOwner(from).map { Photo(newId(), houseId, ownerType, to, it.sha256, it.position, now) }
+        if (photos.isNotEmpty()) db.photos().insert(photos)
     }
 
     /**

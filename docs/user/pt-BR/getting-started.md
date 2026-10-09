@@ -47,3 +47,12 @@ soma tudo o que está dentro dele, em qualquer nível. Você pode digitar um val
 manual no formulário do compartimento; ele passa a contar para os
 compartimentos acima. **Remover valor manual** volta ao valor automático. Itens
 sem preço contam como zero, e o compartimento mostra quantos são.
+
+## Fotos
+
+Cada item, compartimento ou casa pode ter até 3 fotos. No formulário, toque em
+**Adicionar foto**: na primeira vez, escolha Câmera ou Galeria (marque
+**Lembrar minha escolha** para não ser perguntado de novo). Toque em uma foto
+para torná-la a principal ou removê-la, ou toque e segure para arrastar e
+reordenar. As fotos são guardadas pequenas (1920 px) e sem dados de
+localização; o Trecos nunca precisa de permissão de câmera ou armazenamento.

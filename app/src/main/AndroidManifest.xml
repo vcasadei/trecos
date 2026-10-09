@@ -21,6 +21,17 @@
             </intent-filter>
         </activity>
 
+        <!-- Lets the camera app write a photo into the app's private cache; nothing reaches the gallery. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="app.trecos.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <!-- Stores the in-app language on Android 9-12, where the system has no per-app setting. -->
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

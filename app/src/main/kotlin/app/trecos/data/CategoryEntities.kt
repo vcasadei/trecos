@@ -141,3 +141,40 @@ data class TrashEntry(
         const val KIND_CONTAINER = "container"
     }
 }
+
+/**
+ * One photo of an item, container or house. The image file is named by its
+ * SHA-256, so identical photos are stored once and several rows may share it.
+ *
+ * @property id random UUID.
+ * @property houseId the owner's house.
+ * @property ownerType [OWNER_ITEM], [OWNER_CONTAINER] or [OWNER_HOUSE].
+ * @property ownerId the owner's id.
+ * @property sha256 the stored WebP file's SHA-256, in lower-case hex.
+ * @property position the order on the owner; 0 is the main photo.
+ * @property createdAt when it was added, epoch milliseconds.
+ */
+@Entity(tableName = "photo", indices = [Index(value = ["ownerId", "position"]), Index(value = ["sha256"]), Index(value = ["houseId"])])
+data class Photo(
+    @PrimaryKey val id: String,
+    val houseId: String,
+    val ownerType: String,
+    val ownerId: String,
+    val sha256: String,
+    val position: Int,
+    val createdAt: Long,
+) {
+    companion object {
+        /** The photo belongs to an item. */
+        const val OWNER_ITEM = "item"
+
+        /** The photo belongs to a container. */
+        const val OWNER_CONTAINER = "container"
+
+        /** The photo belongs to a house. */
+        const val OWNER_HOUSE = "house"
+
+        /** The most photos one owner can have. */
+        const val MAX_PER_OWNER = 3
+    }
+}

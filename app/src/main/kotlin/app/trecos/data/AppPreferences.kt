@@ -12,6 +12,12 @@ import kotlinx.coroutines.flow.map
 /** How lists show their rows. */
 enum class ListView { Condensed, Detailed }
 
+/** Where new photos come from. */
+enum class ImageSource { Ask, Camera, Gallery }
+
+/** What adding an item starts with. */
+enum class AddFlow { FormFirst, PhotoFirst }
+
 /** When the house colour band is drawn behind the status bar. */
 enum class HouseBand { Automatic, Always, Never }
 
@@ -34,6 +40,16 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
     /** The house band setting; automatic (two or more houses) by default. */
     val houseBand: Flow<HouseBand> = store.data.map { prefs ->
         prefs[HOUSE_BAND]?.let { runCatching { HouseBand.valueOf(it) }.getOrNull() } ?: HouseBand.Automatic
+    }
+
+    /** Where new photos come from; "ask" until the user remembers a choice. */
+    val imageSource: Flow<ImageSource> = store.data.map { prefs ->
+        prefs[IMAGE_SOURCE]?.let { runCatching { ImageSource.valueOf(it) }.getOrNull() } ?: ImageSource.Ask
+    }
+
+    /** What adding an item starts with; the form by default. */
+    val addFlow: Flow<AddFlow> = store.data.map { prefs ->
+        prefs[ADD_FLOW]?.let { runCatching { AddFlow.valueOf(it) }.getOrNull() } ?: AddFlow.FormFirst
     }
 
     /** The ISO 4217 display currency; the phone region's currency by default. */
@@ -61,6 +77,20 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
     suspend fun setHouseBand(band: HouseBand) = store.edit { it[HOUSE_BAND] = band.name }
 
     /**
+     * Saves where new photos come from.
+     *
+     * @param source the chosen source, or [ImageSource.Ask] to be asked every time.
+     */
+    suspend fun setImageSource(source: ImageSource) = store.edit { it[IMAGE_SOURCE] = source.name }
+
+    /**
+     * Saves what adding an item starts with.
+     *
+     * @param flow form first or photo first.
+     */
+    suspend fun setAddFlow(flow: AddFlow) = store.edit { it[ADD_FLOW] = flow.name }
+
+    /**
      * Saves the display currency. Amounts are relabelled, never converted.
      *
      * @param code an ISO 4217 code such as `BRL`.
@@ -72,6 +102,8 @@ class AppPreferences(private val store: DataStore<Preferences>, private val defa
         val LIST_VIEW = stringPreferencesKey("list_view")
         val HOUSE_BAND = stringPreferencesKey("house_band")
         val CURRENCY = stringPreferencesKey("currency")
+        val IMAGE_SOURCE = stringPreferencesKey("image_source")
+        val ADD_FLOW = stringPreferencesKey("add_flow")
 
         /**
          * @return the currency of the phone's region, or USD when the region has none.

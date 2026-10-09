@@ -21,17 +21,24 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import app.trecos.R
 import app.trecos.places.FieldError
+import app.trecos.data.AddFlow
+import app.trecos.ui.appContainer
 import app.trecos.ui.appViewModel
 import app.trecos.ui.shell.TrecosTopBar
 
@@ -84,6 +91,7 @@ private fun FormFrame(title: String, onBack: () -> Unit, buttons: @Composable ()
  * @param error the error message resource, or `null`.
  * @param keyboard the keyboard type.
  * @param singleLine whether the field is one line.
+ * @param focus lets the form move the cursor into this field.
  */
 @Composable
 private fun Field(
@@ -94,6 +102,7 @@ private fun Field(
     error: Int? = null,
     keyboard: KeyboardType = KeyboardType.Text,
     singleLine: Boolean = true,
+    focus: FocusRequester? = null,
 ) {
     OutlinedTextField(
         value = value,
@@ -104,7 +113,7 @@ private fun Field(
         keyboardOptions = KeyboardOptions(keyboardType = keyboard),
         singleLine = singleLine,
         maxLines = if (singleLine) 1 else 5,
-        modifier = Modifier.fillMaxWidth().testTag(fieldTag(tag)),
+        modifier = Modifier.fillMaxWidth().then(if (focus != null) Modifier.focusRequester(focus) else Modifier).testTag(fieldTag(tag)),
     )
 }
 
@@ -132,6 +141,7 @@ fun HouseFormScreen(houseId: String?, onDone: (String?) -> Unit) {
         onBack = { onDone(null) },
         buttons = { Button(onClick = { vm.save(onDone) }, modifier = Modifier.testTag("save")) { Text(stringResource(R.string.action_save)) } },
     ) {
+        PhotoEditor(vm.photos.photos, vm.photos::import, vm.photos::setMain, vm.photos::remove, vm.photos::move)
         Field(R.string.field_name, vm.name, { vm.name = it }, "name", R.string.error_name_required.takeIf { vm.nameError == FieldError.NameRequired })
         Field(R.string.field_address, vm.address, { vm.address = it }, "address")
         Field(R.string.field_description, vm.description, { vm.description = it }, "description", singleLine = false)
@@ -193,6 +203,7 @@ fun ContainerFormScreen(houseId: String, parentId: String?, containerId: String?
         onBack = onDone,
         buttons = { Button(onClick = { vm.save(onDone) }, modifier = Modifier.testTag("save")) { Text(stringResource(R.string.action_save)) } },
     ) {
+        PhotoEditor(vm.photos.photos, vm.photos::import, vm.photos::setMain, vm.photos::remove, vm.photos::move)
         Field(R.string.field_name, vm.name, { vm.name = it }, "name", R.string.error_name_required.takeIf { FieldError.NameRequired in vm.errors })
         Field(R.string.field_description, vm.description, { vm.description = it }, "description", singleLine = false)
         Field(R.string.field_qr, vm.qrCode, { vm.qrCode = it }, "qr", R.string.error_qr_in_use.takeIf { FieldError.QrInUse in vm.errors })
@@ -218,6 +229,16 @@ fun ContainerFormScreen(houseId: String, parentId: String?, containerId: String?
 @Composable
 fun ItemFormScreen(houseId: String, containerId: String?, itemId: String?, onDone: () -> Unit) {
     val vm = appViewModel(key = "itemForm/$itemId/$containerId") { ItemFormViewModel(it, houseId, containerId, itemId) }
+    val addFlow by appContainer().preferences.addFlow.collectAsState(initial = null)
+    var photoFirstPending by rememberSaveable { mutableStateOf(itemId == null) }
+    var focusName by rememberSaveable { mutableStateOf(false) }
+    val nameFocus = remember { FocusRequester() }
+    LaunchedEffect(focusName) {
+        if (focusName) {
+            runCatching { nameFocus.requestFocus() }
+            focusName = false
+        }
+    }
     FormFrame(
         title = stringResource(if (itemId == null) R.string.new_item else R.string.edit_item),
         onBack = onDone,
@@ -230,7 +251,22 @@ fun ItemFormScreen(houseId: String, containerId: String?, itemId: String?, onDon
             Button(onClick = { vm.save(andNew = false, onDone) }, modifier = Modifier.testTag("save")) { Text(stringResource(R.string.action_save)) }
         },
     ) {
-        Field(R.string.field_name, vm.name, { vm.name = it }, "name", R.string.error_name_required.takeIf { FieldError.NameRequired in vm.errors })
+        PhotoEditor(
+            photos = vm.photos.photos,
+            onPicked = { uris ->
+                vm.photos.import(uris)
+                if (uris.isNotEmpty() || addFlow == AddFlow.PhotoFirst) focusName = true
+            },
+            onSetMain = vm.photos::setMain,
+            onRemove = vm.photos::remove,
+            onMove = vm.photos::move,
+            requestAdd = photoFirstPending && addFlow == AddFlow.PhotoFirst,
+            onAddRequested = { photoFirstPending = false },
+        )
+        Field(
+            R.string.field_name, vm.name, { vm.name = it }, "name", R.string.error_name_required.takeIf { FieldError.NameRequired in vm.errors },
+            focus = nameFocus,
+        )
         CategoriesField(vm)
         Field(
             R.string.field_quantity, vm.quantity, { vm.quantity = it }, "quantity",

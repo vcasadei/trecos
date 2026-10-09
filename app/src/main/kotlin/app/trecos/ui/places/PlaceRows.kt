@@ -65,6 +65,7 @@ const val STRIPE_TAG = "stripe"
  * @param listView condensed or detailed.
  * @param currency the display currency code.
  * @param selected whether it is selected in selection mode.
+ * @param photo the main photo's SHA-256, shown instead of the icon, or `null`.
  * @param onLongClick starts or extends selection mode.
  * @param onClick opens the container, or toggles it in selection mode.
  */
@@ -76,6 +77,7 @@ fun ContainerRow(
     listView: ListView,
     currency: String,
     selected: Boolean = false,
+    photo: String? = null,
     onLongClick: () -> Unit = {},
     onClick: () -> Unit,
 ) {
@@ -92,6 +94,7 @@ fun ContainerRow(
         name = container.name,
         listView = listView,
         selected = selected,
+        photo = photo,
         onLongClick = onLongClick,
         onClick = onClick,
         details = buildList {
@@ -111,6 +114,7 @@ fun ContainerRow(
  * @param mainIcon the main category's icon key, `null` for the empty icon, or absent without categories.
  * @param categoryLabels the item's category labels, main first, shown in the detailed view.
  * @param selected whether it is selected in selection mode.
+ * @param photo the main photo's SHA-256, shown instead of the icon, or `null`.
  * @param onLongClick starts or extends selection mode.
  * @param onClick opens the item, or toggles it in selection mode.
  */
@@ -122,6 +126,7 @@ fun ItemRow(
     mainIcon: String? = NO_CATEGORY,
     categoryLabels: List<String> = emptyList(),
     selected: Boolean = false,
+    photo: String? = null,
     onLongClick: () -> Unit = {},
     onClick: () -> Unit,
 ) {
@@ -143,7 +148,7 @@ fun ItemRow(
     val iconKey = if (mainIcon == NO_CATEGORY) "item" else mainIcon ?: CategoryIcons.EMPTY
     PlaceRow(
         id = item.id, stripe = null, icon = icon, iconKey = iconKey, name = item.name, listView = listView,
-        selected = selected, onLongClick = onLongClick, onClick = onClick, details = details,
+        selected = selected, photo = photo, onLongClick = onLongClick, onClick = onClick, details = details,
     )
 }
 
@@ -157,6 +162,7 @@ fun ItemRow(
  * @param name the name, on one line.
  * @param listView condensed (48 dp icon) or detailed (96 dp icon).
  * @param selected whether it is selected; selected rows are highlighted.
+ * @param photo the main photo's SHA-256, shown instead of the icon, or `null`.
  * @param onLongClick called on a long press.
  * @param onClick opens the record.
  * @param details extra lines, each with its line limit.
@@ -170,6 +176,7 @@ private fun PlaceRow(
     name: String,
     listView: ListView,
     selected: Boolean,
+    photo: String?,
     onLongClick: () -> Unit,
     onClick: () -> Unit,
     details: List<Pair<String, Int>>,
@@ -198,7 +205,11 @@ private fun PlaceRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(Modifier.testTag(badgeTag(iconKey))) { PlaceIconBadge(icon, if (detailed) 96.dp else 48.dp) }
+            if (photo != null) {
+                PhotoThumb(photo, if (detailed) 96.dp else 48.dp)
+            } else {
+                Box(Modifier.testTag(badgeTag(iconKey))) { PlaceIconBadge(icon, if (detailed) 96.dp else 48.dp) }
+            }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 SafeText(name, maxLines = 1, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
                 details.forEach { (text, lines) ->
