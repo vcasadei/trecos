@@ -1,5 +1,8 @@
 # Neon outline options
 
+**Chosen:** D6 (Dark) and W5 (White). "Current" below means the outline
+before that choice.
+
 Task 2.25: pick one option for each theme. Tell me the codes (for example
 "D4 and W3"), or mix them ("D2's strength with D5's colour"). Every option is a
 real render of the bottom bar on the Home tab. Colour, line width, glow width,

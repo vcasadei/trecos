@@ -57,12 +57,13 @@ The bar floats with a neon outline instead of a shadow: a 1.5 dp line plus an
 8 dp blurred glow at 55% opacity, following the bar and its bump. The glow is
 decorative (no text sits on it), so it has no contrast requirement.
 
-Variations to choose from (task 2.25): [neon-options.md](neon-options.md).
+The colours were chosen from these options (task 2.25): D6 for Dark and W5 for White,
+see [neon-options.md](neon-options.md).
 
 | Theme | Glow colour |
 |---|---|
-| White | `#3F55B0` (the accent blue; cyan washes out on off-white) |
-| Dark | `#00E5FF` (electric cyan) |
+| White | `#651FFF` (violet, W5) |
+| Dark | `#B388FF` (violet, D6) |
 
 | Tab | White | Dark |
 |---|---|---|
