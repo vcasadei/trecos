@@ -87,6 +87,21 @@ class SyncEngineTest {
         override suspend fun getObject(sha256: String): ByteArray? = call().let { objects[sha256] }
     }
 
+    /** An in-memory key vault. */
+    class FakeVault : app.trecos.crypto.KeyVault {
+        var key: ByteArray? = null
+
+        override suspend fun get(): ByteArray? = key
+
+        override suspend fun put(key: ByteArray) {
+            this.key = key
+        }
+
+        override suspend fun delete() {
+            key = null
+        }
+    }
+
     /** One simulated device. */
     inner class Device(name: String) {
         val db: TrecosDatabase = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), TrecosDatabase::class.java)
@@ -94,7 +109,7 @@ class SyncEngineTest {
         val photos = PhotoStore(folder.newFolder(), ApplicationProvider.getApplicationContext<Context>().contentResolver)
         val store = SyncStore(folder.newFolder(), name)
         var now = 1_000L
-        val engine = SyncEngine(db, photos, store) { now++ }
+        val engine = SyncEngine(db, photos, store, clock = { now++ })
         val organize = OrganizeStore(db, { now++ }, { UUID.randomUUID().toString() })
 
         /** Syncs, pulling [pull] too. */

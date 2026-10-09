@@ -37,6 +37,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import app.trecos.AppContainer
+import app.trecos.AppMessage
 import app.trecos.R
 import app.trecos.data.AddFlow
 import app.trecos.data.DetailExtras
@@ -215,6 +216,7 @@ fun SettingsScreen(nav: SettingsNavigation) {
         val current = state ?: return@Column
         val language = AppLanguage.current()
         val driveSync = appFeatures().driveSync
+        val encryptionOn = appFeatures().encryption
         LazyColumn(contentPadding = PaddingValues(bottom = BottomBarClearance), modifier = Modifier.testTag(SETTINGS_LIST_TAG)) {
             item { Section(R.string.settings_general) }
             item {
@@ -296,6 +298,7 @@ fun SettingsScreen(nav: SettingsNavigation) {
             }
             item { Section(R.string.settings_security) }
             item { AppLockRow(current.appLock, vm) }
+            if (encryptionOn) item { EncryptionRow(nav.openSync) }
             if (current.appLock) {
                 item {
                     ChoiceRow(
@@ -335,6 +338,88 @@ fun SettingsScreen(nav: SettingsNavigation) {
 /** @return the feature flags. */
 @Composable
 private fun appFeatures() = app.trecos.ui.appContainer().features
+
+/**
+ * The encryption setting (encryption spec): needs a connected Google account,
+ * confirms, shows progress, then the app restarts to finish.
+ *
+ * @param openSync opens Sync, to connect an account.
+ */
+@Composable
+private fun EncryptionRow(openSync: () -> Unit) {
+    val app = app.trecos.ui.appContainer()
+    val encryption = app.encryption
+    val status by encryption.status.collectAsStateWithLifecycle()
+    val syncStatus by app.sync.status.collectAsStateWithLifecycle()
+    var dialog by remember { mutableStateOf<String?>(null) }
+    androidx.compose.runtime.LaunchedEffect(Unit) { encryption.refresh() }
+    val accountOnly = encryption.accountKeyOnly()
+    val value = when {
+        status.on -> stringResource(R.string.encryption_on)
+        accountOnly != null -> stringResource(R.string.encryption_account_only)
+        else -> stringResource(R.string.encryption_off)
+    }
+    val working = status.working
+    Column(
+        Modifier.fillMaxWidth().heightIn(min = 64.dp).clickable(enabled = !working) {
+            dialog = when {
+                status.on -> "disable"
+                !syncStatus.state.connected -> "account"
+                else -> "enable"
+            }
+        }.padding(horizontal = 16.dp, vertical = 10.dp).testTag("setting_encryption"),
+    ) {
+        Text(stringResource(R.string.setting_encryption), style = MaterialTheme.typography.bodyLarge)
+        Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.testTag("value_encryption"))
+    }
+    fun run(enable: Boolean) {
+        dialog = null
+        app.scope.launch {
+            val vault = app.sync.vault()
+            val ok = if (enable) encryption.enable(vault, existing = encryption.accountKeyOnly()) else encryption.disable(vault)
+            if (!ok) app.messages.tryEmit(AppMessage(app.resources.getString(if (enable) R.string.encryption_failed else R.string.decryption_failed)))
+        }
+    }
+    when (dialog) {
+        "account" -> AlertDialog(
+            onDismissRequest = { dialog = null },
+            text = { Text(stringResource(R.string.encryption_needs_account), modifier = Modifier.testTag("encryption_needs_account")) },
+            confirmButton = {
+                TextButton(onClick = {
+                    dialog = null
+                    openSync()
+                }, modifier = Modifier.testTag("encryption_connect")) { Text(stringResource(R.string.sync_connect)) }
+            },
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+        "enable" -> AlertDialog(
+            onDismissRequest = { dialog = null },
+            title = { Text(stringResource(R.string.encryption_enable_title)) },
+            text = { Text(stringResource(R.string.encryption_enable_body)) },
+            confirmButton = { TextButton(onClick = { run(enable = true) }, modifier = Modifier.testTag("confirm_encryption")) { Text(stringResource(R.string.encryption_enable_action)) } },
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+        "disable" -> AlertDialog(
+            onDismissRequest = { dialog = null },
+            title = { Text(stringResource(R.string.encryption_disable_title)) },
+            text = { Text(stringResource(R.string.encryption_disable_body)) },
+            confirmButton = { TextButton(onClick = { run(enable = false) }, modifier = Modifier.testTag("confirm_decryption")) { Text(stringResource(R.string.encryption_disable_action)) } },
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
+    if (working) {
+        AlertDialog(
+            onDismissRequest = {},
+            text = {
+                Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp), modifier = Modifier.testTag("encryption_progress")) {
+                    androidx.compose.material3.LinearProgressIndicator(Modifier.fillMaxWidth())
+                    Text(stringResource(if (status.on) R.string.decryption_working else R.string.encryption_working))
+                }
+            },
+            confirmButton = {},
+        )
+    }
+}
 
 /**
  * The Sync row: off, or the account, with a badge counting conflicts to resolve.

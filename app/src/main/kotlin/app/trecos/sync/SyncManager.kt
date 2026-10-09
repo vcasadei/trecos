@@ -6,6 +6,11 @@ import android.net.ConnectivityManager
 import android.os.Build
 import androidx.room.withTransaction
 import app.trecos.R
+import app.trecos.crypto.DriveKeyVault
+import app.trecos.crypto.EncryptionManager
+import app.trecos.crypto.KeyVault
+import app.trecos.crypto.MissingKeyException
+import app.trecos.crypto.SnapshotCipher
 import app.trecos.backup.deleteHouseRows
 import app.trecos.data.AppPreferences
 import app.trecos.data.TrecosDatabase
@@ -61,6 +66,15 @@ sealed interface ConnectResult {
 }
 
 /**
+ * One connection to the user's Drive.
+ *
+ * @property remote the sync store.
+ * @property user reads the Google account.
+ * @property vault the key vault in the hidden app folder.
+ */
+class DriveSession(val remote: SyncRemote, val user: suspend () -> DriveUser, val vault: KeyVault)
+
+/**
  * The sync status screens show.
  *
  * @property state the stored state.
@@ -78,6 +92,7 @@ data class SyncStatus(val state: SyncState, val running: Boolean = false)
  * @param preferences device preferences.
  * @param resources for plain-language errors.
  * @param clock the current time.
+ * @param encryption database encryption, whose key also encrypts Drive snapshots.
  */
 class SyncManager(
     private val context: Context,
@@ -86,20 +101,21 @@ class SyncManager(
     private val preferences: AppPreferences,
     private val resources: Resources,
     clock: () -> Long,
+    private val encryption: EncryptionManager,
 ) {
     /** This device's sync state. */
     val store = SyncStore(File(context.filesDir, "sync"), Build.MODEL ?: "Android")
 
     /** The merge and upload logic. */
-    val engine = SyncEngine(db, photos, store, clock)
+    val engine = SyncEngine(db, photos, store, clock, writeKey = { encryption.snapshotKey() }, readKeys = { encryption.readKeys() })
 
     /** Access to Drive; tests replace it. */
     var auth: DriveAuth = GoogleDriveAuth
 
-    /** Opens the remote store and reads the account for a token; tests replace it. */
-    var connectTo: (token: String) -> Pair<SyncRemote, suspend () -> DriveUser> = { token ->
+    /** Opens a Drive session for a token; tests replace it. */
+    var connectTo: (token: String) -> DriveSession = { token ->
         val client = DriveClient(token = { token })
-        DriveRemote(client) to { client.user() }
+        DriveSession(DriveRemote(client), { client.user() }, DriveKeyVault(client))
     }
 
     /** Whether photos may move now; tests replace it. */
@@ -120,9 +136,10 @@ class SyncManager(
      * @return what happened.
      */
     suspend fun connect(token: String): ConnectResult = run {
-        val (remote, user) = connectTo(token)
+        val session = open(token)
+        val remote = session.remote
         val existed = remote.open(create = true)
-        val account = user()
+        val account = session.user()
         store.update { it.copy(connected = true, accountEmail = account.emailAddress) }
         if (!existed) return@run ConnectResult.Synced(syncWith(remote, account, create = true))
         val local = db.snapshots().houses().map { it.id }.toSet()
@@ -141,7 +158,8 @@ class SyncManager(
      * @return the sync report.
      */
     suspend fun restore(token: String, houses: Set<String>, replaceLocal: Boolean): ConnectResult = run {
-        val (remote, user) = connectTo(token)
+        val session = open(token)
+        val (remote, user) = session.remote to session.user
         remote.open(create = false)
         if (replaceLocal) {
             db.withTransaction { db.snapshots().houses().forEach { deleteHouseRows(db, it.id) } }
@@ -165,10 +183,29 @@ class SyncManager(
             return false
         }
         val result = run {
-            val (remote, user) = connectTo(access)
-            ConnectResult.Synced(syncWith(remote, user()))
+            val session = open(access)
+            ConnectResult.Synced(syncWith(session.remote, session.user()))
         }
         return result is ConnectResult.Synced
+    }
+
+    /**
+     * The key vault of the connected account, for turning encryption on or off.
+     *
+     * @param token a token, or `null` to get one silently.
+     * @return the vault, or `null` when not connected or no token is available.
+     */
+    suspend fun vault(token: String? = null): KeyVault? {
+        if (!store.load().connected) return null
+        val access = token ?: auth.token(context) ?: return null
+        return connectTo(access).vault
+    }
+
+    /** Opens a session and picks up the account's encryption key, if Drive has one. */
+    private suspend fun open(token: String): DriveSession {
+        val session = connectTo(token)
+        runCatching { session.vault.get() }.getOrNull()?.let(encryption::useSessionKey)
+        return session
     }
 
     /**
@@ -181,16 +218,23 @@ class SyncManager(
         val access = token ?: auth.token(context) ?: return false
         store.update { it.copy(houses = emptyMap(), driveMissing = false) }
         val result = run {
-            val (remote, user) = connectTo(access)
-            ConnectResult.Synced(syncWith(remote, user(), create = true))
+            val session = open(access)
+            ConnectResult.Synced(syncWith(session.remote, session.user(), create = true))
         }
         return result is ConnectResult.Synced
     }
 
-    /** Stops syncing; every house stays on the phone (spec "Connecting Google Drive"). */
-    fun disconnect() {
+    /**
+     * Stops syncing; every house stays on the phone (spec "Connecting Google Drive").
+     * Refused while encryption is on, since the key's recovery copy depends on the account.
+     *
+     * @return `true` when disconnected.
+     */
+    fun disconnect(): Boolean {
+        if (encryption.keys.isEncrypted()) return false
         store.update { it.copy(connected = false, accountEmail = "", lastError = null) }
         refresh()
+        return true
     }
 
     /**
@@ -268,6 +312,7 @@ class SyncManager(
             is DriveAuthException -> R.string.sync_error_auth
             is NewerFormatException -> R.string.sync_error_newer
             is DriveFolderMissingException -> R.string.sync_error_missing
+            is MissingKeyException -> R.string.sync_error_key
             is IOException -> R.string.sync_error_network
             else -> R.string.sync_error_other
         },
@@ -285,6 +330,9 @@ class SyncManager(
     private suspend fun houseNames(remote: SyncRemote, ids: List<String>): Map<String, String> = ids.associateWith { id ->
         val ref = remote.refs(id).values.maxByOrNull { it.time }
         val bytes = ref?.let { remote.commit(id, it.commitId) }
-        bytes?.let { runCatching { CommitCodec.decode(it).second["house/$id"]?.get("name")?.toString()?.trim('"') }.getOrNull() } ?: id
+        bytes?.let { file ->
+            val plain = if (SnapshotCipher.isEncrypted(file)) encryption.readKeys().firstNotNullOfOrNull { key -> runCatching { SnapshotCipher.decrypt(file, key) }.getOrNull() } else file
+            plain?.let { runCatching { CommitCodec.decode(it).second["house/$id"]?.get("name")?.toString()?.trim('"') }.getOrNull() }
+        } ?: id
     }
 }
