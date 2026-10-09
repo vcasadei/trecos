@@ -132,13 +132,23 @@ report frame timings.
 | Step | What it does |
 |---|---|
 | Decode the keystore | `TRECOS_KEYSTORE_BASE64` into `$RUNNER_TEMP/release.p12`, removed at the end |
-| Build | `./gradlew assembleRelease` with the four variables: one APK per ABI (`arm64-v8a`, `armeabi-v7a`, `x86_64`) plus a universal one |
+| Build | `./gradlew assembleRelease -Ptrecos.version=<tag without the v>` with the four variables: one APK per ABI (`arm64-v8a`, `armeabi-v7a`, `x86_64`) plus a universal one |
 | Check | Debug logs stripped; `apksigner verify --print-certs` on every APK |
 | Publish | `trecos-<version>-<abi>.apk`, `SHA256SUMS` and the certificate fingerprint in the notes, as a pre-release |
 
 ```sh
 git tag v0.2.0 && git push origin v0.2.0
 ```
+
+### Version
+
+The tag sets the version; nothing is bumped by hand. `v1.2.3` gives
+`versionName` 1.2.3 and `versionCode` 10203 (major × 10000 + minor × 100 +
+patch), so every release has a higher code than the one before, as Google
+Play requires. The tag must be three numbers, with minor and patch below 100;
+anything else (for example `v1.2` or `v1.2.3-rc1`) stops the build. A build
+without `-Ptrecos.version`, such as a local one, is `0.0.0-dev` with
+`versionCode` 1.
 
 The workflow has not run yet: it needs the secrets (tasks 2.20-2.22). The
 signing path itself was tested locally with a throwaway key: the release build

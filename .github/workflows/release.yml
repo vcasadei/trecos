@@ -40,7 +40,8 @@ jobs:
           TRECOS_KEYSTORE_PASSWORD: ${{ secrets.TRECOS_KEYSTORE_PASSWORD }}
           TRECOS_KEY_ALIAS: ${{ secrets.TRECOS_KEY_ALIAS }}
           TRECOS_KEY_PASSWORD: ${{ secrets.TRECOS_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease
+        # The version comes from the tag: v1.2.3 gives versionName 1.2.3 and versionCode 10203.
+        run: ./gradlew assembleRelease -Ptrecos.version="${GITHUB_REF_NAME#v}"
 
       - name: Check logs are stripped
         run: scripts/check-release-logs.sh app/build/outputs/apk/release/app-universal-release.apk

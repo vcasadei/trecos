@@ -10,6 +10,16 @@ plugins {
     alias(libs.plugins.room)
 }
 
+// The version comes from the v* tag: the release workflow passes -Ptrecos.version=1.2.3.
+// versionCode is major * 10000 + minor * 100 + patch, so it grows with every release.
+// Local builds without the property are 0.0.0-dev with versionCode 1.
+val appVersion: Pair<String, Int> = (findProperty("trecos.version") as String?)?.let { raw ->
+    val version = raw.removePrefix("v")
+    val (major, minor, patch) = Regex("""(\d{1,3})\.(\d{1,2})\.(\d{1,2})""").matchEntire(version)?.destructured
+        ?: throw GradleException("trecos.version must look like 1.2.3 (minor and patch below 100), not '$raw'")
+    version to major.toInt() * 10000 + minor.toInt() * 100 + patch.toInt()
+} ?: ("0.0.0-dev" to 1)
+
 android {
     namespace = "app.trecos"
     compileSdk = 37
@@ -18,8 +28,8 @@ android {
         applicationId = "app.trecos"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersion.second
+        versionName = appVersion.first
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Feature flags (design D19): off until their releases are ready. Turn one on
         // for a local build with -Ptrecos.driveSync=true or -Ptrecos.encryption=true.

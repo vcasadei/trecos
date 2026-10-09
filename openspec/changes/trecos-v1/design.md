@@ -266,7 +266,9 @@ There's no remote configuration (there is no server), so flags are build-time
   `apksigner verify --print-certs`, and publishes them on GitHub Releases
   with a `SHA256SUMS` file and the signing certificate's SHA-256 fingerprint
   in the release notes, so a sideloader can check what they install. From
-  0.7 it also builds the App Bundle for Play.
+  0.7 it also builds the App Bundle for Play. The tag sets the version: `v1.2.3` gives
+  `versionName` 1.2.3 and `versionCode` 10203 (major × 10000 + minor × 100 +
+  patch); local builds are `0.0.0-dev` with code 1.
 
 ### D21. Dependencies (approved at proposal time unless marked)
 AndroidX (Compose, Material 3, Navigation, WorkManager, DataStore, AppCompat,
