@@ -1,6 +1,10 @@
 package app.trecos.ui.places
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
+import app.trecos.ui.shell.TrecosApp
+import app.trecos.ui.theme.TrecosTheme
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -47,18 +51,39 @@ abstract class PlacesTestBase {
 
     /**
      * Seeds houses, containers and items, and makes the first house the current one.
+     * With two or more houses it then starts the app again, so Home opens the
+     * first house above the house list, as on a real app start, instead of
+     * racing the start-up against the seeding.
      *
      * @param houses houses to add.
      * @param containers containers to add.
      * @param items items to add.
      */
-    protected fun seed(houses: List<House> = listOf(Fixtures.house()), containers: List<Container> = emptyList(), items: List<Item> = emptyList()) =
+    protected fun seed(houses: List<House> = listOf(Fixtures.house()), containers: List<Container> = emptyList(), items: List<Item> = emptyList()) {
         runBlocking {
             houses.forEach { app.database.houses().insert(it) }
             containers.forEach { app.database.containers().insert(it) }
             items.forEach { app.database.items().insert(it) }
             houses.firstOrNull()?.let { app.preferences.setLastHouse(it.id) }
         }
+        if (houses.size >= 2) restartApp()
+    }
+
+    /** The app's UI; tests with fakes wrap it in their composition locals. */
+    protected open val appContent: @Composable () -> Unit = { TrecosTheme { TrecosApp() } }
+
+    /** Starts the app's UI ([appContent]) again from scratch, as on an app start. */
+    protected fun restartApp() {
+        rule.runOnUiThread { rule.activity.setContent { appContent() } }
+        rule.waitForIdle()
+    }
+
+    /** With two or more houses: leaves the house that opened on start for the house list. */
+    protected fun showHouseList() {
+        tag(PLACE_LIST_TAG)
+        pressBack()
+        tag(HOUSE_LIST_TAG)
+    }
 
     /**
      * Waits until a node with the tag exists.

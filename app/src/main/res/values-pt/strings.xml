@@ -49,6 +49,7 @@
     <string name="section_items">Itens (%1$d)</string>
     <string name="empty_hint">Ainda não há nada aqui. Toque em + para adicionar um item ou compartimento.</string>
     <string name="add_house">Adicionar casa</string>
+    <string name="houses_title">Casas</string>
     <string name="new_house">Nova casa</string>
     <string name="edit_house">Editar casa</string>
     <string name="new_container">Novo compartimento</string>

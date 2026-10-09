@@ -30,6 +30,7 @@ import app.trecos.data.ItemFieldValue
 import app.trecos.data.FieldType
 import app.trecos.data.DetailExtras
 import app.trecos.data.Container
+import app.trecos.data.House
 import app.trecos.data.Item
 import app.trecos.data.ListView
 import app.trecos.categories.CategoryIcons
@@ -105,6 +106,42 @@ fun ContainerRow(
         details = buildList {
             if (listView == ListView.Detailed) container.description?.let { add(it to 2) }
             if (summary.isNotEmpty()) add(summary to 1)
+        },
+    )
+}
+
+/**
+ * A house on the house list: colour stripe, main photo or icon, name, and its
+ * item count and value. The detailed view adds the address.
+ *
+ * @param house the house.
+ * @param value its folded value.
+ * @param listView condensed or detailed.
+ * @param currency the display currency code.
+ * @param photo the main photo's SHA-256, shown instead of the icon, or `null`.
+ * @param onClick opens the house.
+ */
+@Composable
+fun HouseRow(house: House, value: PlaceValue, listView: ListView, currency: String, photo: String?, onClick: () -> Unit) {
+    val language = AppLanguage.current()
+    val summary = buildList {
+        add(pluralStringResource(R.plurals.item_count, value.items, value.items))
+        value.value.takeIf { it > 0 }?.let { add(Money.format(it, currency, language)) }
+    }.joinToString(" · ")
+    PlaceRow(
+        id = house.id,
+        stripe = (PaletteColor.fromKey(house.colorKey) ?: PaletteColor.Stone).band,
+        icon = PlaceIcons.house(house.icon),
+        iconKey = house.icon,
+        name = house.name,
+        listView = listView,
+        selected = false,
+        photo = photo,
+        onLongClick = {},
+        onClick = onClick,
+        details = buildList {
+            if (listView == ListView.Detailed) house.address?.let { add(it to 2) }
+            add(summary to 1)
         },
     )
 }

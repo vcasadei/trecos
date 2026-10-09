@@ -72,6 +72,10 @@ interface ContainerDao {
     @Query("SELECT * FROM container WHERE houseId = :houseId AND deletedAt IS NULL")
     fun observeAllInHouse(houseId: String): Flow<List<Container>>
 
+    /** @return every container of every house, updating as they change; for the house list's values. */
+    @Query("SELECT * FROM container WHERE deletedAt IS NULL")
+    fun observeAllHouses(): Flow<List<Container>>
+
     /**
      * @param id the container id.
      * @return the container, updating as it changes, or `null` if missing or deleted.
@@ -150,6 +154,18 @@ interface ItemDao {
             "FROM item WHERE houseId = :houseId AND deletedAt IS NULL GROUP BY containerId",
     )
     fun observeTotals(houseId: String): Flow<List<ContainerTotal>>
+
+    /**
+     * [observeTotals] for every house at once, for the house list.
+     *
+     * @return one row per house and container that holds items, plus one per house top level that does.
+     */
+    @Query(
+        "SELECT houseId, containerId, COALESCE(SUM(quantity * unitPrice), 0) AS total, " +
+            "SUM(CASE WHEN unitPrice IS NULL THEN 1 ELSE 0 END) AS unpriced, COUNT(*) AS items " +
+            "FROM item WHERE deletedAt IS NULL GROUP BY houseId, containerId",
+    )
+    fun observeAllTotals(): Flow<List<HouseContainerTotal>>
 
     /**
      * Inserts a new item. Fails if its id is already taken, so nothing is

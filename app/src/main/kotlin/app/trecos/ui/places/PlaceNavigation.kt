@@ -5,7 +5,8 @@ package app.trecos.ui.places
  * navigation graph.
  *
  * @property back goes back one screen.
- * @property openHouse opens a house's top level on the Home tab.
+ * @property openHouse opens a house's top level on the Home tab: the root itself with one house, above the house list with more.
+ * @property openHouseScreen opens a house's top level as its own screen, above the house list.
  * @property openContainer opens a container screen.
  * @property openItem opens an item screen.
  * @property addHouse opens the new-house form.
@@ -25,6 +26,7 @@ package app.trecos.ui.places
 data class PlaceNavigation(
     val back: () -> Unit,
     val openHouse: (houseId: String) -> Unit,
+    val openHouseScreen: (houseId: String) -> Unit = {},
     val openContainer: (houseId: String, containerId: String) -> Unit,
     val openItem: (itemId: String) -> Unit,
     val addHouse: () -> Unit,

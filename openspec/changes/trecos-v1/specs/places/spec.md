@@ -44,8 +44,12 @@ remaining house MUST NOT be deletable.
 ### Requirement: Home tab entry point
 When exactly one house exists, the Home tab SHALL open directly inside it, and
 the house name at the top MUST act as a switcher that also offers "Add house".
-With two or more houses, the Home tab MUST list them, and on app start it SHALL
-open the top level of the last-used house.
+With two or more houses, the root of the Home tab MUST be a house list: each
+house with its main photo or icon, its colour, its item count and its value,
+plus "Add house". Tapping a house SHALL open its top level, and back MUST
+return to the list. On app start it SHALL open the top level of the last-used
+house above that list, so back from it shows the list. The house band MUST NOT
+show on the house list, since no house is open there.
 
 #### Scenario: Single house
 - **AS A** user with one house
@@ -56,7 +60,13 @@ open the top level of the last-used house.
 - **AS A** user with two houses who last used "Apartment"
 - **WHEN** I open the app
 - **THEN** the Home tab shows the top level of "Apartment"
-- **AND** tapping the house name lets me switch to the other house
+- **AND** pressing back shows the list of both houses
+
+#### Scenario: Opening a house from the list
+- **AS A** user with two houses on the house list
+- **WHEN** I tap "Parents' house"
+- **THEN** I see the top level of "Parents' house"
+- **AND** it becomes the last-used house
 
 ### Requirement: Nested containers
 Containers SHALL nest to any depth inside a house, and items MAY be placed in

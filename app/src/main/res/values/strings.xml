@@ -55,6 +55,7 @@
     <string name="section_items">Items (%1$d)</string>
     <string name="empty_hint">Nothing here yet. Tap + to add an item or a container.</string>
     <string name="add_house">Add house</string>
+    <string name="houses_title">Houses</string>
     <string name="new_house">New house</string>
     <string name="edit_house">Edit house</string>
     <string name="new_container">New container</string>

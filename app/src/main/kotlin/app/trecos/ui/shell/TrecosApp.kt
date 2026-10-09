@@ -143,7 +143,10 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
     if (rootTab != null) SideEffect { lastTab = rootTab }
     val currentTab = rootTab ?: lastTab
     val shell = appViewModel { ShellViewModel(it) }
-    val band by shell.band.collectAsStateWithLifecycle()
+    val houseBand by shell.band.collectAsStateWithLifecycle()
+    val houseCount by shell.houseCount.collectAsStateWithLifecycle()
+    // No house is open on the house list, so it has no band.
+    val band = houseBand.takeUnless { route == rootRoute(TrecosTab.Home) && houseCount >= 2 }
     val dark = LocalDarkTheme.current
     val view = LocalView.current
     SideEffect {
@@ -151,7 +154,10 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = band == null && !dark
         }
     }
-    val nav = remember(navController) { placeNavigation(navController) }
+    // A house to open on the Home tab once its root is ready: with two or more houses
+    // it opens above the house list; with one, the root already shows it.
+    val pendingHouse = rememberSaveable { mutableStateOf<String?>(null) }
+    val nav = remember(navController) { placeNavigation(navController) { pendingHouse.value = it } }
     val app = appContainer()
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -160,7 +166,12 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
     LaunchedEffect(app) {
         if (!startApplied) {
             startApplied = true
-            if (app.preferences.startScreen.first() == StartScreen.Search) navController.navigateToTab(TrecosTab.Search)
+            if (app.preferences.startScreen.first() == StartScreen.Search) {
+                navController.navigateToTab(TrecosTab.Search)
+            } else {
+                // On app start Home opens the last-used house, above the house list when there is one.
+                app.preferences.lastHouseId.first()?.takeIf { app.database.houses().get(it) != null }?.let { pendingHouse.value = it }
+            }
         }
     }
     val activity = androidx.activity.compose.LocalActivity.current
@@ -233,7 +244,9 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                 composable(Routes.EXTRAS) { ExtrasScreen { navController.popBackStack() } }
                 composable(Routes.FIELDS, listOf(stringArg("house"))) { entry -> HouseFieldsScreen(entry.string("house")!!) { navController.popBackStack() } }
                 composable(rootRoute(TrecosTab.Home)) {
-                    Box(Modifier.fillMaxSize().testTag(rootScreenTag(TrecosTab.Home))) { HomeScreen(nav) }
+                    Box(Modifier.fillMaxSize().testTag(rootScreenTag(TrecosTab.Home))) {
+                        HomeScreen(nav, pendingHouse = pendingHouse.value, onPendingHandled = { pendingHouse.value = null })
+                    }
                 }
                 composable(Routes.PLACE, listOf(stringArg("house"), optionalArg("container"))) { entry ->
                     PlaceScreen(entry.string("house")!!, entry.string("container"), nav, isTabRoot = false)
@@ -304,11 +317,16 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
  * Builds the place screens' navigation actions on top of the controller.
  *
  * @param controller the navigation controller.
+ * @param requestHouse asks the Home root to show a house (see `HomeScreen`).
  * @return the actions.
  */
-private fun placeNavigation(controller: NavHostController) = PlaceNavigation(
+private fun placeNavigation(controller: NavHostController, requestHouse: (String) -> Unit) = PlaceNavigation(
     back = { controller.popBackStack() },
-    openHouse = { _ -> controller.popBackStack(rootRoute(TrecosTab.Home), inclusive = false) },
+    openHouse = { house ->
+        controller.popBackStack(rootRoute(TrecosTab.Home), inclusive = false)
+        requestHouse(house)
+    },
+    openHouseScreen = { house -> controller.navigate("place/$house") },
     openContainer = { house, container -> controller.navigate("place/$house?container=$container") },
     openItem = { item -> controller.navigate("item/$item") },
     addHouse = { controller.navigate("form/house") },

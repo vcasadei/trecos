@@ -71,6 +71,14 @@ see [neon-options.md](neon-options.md).
 | Home | ![Home, White](../../app/src/test/screenshots/TrecosBottomBar_White_Home.png) | ![Home, Dark](../../app/src/test/screenshots/TrecosBottomBar_Dark_Home.png) |
 | Settings | ![Settings, White](../../app/src/test/screenshots/TrecosBottomBar_White_Settings.png) | ![Settings, Dark](../../app/src/test/screenshots/TrecosBottomBar_Dark_Settings.png) |
 
+## House list
+
+With two or more houses, Home's root lists them: the house colour as the row
+stripe, the main photo or icon, the item count and the value. There is no
+house band here, since no house is open.
+
+![House list, White](../../app/src/test/screenshots/HouseList_White.png)
+
 ## Text safety
 
 The stress fixtures: a 200-character name next to a quantity and price, the

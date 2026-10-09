@@ -2,6 +2,7 @@ package app.trecos.ui.places
 
 import android.content.Context
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
@@ -63,14 +64,12 @@ class QrScenariosTest : PlacesTestBase() {
     private val printer = FakePrinter()
     private val scanner = FakeScanner()
 
-    @Before
-    fun useFakes() {
-        rule.runOnUiThread {
-            rule.activity.setContent {
-                CompositionLocalProvider(LocalLabelPrinter provides printer, LocalQrScanner provides scanner) { TrecosTheme { TrecosApp() } }
-            }
-        }
+    override val appContent: @Composable () -> Unit = {
+        CompositionLocalProvider(LocalLabelPrinter provides printer, LocalQrScanner provides scanner) { TrecosTheme { TrecosApp() } }
     }
+
+    @Before
+    fun useFakes() = restartApp()
 
     /** @return whether a node with the tag exists. */
     private fun exists(tag: String) = rule.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()

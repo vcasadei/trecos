@@ -5,10 +5,19 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.performClick
 import app.trecos.data.Fixtures.container
 import app.trecos.data.Fixtures.house
+import app.trecos.data.Fixtures.item
+import app.trecos.ui.shell.HOUSE_BAND_TAG
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import org.junit.Assert.assertTrue
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.robolectric.annotation.Config
+import androidx.compose.ui.test.onRoot
+import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -41,6 +50,7 @@ class HouseScenariosTest : PlacesTestBase() {
         type("address", "Rua das Flores, 10")
         saveAndClose()
 
+        tag(EMPTY_HINT_TAG).assertIsDisplayed()
         text("Casa dos meus pais").assertIsDisplayed()
         val houses = runBlocking { app.database.houses().observeAll().first() }
         assertEquals(listOf("Apartment", "Casa dos meus pais"), houses.map { it.name })
@@ -83,13 +93,89 @@ class HouseScenariosTest : PlacesTestBase() {
     @Test
     fun severalHouses() {
         seed(houses = listOf(house("h1", "Apartment"), house("h2", "Parents")))
+        showHouseList()
 
-        text("Apartment").assertIsDisplayed()
-        text("Apartment").performClickAndIdle()
-        click("switch_h2")
+        tag(rowTag("h1")).assertIsDisplayed()
+        click(rowTag("h2"))
 
+        tag(EMPTY_HINT_TAG).assertIsDisplayed()
         text("Parents").assertIsDisplayed()
-        assertEquals("h2", runBlocking { app.preferences.lastHouseId.first() })
+        eventually(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.lastHouseId.first() } == "h2" }
+
+        pressBack()
+        tag(HOUSE_LIST_TAG).assertIsDisplayed()
+    }
+
+    @Test
+    fun houseListShowsItemCountsAndValues() {
+        seed(
+            houses = listOf(house("h1", "Apartment"), house("h2", "Parents")),
+            containers = listOf(container("office", name = "Office")),
+            items = listOf(item("cable", containerId = "office", quantity = 2, unitPrice = 1_000), item("lamp", unitPrice = 500)),
+        )
+        showHouseList()
+
+        rowShows("h1", "2 items")
+        rowShows("h1", "25.00")
+        rowShows("h2", "0 items")
+    }
+
+    @Test
+    fun addingAHouseFromTheList() {
+        seed(houses = listOf(house("h1", "Apartment"), house("h2", "Parents")))
+        showHouseList()
+        click(HOUSE_LIST_ADD_TAG)
+        type("name", "Beach house")
+        saveAndClose()
+
+        tag(EMPTY_HINT_TAG).assertIsDisplayed()
+        text("Beach house").assertIsDisplayed()
+        pressBack()
+        tag(rowTag(runBlocking { app.database.houses().observeAll().first() }.first { it.name == "Beach house" }.id))
+    }
+
+    @Test
+    fun appStartOpensTheLastUsedHouseAboveTheList() {
+        // seed() makes the first house the last used, then starts the app again.
+        seed(houses = listOf(house("h2", "Parents"), house("h1", "Apartment")))
+
+        tag(EMPTY_HINT_TAG).assertIsDisplayed()
+        text("Parents").assertIsDisplayed()
+        pressBack()
+        tag(HOUSE_LIST_TAG).assertIsDisplayed()
+    }
+
+    @Test
+    fun noBandOnTheHouseList() {
+        seed(houses = listOf(house("h1", "Apartment"), house("h2", "Parents")))
+        showHouseList()
+        assertTrue(rule.onAllNodes(hasTestTag(HOUSE_BAND_TAG)).fetchSemanticsNodes().isEmpty())
+
+        click(rowTag("h1"))
+        tag(HOUSE_BAND_TAG)
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h800dp-xhdpi")
+    fun houseListScreenshot() {
+        seed(
+            houses = listOf(
+                house("h1", "Apartment").copy(colorKey = "sky", address = "Rua Augusta, 1500, apto 42"),
+                house("h2", "Parents' house").copy(colorKey = "coral", icon = "house"),
+                house("h3", "Beach house").copy(colorKey = "mint"),
+            ),
+            containers = listOf(container("office", name = "Office")),
+            items = listOf(item("laptop", containerId = "office", unitPrice = 350_000), item("lamp", unitPrice = 12_000), item("box", houseId = "h2")),
+        )
+        runBlocking { app.preferences.setCurrency("BRL") }
+        showHouseList()
+        rowShows("h1", "2 items")
+        rule.onRoot().captureRoboImage("src/test/screenshots/HouseList_White.png")
+    }
+
+    /** Checks that a row's text contains [text]. */
+    private fun rowShows(id: String, text: String) {
+        rule.onNode(hasTestTag(rowTag(id)) and hasAnyDescendant(hasText(text, substring = true)), useUnmergedTree = true).assertExists()
     }
 
     /** Taps the node and waits for the UI to settle. */

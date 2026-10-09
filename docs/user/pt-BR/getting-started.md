@@ -35,8 +35,8 @@ com a mesma chave; o Android recusa uma atualização assinada com outra.
 | Adicionar um compartimento | Toque em **+** e depois em **Compartimento**: um cômodo, prateleira, caixa ou bolsa. Compartimentos podem ficar dentro de compartimentos |
 | Adicionar um item | Toque em **+** dentro de um compartimento e depois em **Item**. Só o nome é obrigatório |
 | Adicionar vários itens | Use **Salvar + novo**: o próximo formulário continua no mesmo compartimento |
-| Adicionar outra casa | Toque no nome da casa no topo e depois em **Adicionar casa** |
-| Trocar de casa | Toque no nome da casa no topo e escolha uma |
+| Adicionar outra casa | Com uma casa, toque no nome dela no topo e depois em **Adicionar casa**. Com duas ou mais, toque em **Adicionar casa** na lista de casas |
+| Trocar de casa | Com duas ou mais casas, o Início lista todas: volte para a lista e toque em outra casa. O app abre na casa usada por último |
 | Subir de nível | Toque em qualquer nível do caminho, como "Apartamento > Escritório" |
 | Mudar a lista | Toque no botão de visualização no topo: compacta ou detalhada. A escolha vale para o app todo |
 

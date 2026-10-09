@@ -126,3 +126,17 @@ data class Item(
  * @property items number of items.
  */
 data class ContainerTotal(val containerId: String?, val total: Long, val unpriced: Int, val items: Int = 0)
+
+/**
+ * [ContainerTotal] with its house, for totals across every house at once.
+ *
+ * @property houseId the house.
+ * @property containerId the container, or `null` for the house's top level.
+ * @property total the sum of quantity × unit price, in minor units.
+ * @property unpriced how many items have no price.
+ * @property items how many items.
+ */
+data class HouseContainerTotal(val houseId: String, val containerId: String?, val total: Long, val unpriced: Int, val items: Int) {
+    /** @return the same total without the house. */
+    fun withoutHouse() = ContainerTotal(containerId, total, unpriced, items)
+}
