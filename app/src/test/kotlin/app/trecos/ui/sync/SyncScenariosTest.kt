@@ -1,6 +1,7 @@
 package app.trecos.ui.sync
 
 import androidx.compose.ui.test.performTextInput
+import app.trecos.ui.places.HOUSE_LIST_TAG
 import app.trecos.ui.places.rowTag
 import app.trecos.data.Fixtures
 import android.content.Context
@@ -146,8 +147,9 @@ class SyncScenariosTest : PlacesTestBase() {
         connect()
         assertEquals(setOf("beach", "h1"), remote.commits.keys)
 
+        // Home opens on its root: the house list, since there are two houses.
         click(tabTag(TrecosTab.Home))
-        showHouseList()
+        tag(HOUSE_LIST_TAG)
         click(rowTag("beach"))
         clickDescription("More options")
         click("menu_delete")
@@ -159,8 +161,8 @@ class SyncScenariosTest : PlacesTestBase() {
         assertTrue("nothing deleted from Drive", remote.commits["beach"]!!.isNotEmpty())
         assertNull(runBlocking { app.database.houses().get("beach") })
 
-        // The Settings tab comes back on Settings > Sync, where connecting left it.
-        click(tabTag(TrecosTab.Settings))
+        // The Settings tab opens on its root, so go to Sync from there.
+        openSync()
         click("open_deleted_houses")
         tag("deleted_beach")
         shows("Beach house")

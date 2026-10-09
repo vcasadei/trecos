@@ -195,6 +195,7 @@ run at the end of **every** release group before it is tagged.
 - [ ] 14.9 Publish the site at trecos.app on GitHub Pages (enforced HTTPS, privacy policy, commercial-license page, links to external donations) and set up forwarding of hello@trecos.app on Porkbun together with the user; verify the site loads over HTTPS and a test e-mail arrives
 - [ ] 14.10 Prepare the Play listing ("Trecos: Home Inventory", English and Portuguese texts and screenshots, data safety form, privacy policy URL) and publish 1.0 to production; verify that the listing is live
 - [x] 14.11 Complete the user guide in both languages, update `docs/product/roadmap.md` (1.1 OCR to multi-user), and add the 1.0 entry to `CHANGELOG.md`
+- [x] 14.12 Make every tab tap open that tab's root, closing screens opened below any tab (also when tapping the selected tab), as asked by the developer after testing on a phone; update the app-shell spec and cover it with navigation tests
 
 ## 15. Quality Gates
 

@@ -13,6 +13,8 @@ Search, Home, Settings. An unselected tab MUST show only its text label. The
 selected tab MUST show its label plus a circle containing the tab's icon
 (magnifier, house, gear) that rises above the bar's top edge. When the
 selection changes, the circle SHALL move to the new tab in 250 ms or less.
+Tapping a tab MUST open that tab's root screen, closing any screens opened
+below it, also when the tab is already selected.
 
 #### Scenario: Switching tabs
 - **AS A** user on the Home tab
@@ -20,6 +22,16 @@ selection changes, the circle SHALL move to the new tab in 250 ms or less.
 - **THEN** the Search screen opens
 - **AND** the raised circle with the magnifier icon moves under the "Search" label
 - **AND** "Home" is shown as a text label only
+
+#### Scenario: A tab always opens its root
+- **AS A** user who opened Settings > Sync, then switched to Home
+- **WHEN** I tap "Settings"
+- **THEN** the Settings root opens, not the Sync screen
+
+#### Scenario: Home goes all the way back
+- **AS A** user on the Home tab inside a container, viewing an item
+- **WHEN** I tap "Home"
+- **THEN** the Home root opens, or the house list when there are two or more houses
 
 #### Scenario: Reduced motion
 - **AS A** user who turned on Android's "Remove animations" setting
