@@ -97,9 +97,10 @@ the trash.
 
 ### Requirement: Deleting a house
 Deleting a house SHALL require typing the house's name to confirm, and it MUST
-be permanent, removing the house, its contents, its trash and its photos. The
-confirmation MUST suggest exporting a backup first. The last remaining house
-MUST NOT be deletable.
+be permanent on the phone, removing the house, its contents, its trash and its
+photos. With sync on, its copy in Drive is kept and can be restored (sync spec
+"Deleted houses"). The confirmation MUST suggest exporting a backup first. The
+last remaining house MUST NOT be deletable.
 
 #### Scenario: Deleting a house
 - **AS A** user with two houses

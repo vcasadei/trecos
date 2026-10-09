@@ -169,6 +169,7 @@ run at the end of **every** release group before it is tagged.
 - [x] 12.10 Implement restore onto a device (offer restore, merge or keep Drive data), the format-version refusal, and detection of a deleted or altered folder; tests for scenarios "New phone", "Old app, new data" and "Folder deleted"
 - [x] 12.11 Add the replace-with-sync warning to import; test for scenario "Replacing with sync on"
 - [x] 12.12 Write `docs/architecture/sync-protocol.md`, update `PRIVACY.md` (Drive data, 30-sync retention), write FAQ answers 5 (sync part) and 10 (both languages), and add the 0.11 entry to `CHANGELOG.md`
+- [x] 12.13 Deleted houses with sync on: deleting a house marks it with `houses/<houseId>/deleted.json` in Drive (at once, or at the next sync when offline) and deletes nothing there; other devices remove it unless they have unsynced changes or it is their only house (then the marker goes); marked houses are left out of the restore offer; Settings > Sync > Deleted houses lists them with Restore, and devices that removed a restored house pull it back; engine and scenario tests; update `docs/architecture/sync-protocol.md`
 
 ## 13. Release 0.12 — Encryption (behind `FEATURE_ENCRYPTION`)
 

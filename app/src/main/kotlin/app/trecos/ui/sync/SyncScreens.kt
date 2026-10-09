@@ -26,6 +26,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -50,6 +51,7 @@ import app.trecos.sync.AuthOutcome
 import app.trecos.sync.CommitMeta
 import app.trecos.sync.ConflictKind
 import app.trecos.sync.ConnectResult
+import app.trecos.sync.DeletedHouse
 import app.trecos.sync.StoredConflict
 import app.trecos.sync.SyncWorker
 import app.trecos.ui.appContainer
@@ -186,6 +188,41 @@ class SyncViewModel(private val app: AppContainer) : ViewModel() {
         app.scope.launch { sync.resolve(conflict, keepTheirs) }
     }
 
+    /** The deleted houses: `null` while loading, empty when there are none. */
+    var deleted by mutableStateOf<List<DeletedHouse>?>(null)
+        private set
+
+    /** Whether reading the deleted houses failed. */
+    var deletedFailed by mutableStateOf(false)
+        private set
+
+    /** Reads the deleted houses from Drive. */
+    fun loadDeleted() {
+        viewModelScope.launch {
+            val found = sync.deletedHouses()
+            deletedFailed = found == null
+            deleted = found.orEmpty()
+        }
+    }
+
+    /**
+     * Brings a deleted house back, on the app's scope so it finishes even if the screen closes.
+     *
+     * @param house the house.
+     */
+    fun restoreDeleted(house: DeletedHouse) {
+        app.scope.launch {
+            when (val result = sync.restoreDeleted(house.id)) {
+                is ConnectResult.Synced -> {
+                    app.messages.tryEmit(AppMessage(app.resources.getString(R.string.house_restored, house.name)))
+                    deleted = deleted?.filter { it.id != house.id }
+                }
+                is ConnectResult.Failed -> app.messages.tryEmit(AppMessage(result.message))
+                else -> Unit
+            }
+        }
+    }
+
     /** @return the sync history, newest first. */
     fun history(): List<CommitMeta> = sync.engine.history()
 
@@ -202,8 +239,9 @@ class SyncViewModel(private val app: AppContainer) : ViewModel() {
  *
  * @property openConflicts opens the conflicts.
  * @property openHistory opens the history.
+ * @property openDeleted opens the deleted houses.
  */
-data class SyncNavigation(val openConflicts: () -> Unit, val openHistory: () -> Unit)
+data class SyncNavigation(val openConflicts: () -> Unit, val openHistory: () -> Unit, val openDeleted: () -> Unit = {})
 
 /**
  * Settings > Sync (spec "Connecting Google Drive", "Sync never blocks the app").
@@ -291,6 +329,7 @@ fun SyncScreen(nav: SyncNavigation, onBack: () -> Unit) {
                 }
             }
             item { OutlinedButton(onClick = nav.openHistory, modifier = Modifier.testTag("open_history")) { Text(stringResource(R.string.sync_history)) } }
+            item { OutlinedButton(onClick = nav.openDeleted, modifier = Modifier.testTag("open_deleted_houses")) { Text(stringResource(R.string.deleted_houses)) } }
             item { TextButton(onClick = vm::disconnect, modifier = Modifier.testTag("disconnect")) { Text(stringResource(R.string.sync_disconnect)) } }
         }
     }
@@ -451,6 +490,41 @@ private fun shown(field: String?, value: JsonElement?): String {
 
 /** @return a JSON value's plain text. */
 private fun plain(value: JsonElement): String = (value as? JsonPrimitive)?.content ?: value.toString()
+
+/**
+ * Settings > Sync > Deleted houses (spec "Deleted houses"): the houses deleted
+ * in Drive, each with Restore.
+ *
+ * @param onBack leaves the screen.
+ */
+@Composable
+fun DeletedHousesScreen(onBack: () -> Unit) {
+    val vm = appViewModel { SyncViewModel(it) }
+    LaunchedEffect(vm) { vm.loadDeleted() }
+    val language = AppLanguage.current()
+    val status by vm.status.collectAsStateWithLifecycle()
+    Column(Modifier.fillMaxSize()) {
+        TrecosTopBar(title = stringResource(R.string.deleted_houses), onBack = onBack)
+        val houses = vm.deleted
+        if (houses == null || status.running) LinearProgressIndicator(Modifier.fillMaxWidth().testTag("deleted_loading"))
+        LazyColumn(contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, BottomBarClearance), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (vm.deletedFailed) item { Text(stringResource(R.string.deleted_houses_failed), color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("deleted_failed")) }
+            else if (houses != null && houses.isEmpty()) item { Text(stringResource(R.string.deleted_houses_none), modifier = Modifier.testTag("no_deleted_houses")) }
+            items(houses.orEmpty(), key = { it.id }) { house ->
+                Row(Modifier.fillMaxWidth().testTag("deleted_${house.id}"), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        SafeText(house.name, maxLines = 1, style = MaterialTheme.typography.titleMedium)
+                        val day = DateTimeFormatter.ofPattern("d MMM yyyy", Money.localeOf(language)).format(Instant.ofEpochMilli(house.time).atZone(ZoneId.systemDefault()))
+                        Text(stringResource(R.string.deleted_on, day), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    TextButton(onClick = { vm.restoreDeleted(house) }, enabled = !status.running, modifier = Modifier.testTag("restore_${house.id}")) {
+                        Text(stringResource(R.string.action_restore))
+                    }
+                }
+            }
+        }
+    }
+}
 
 /**
  * The sync history (spec "Sync history"): time, Google user, device and a summary.

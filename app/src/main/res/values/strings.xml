@@ -153,6 +153,7 @@
     <string name="new_container_name">New container name</string>
     <string name="delete_house_title">Delete \"%1$s\" permanently?</string>
     <string name="delete_house_body">Everything in this house, its trash and its photos are removed for good. Consider exporting a backup first. Type the house name to confirm.</string>
+    <string name="delete_house_synced">Its copy in Google Drive stays: you can restore it from Settings &gt; Sync &gt; Deleted houses. Your other devices remove it at their next sync.</string>
     <string name="type_house_name">House name</string>
     <string name="select_all">Select all</string>
     <string name="clear_selection">Clear selection</string>
@@ -356,6 +357,11 @@
     <string name="setting_sync_off">Off</string>
     <string name="setting_sync_on">Connected as %1$s</string>
     <string name="sync_title">Sync</string>
+    <string name="deleted_houses">Deleted houses</string>
+    <string name="deleted_houses_none">No deleted houses.</string>
+    <string name="deleted_houses_failed">Couldn\'t read Google Drive. Check your connection and try again.</string>
+    <string name="deleted_on">Deleted on %1$s</string>
+    <string name="house_restored">\"%1$s\" is back.</string>
     <string name="sync_intro">Keep your inventory in step across your devices through a visible Trecos folder in your own Google Drive. Trecos only sees files it created.</string>
     <string name="sync_connect">Connect Google Drive</string>
     <string name="sync_connected_as">Connected as %1$s</string>

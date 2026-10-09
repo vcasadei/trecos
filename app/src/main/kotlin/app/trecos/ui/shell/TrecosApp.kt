@@ -14,6 +14,7 @@ import app.trecos.ui.help.FaqScreen
 import app.trecos.ui.help.LicensesScreen
 import app.trecos.ui.help.TipsScreen
 import app.trecos.ui.sync.ConflictsScreen
+import app.trecos.ui.sync.DeletedHousesScreen
 import app.trecos.ui.sync.HistoryScreen
 import app.trecos.ui.sync.SyncNavigation
 import app.trecos.ui.sync.SyncScreen
@@ -118,6 +119,7 @@ private object Routes {
     const val LICENSES = "settings/about/licenses"
     const val CONFLICTS = "settings/sync/conflicts"
     const val HISTORY = "settings/sync/history"
+    const val DELETED_HOUSES = "settings/sync/deleted"
     const val HOUSE_FORM = "form/house?id={id}"
     const val CONTAINER_FORM = "form/container?house={house}&parent={parent}&id={id}&qr={qr}"
     const val ITEM_FORM = "form/item?house={house}&container={container}&id={id}&qr={qr}"
@@ -229,7 +231,11 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                 composable(Routes.CURRENCY) { CurrencyScreen { navController.popBackStack() } }
                 composable(Routes.SYNC) {
                     SyncScreen(
-                        SyncNavigation(openConflicts = { navController.navigate(Routes.CONFLICTS) }, openHistory = { navController.navigate(Routes.HISTORY) }),
+                        SyncNavigation(
+                            openConflicts = { navController.navigate(Routes.CONFLICTS) },
+                            openHistory = { navController.navigate(Routes.HISTORY) },
+                            openDeleted = { navController.navigate(Routes.DELETED_HOUSES) },
+                        ),
                         onBack = { navController.popBackStack() },
                     )
                 }
@@ -239,6 +245,7 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                 composable(Routes.LICENSES) { LicensesScreen { navController.popBackStack() } }
                 composable(Routes.CONFLICTS) { ConflictsScreen { navController.popBackStack() } }
                 composable(Routes.HISTORY) { HistoryScreen { navController.popBackStack() } }
+                composable(Routes.DELETED_HOUSES) { DeletedHousesScreen { navController.popBackStack() } }
                 composable(Routes.BACKUP) { BackupScreen { navController.popBackStack() } }
                 composable(Routes.PROFILE) { ProfileScreen { navController.popBackStack() } }
                 composable(Routes.EXTRAS) { ExtrasScreen { navController.popBackStack() } }

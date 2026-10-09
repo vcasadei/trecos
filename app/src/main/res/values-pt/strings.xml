@@ -150,6 +150,7 @@
     <string name="new_container_name">Nome do novo compartimento</string>
     <string name="delete_house_title">Excluir \"%1$s\" para sempre?</string>
     <string name="delete_house_body">Tudo o que há nesta casa, a lixeira e as fotos serão removidos de vez. Considere exportar um backup antes. Digite o nome da casa para confirmar.</string>
+    <string name="delete_house_synced">A cópia no Google Drive continua: você pode restaurá-la em Ajustes &gt; Sincronização &gt; Casas excluídas. Seus outros aparelhos a removem na próxima sincronização.</string>
     <string name="type_house_name">Nome da casa</string>
     <string name="select_all">Selecionar tudo</string>
     <string name="clear_selection">Limpar seleção</string>
@@ -364,6 +365,11 @@
     <string name="setting_sync_off">Desligada</string>
     <string name="setting_sync_on">Conectada como %1$s</string>
     <string name="sync_title">Sincronização</string>
+    <string name="deleted_houses">Casas excluídas</string>
+    <string name="deleted_houses_none">Nenhuma casa excluída.</string>
+    <string name="deleted_houses_failed">Não foi possível ler o Google Drive. Verifique a conexão e tente de novo.</string>
+    <string name="deleted_on">Excluída em %1$s</string>
+    <string name="house_restored">\"%1$s\" voltou.</string>
     <string name="sync_intro">Mantenha seu inventário igual em todos os seus aparelhos por meio de uma pasta Trecos visível no seu próprio Google Drive. O Trecos só vê os arquivos que ele criou.</string>
     <string name="sync_connect">Conectar o Google Drive</string>
     <string name="sync_connected_as">Conectado como %1$s</string>

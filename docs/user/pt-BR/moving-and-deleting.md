@@ -43,3 +43,9 @@ Concluir não exclui nada.
 Menu da casa ⋮ > **Excluir** e digite o nome da casa. Isso é **permanente**: a
 casa, o conteúdo e a lixeira são removidos. Exporte um backup antes. A última
 casa não pode ser excluída.
+
+Com a sincronização ligada, a cópia da casa no seu Google Drive continua: os
+outros aparelhos removem a casa na próxima sincronização, e **Ajustes >
+Sincronização > Casas excluídas** a traz de volta com **Restaurar**, como estava
+na última sincronização, em todos os aparelhos. Se outro aparelho mudou a casa
+sem ter sincronizado ainda, esse aparelho fica com ela.

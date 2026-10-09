@@ -83,6 +83,27 @@ interface SyncRemote {
      */
     suspend fun deleteCommit(houseId: String, commitId: String)
 
+    /**
+     * @param houseId the house.
+     * @return its deletion marker, or `null` when it isn't deleted.
+     */
+    suspend fun deletion(houseId: String): Deletion?
+
+    /**
+     * Marks a house as deleted; its commits and refs stay.
+     *
+     * @param houseId the house.
+     * @param deletion the marker.
+     */
+    suspend fun markDeleted(houseId: String, deletion: Deletion)
+
+    /**
+     * Removes a house's deletion marker, if any.
+     *
+     * @param houseId the house.
+     */
+    suspend fun clearDeleted(houseId: String)
+
     /** @return the hashes of every stored photo. */
     suspend fun objects(): Set<String>
 
