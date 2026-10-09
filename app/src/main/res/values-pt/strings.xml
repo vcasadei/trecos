@@ -49,6 +49,7 @@
     <string name="section_items">Itens (%1$d)</string>
     <string name="empty_hint">Ainda não há nada aqui. Toque em + para adicionar um item ou compartimento.</string>
     <string name="add_house">Adicionar casa</string>
+    <string name="houses_title">Casas</string>
     <string name="new_house">Nova casa</string>
     <string name="edit_house">Editar casa</string>
     <string name="new_container">Novo compartimento</string>
@@ -91,13 +92,13 @@
     <string name="category_top_level">Categoria principal própria</string>
     <string name="delete_category">Excluir categoria</string>
     <string name="suggestions">Sugestões</string>
-    <string name="field_tags">Etiquetas</string>
-    <string name="add_tag">Adicionar etiqueta</string>
-    <string name="tags_title">Etiquetas</string>
+    <string name="field_tags">Tags</string>
+    <string name="add_tag">Adicionar tag</string>
+    <string name="tags_title">Tags</string>
     <string name="action_rename">Renomear</string>
-    <string name="delete_tag_confirm">Remover esta etiqueta de todos os itens?</string>
-    <string name="no_tags">Nenhuma etiqueta ainda. Adicione em um item.</string>
-    <string name="copy_from">Copiar categorias, etiquetas e campos de</string>
+    <string name="delete_tag_confirm">Remover esta tag de todos os itens?</string>
+    <string name="no_tags">Nenhuma tag ainda. Adicione em um item.</string>
+    <string name="copy_from">Copiar categorias, tags e campos de</string>
     <string name="copy_none">Não copiar</string>
     <string name="action_done">Concluir</string>
     <string name="no_categories">Sem categorias</string>
@@ -149,6 +150,7 @@
     <string name="new_container_name">Nome do novo compartimento</string>
     <string name="delete_house_title">Excluir \"%1$s\" para sempre?</string>
     <string name="delete_house_body">Tudo o que há nesta casa, a lixeira e as fotos serão removidos de vez. Considere exportar um backup antes. Digite o nome da casa para confirmar.</string>
+    <string name="delete_house_synced">A cópia no Google Drive continua: você pode restaurá-la em Ajustes &gt; Sincronização &gt; Casas excluídas. Seus outros aparelhos a removem na próxima sincronização.</string>
     <string name="type_house_name">Nome da casa</string>
     <string name="select_all">Selecionar tudo</string>
     <string name="clear_selection">Limpar seleção</string>
@@ -266,7 +268,7 @@
     <string name="add_flow_photo">Foto</string>
     <string name="setting_image_source">Origem da imagem</string>
     <string name="source_ask">Perguntar sempre</string>
-    <string name="setting_tags">Etiquetas</string>
+    <string name="setting_tags">Tags</string>
     <string name="setting_house_fields">Campos para todos os itens</string>
     <string name="setting_open_trash">Lixeira</string>
     <string name="setting_version">Versão</string>
@@ -363,6 +365,11 @@
     <string name="setting_sync_off">Desligada</string>
     <string name="setting_sync_on">Conectada como %1$s</string>
     <string name="sync_title">Sincronização</string>
+    <string name="deleted_houses">Casas excluídas</string>
+    <string name="deleted_houses_none">Nenhuma casa excluída.</string>
+    <string name="deleted_houses_failed">Não foi possível ler o Google Drive. Verifique a conexão e tente de novo.</string>
+    <string name="deleted_on">Excluída em %1$s</string>
+    <string name="house_restored">\"%1$s\" voltou.</string>
     <string name="sync_intro">Mantenha seu inventário igual em todos os seus aparelhos por meio de uma pasta Trecos visível no seu próprio Google Drive. O Trecos só vê os arquivos que ele criou.</string>
     <string name="sync_connect">Conectar o Google Drive</string>
     <string name="sync_connected_as">Conectado como %1$s</string>

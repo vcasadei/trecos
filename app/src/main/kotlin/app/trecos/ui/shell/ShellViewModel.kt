@@ -8,6 +8,7 @@ import app.trecos.ui.theme.PaletteColor
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -35,4 +36,8 @@ class ShellViewModel(app: AppContainer) : ViewModel() {
         }
         if (show) PaletteColor.fromKey(house?.colorKey) ?: PaletteColor.Stone else null
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** How many houses exist; with two or more, Home's root is the house list. */
+    val houseCount: StateFlow<Int> = app.database.houses().observeAll().map { it.size }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 }

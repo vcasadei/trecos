@@ -30,6 +30,10 @@ interface PhotoDao {
     @Query("SELECT * FROM photo WHERE houseId = :houseId AND position = 0")
     fun observeMainPhotos(houseId: String): Flow<List<Photo>>
 
+    /** @return every house's own main photo, updating as they change; for the house list. */
+    @Query("SELECT * FROM photo WHERE ownerId = houseId AND position = 0")
+    fun observeHouseMainPhotos(): Flow<List<Photo>>
+
     /** @param photos rows to add. */
     @Insert
     suspend fun insert(photos: List<Photo>)

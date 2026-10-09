@@ -71,10 +71,14 @@ class SyncEngine(
             store.update { it.copy(driveMissing = true, lastError = e.message) }
             throw e
         }
-        val localHouses = db.snapshots().houses().map { it.id }
         val remoteHouses = remote.houses()
-        var total = SyncReport(remoteOnlyHouses = remoteHouses.filter { it !in localHouses && it !in pull })
-        for (houseId in localHouses + pull.filter { it !in localHouses }) {
+        val deleted = handleDeletions(remote, remoteHouses)
+        val localHouses = db.snapshots().houses().map { it.id }
+        // Houses removed here because another device deleted them come back once restored there.
+        val returning = store.load().droppedHouses.filter { it in remoteHouses && it !in deleted && it !in localHouses }
+        val toPull = pull + returning
+        var total = SyncReport(remoteOnlyHouses = remoteHouses.filter { it !in localHouses && it !in toPull && it !in deleted })
+        for (houseId in localHouses + toPull.filter { it !in localHouses }) {
             val report = try {
                 syncHouse(remote, houseId, user, photosAllowed)
             } catch (e: app.trecos.backup.SnapshotFormatException) {
@@ -89,8 +93,91 @@ class SyncEngine(
                 photosWaiting = total.photosWaiting + report.photosWaiting,
             )
         }
-        store.update { it.copy(lastSuccess = clock(), lastError = null, driveMissing = false) }
+        store.update { it.copy(lastSuccess = clock(), lastError = null, driveMissing = false, droppedHouses = it.droppedHouses - returning.toSet()) }
         return total
+    }
+
+    /**
+     * Forgets a house deleted on this device. With sync connected, the next
+     * sync marks it as deleted in Drive, where its data stays (spec "Deleted houses").
+     *
+     * @param houseId the house.
+     * @param connected whether sync is connected.
+     */
+    fun houseDeleted(houseId: String, connected: Boolean) {
+        store.update { s ->
+            s.copy(
+                houses = s.houses - houseId,
+                conflicts = s.conflicts.filter { it.houseId != houseId },
+                droppedHouses = s.droppedHouses - houseId,
+                pendingDeletes = if (connected) s.pendingDeletes + houseId else s.pendingDeletes,
+            )
+        }
+    }
+
+    /**
+     * Lists the houses marked as deleted in Drive.
+     *
+     * @param remote the shared store.
+     * @return each deleted house's id and marker.
+     */
+    suspend fun deletedHouses(remote: SyncRemote): Map<String, Deletion> =
+        remote.houses().mapNotNull { id -> remote.deletion(id)?.let { id to it } }.toMap()
+
+    /**
+     * Brings a deleted house back from Drive: removes its marker and pulls it
+     * from its newest commits; devices that removed it pull it back at their next sync.
+     *
+     * @param remote the shared store.
+     * @param houseId the house.
+     * @param user the Google account.
+     * @param photosAllowed whether photos may move now.
+     * @return what the sync did.
+     */
+    suspend fun restoreDeleted(remote: SyncRemote, houseId: String, user: DriveUser, photosAllowed: Boolean): SyncReport {
+        remote.open(create = false)
+        remote.clearDeleted(houseId)
+        store.update { s -> s.copy(houses = s.houses - houseId, droppedHouses = s.droppedHouses - houseId) }
+        return sync(remote, user, photosAllowed, pull = setOf(houseId))
+    }
+
+    /**
+     * Marks the houses deleted here, then handles the houses deleted elsewhere:
+     * each is removed here, unless this device changed it since its last sync
+     * or it is the only house here, in which case the edit wins and the marker goes.
+     *
+     * @return the houses that stay deleted.
+     */
+    private suspend fun handleDeletions(remote: SyncRemote, remoteHouses: List<String>): Set<String> {
+        val state = store.load()
+        for (houseId in state.pendingDeletes) {
+            if (houseId in remoteHouses) remote.markDeleted(houseId, Deletion(clock(), state.deviceId))
+            store.update { it.copy(pendingDeletes = it.pendingDeletes - houseId) }
+        }
+        val marked = remoteHouses.filter { remote.deletion(it) != null }.toMutableSet()
+        for (houseId in db.snapshots().houses().map { it.id }.filter { it in marked }) {
+            if (unchangedSinceSync(remote, houseId) && db.snapshots().houses().size > 1) {
+                db.withTransaction { deleteHouseRows(db, houseId) }
+                store.update { s ->
+                    s.copy(
+                        houses = s.houses - houseId,
+                        conflicts = s.conflicts.filter { it.houseId != houseId },
+                        droppedHouses = s.droppedHouses + houseId,
+                    )
+                }
+            } else {
+                remote.clearDeleted(houseId)
+                marked -= houseId
+            }
+        }
+        return marked
+    }
+
+    /** @return whether a house's local rows are what this device last synced. */
+    private suspend fun unchangedSinceSync(remote: SyncRemote, houseId: String): Boolean {
+        val head = store.load().houses[houseId]?.head ?: return false
+        val headRows = rowsOf(remote, houseId, head) ?: return false
+        return localRows(houseId) == headRows
     }
 
     /**
@@ -108,7 +195,8 @@ class SyncEngine(
         val localRows = localRows(houseId)
         val refs = remote.refs(houseId)
         refs.values.maxOfOrNull { it.formatVersion }?.let { if (it > SnapshotFormat.VERSION) throw NewerFormatException(it) }
-        val others = refs.filterKeys { it != state.deviceId }.filter { (device, ref) -> houseState.seen[device] != ref.commitId }
+        // Without a head (a house restored here), this device's own ref is a commit to merge like the others.
+        val others = refs.filterKeys { it != state.deviceId || houseState.head == null }.filter { (device, ref) -> houseState.seen[device] != ref.commitId }
         val headRows = houseState.head?.let { rowsOf(remote, houseId, it) }
 
         val pairs = others.map { (_, ref) ->

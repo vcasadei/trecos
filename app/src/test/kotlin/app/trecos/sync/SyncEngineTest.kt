@@ -45,6 +45,7 @@ class SyncEngineTest {
         val refs = HashMap<String, HashMap<String, Ref>>()
         val commits = HashMap<String, HashMap<String, ByteArray>>()
         val objects = HashMap<String, ByteArray>()
+        val deleted = HashMap<String, Deletion>()
         var uploads = 0
         var calls = 0
         var failAt: Int? = null
@@ -78,6 +79,15 @@ class SyncEngineTest {
         override suspend fun deleteCommit(houseId: String, commitId: String) {
             call()
             commits[houseId]?.remove(commitId)
+        }
+        override suspend fun deletion(houseId: String): Deletion? = call().let { deleted[houseId] }
+        override suspend fun markDeleted(houseId: String, deletion: Deletion) {
+            call()
+            deleted[houseId] = deletion
+        }
+        override suspend fun clearDeleted(houseId: String) {
+            call()
+            deleted.remove(houseId)
         }
         override suspend fun objects(): Set<String> = call().let { objects.keys.toSet() }
         override suspend fun putObject(sha256: String, bytes: ByteArray) {
@@ -148,6 +158,130 @@ class SyncEngineTest {
         val tablet = device("tablet")
         tablet.sync(pull = setOf("h1"))
         return phone to tablet
+    }
+
+    /** A phone and a tablet sharing two houses: h1 with the Pi, and an empty "Beach house". */
+    private fun pairWithTwoHouses(): Pair<Device, Device> {
+        val phone = phone()
+        runBlocking { phone.db.houses().insert(House("h2", "Beach house", icon = "house", createdAt = 1, updatedAt = 1)) }
+        phone.sync()
+        val tablet = device("tablet")
+        tablet.sync(pull = setOf("h1", "h2"))
+        return phone to tablet
+    }
+
+    /** Deletes a house as the delete screen does, with sync connected. */
+    private fun Device.deleteHouse(id: String) = runBlocking {
+        organize.deleteHouse(id)
+        engine.houseDeleted(id, connected = true)
+    }
+
+    @Test
+    fun deletingAHouseKeepsItInDriveAndRemovesItElsewhere() {
+        val (phone, tablet) = pairWithTwoHouses()
+        val commits = remote.commits["h1"]!!.keys.toSet()
+        phone.deleteHouse("h1")
+        phone.sync()
+
+        assertNotNull(remote.deleted["h1"])
+        assertEquals(phone.store.load().deviceId, remote.deleted["h1"]!!.deviceId)
+        tablet.sync()
+        assertNull(runBlocking { tablet.db.houses().get("h1") })
+        assertNull(tablet.item("pi"))
+        assertNotNull(runBlocking { tablet.db.houses().get("h2") })
+        assertEquals(setOf("h1"), tablet.store.load().droppedHouses)
+        assertEquals("nothing deleted from Drive", commits, remote.commits["h1"]!!.keys)
+        assertTrue("a deleted house isn't offered back", phone.sync().remoteOnlyHouses.isEmpty())
+        assertTrue(tablet.sync().remoteOnlyHouses.isEmpty())
+    }
+
+    @Test
+    fun restoringADeletedHouseBringsItBackEverywhere() {
+        val (phone, tablet) = pairWithTwoHouses()
+        phone.deleteHouse("h1")
+        phone.sync()
+        tablet.sync()
+
+        val deleted = runBlocking { phone.engine.deletedHouses(remote) }
+        assertEquals(setOf("h1"), deleted.keys)
+        runBlocking { phone.engine.restoreDeleted(remote, "h1", DriveUser("Vitor", "v@example.com"), photosAllowed = true) }
+        assertEquals("Pi", phone.item("pi")!!.name)
+        assertNull(remote.deleted["h1"])
+
+        tablet.sync()
+        assertEquals("Pi", tablet.item("pi")!!.name)
+        assertTrue(tablet.store.load().droppedHouses.isEmpty())
+        phone.edit("pi") { it.copy(quantity = 3) }
+        phone.sync()
+        tablet.sync()
+        assertEquals("they sync again as usual", 3, tablet.item("pi")!!.quantity)
+    }
+
+    @Test
+    fun restoringOnTheOnlyDevice() {
+        val phone = phone()
+        runBlocking { phone.db.houses().insert(House("h2", "Beach house", icon = "house", createdAt = 1, updatedAt = 1)) }
+        phone.sync()
+        phone.deleteHouse("h1")
+        phone.sync()
+        runBlocking { phone.engine.restoreDeleted(remote, "h1", DriveUser("Vitor", "v@example.com"), photosAllowed = true) }
+
+        assertEquals("Pi", phone.item("pi")!!.name)
+        assertEquals(1, phone.sync().let { remote.refs["h1"]!!.size })
+    }
+
+    @Test
+    fun unsyncedChangesKeepADeletedHouse() {
+        val (phone, tablet) = pairWithTwoHouses()
+        phone.deleteHouse("h1")
+        phone.sync()
+        tablet.edit("pi") { it.copy(name = "Raspberry Pi 5") }
+        tablet.sync()
+
+        assertEquals("Raspberry Pi 5", tablet.item("pi")!!.name)
+        assertNull("the edit wins: the house is no longer deleted", remote.deleted["h1"])
+        assertTrue(tablet.store.load().droppedHouses.isEmpty())
+        assertEquals(listOf("h1"), phone.sync().remoteOnlyHouses)
+    }
+
+    @Test
+    fun theOnlyHouseOnADeviceIsKept() {
+        val phone = phone()
+        runBlocking { phone.db.houses().insert(House("h2", "Beach house", icon = "house", createdAt = 1, updatedAt = 1)) }
+        phone.sync()
+        val tablet = device("tablet")
+        tablet.sync(pull = setOf("h1"))
+        phone.deleteHouse("h1")
+        phone.sync()
+        tablet.sync()
+
+        assertEquals("Pi", tablet.item("pi")!!.name)
+        assertNull(remote.deleted["h1"])
+    }
+
+    @Test
+    fun aHouseDeletedOfflineIsMarkedAtTheNextSync() {
+        val (phone, _) = pairWithTwoHouses()
+        phone.deleteHouse("h1")
+        remote.failAt = remote.calls + 1
+        assertThrows(IOException::class.java) { phone.sync() }
+        assertNull(remote.deleted["h1"])
+        assertEquals(setOf("h1"), phone.store.load().pendingDeletes)
+
+        phone.sync()
+        assertNotNull(remote.deleted["h1"])
+        assertTrue(phone.store.load().pendingDeletes.isEmpty())
+    }
+
+    @Test
+    fun aHouseNeverSyncedIsNotMarked() {
+        val (phone, _) = pairWithTwoHouses()
+        runBlocking { phone.db.houses().insert(House("h3", "Office", icon = "house", createdAt = 1, updatedAt = 1)) }
+        phone.deleteHouse("h3")
+        phone.sync()
+
+        assertNull(remote.deleted["h3"])
+        assertTrue(phone.store.load().pendingDeletes.isEmpty())
     }
 
     @Test

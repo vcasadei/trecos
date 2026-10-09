@@ -14,6 +14,7 @@ import app.trecos.ui.help.FaqScreen
 import app.trecos.ui.help.LicensesScreen
 import app.trecos.ui.help.TipsScreen
 import app.trecos.ui.sync.ConflictsScreen
+import app.trecos.ui.sync.DeletedHousesScreen
 import app.trecos.ui.sync.HistoryScreen
 import app.trecos.ui.sync.SyncNavigation
 import app.trecos.ui.sync.SyncScreen
@@ -118,6 +119,7 @@ private object Routes {
     const val LICENSES = "settings/about/licenses"
     const val CONFLICTS = "settings/sync/conflicts"
     const val HISTORY = "settings/sync/history"
+    const val DELETED_HOUSES = "settings/sync/deleted"
     const val HOUSE_FORM = "form/house?id={id}"
     const val CONTAINER_FORM = "form/container?house={house}&parent={parent}&id={id}&qr={qr}"
     const val ITEM_FORM = "form/item?house={house}&container={container}&id={id}&qr={qr}"
@@ -143,7 +145,10 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
     if (rootTab != null) SideEffect { lastTab = rootTab }
     val currentTab = rootTab ?: lastTab
     val shell = appViewModel { ShellViewModel(it) }
-    val band by shell.band.collectAsStateWithLifecycle()
+    val houseBand by shell.band.collectAsStateWithLifecycle()
+    val houseCount by shell.houseCount.collectAsStateWithLifecycle()
+    // No house is open on the house list, so it has no band.
+    val band = houseBand.takeUnless { route == rootRoute(TrecosTab.Home) && houseCount >= 2 }
     val dark = LocalDarkTheme.current
     val view = LocalView.current
     SideEffect {
@@ -151,7 +156,10 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = band == null && !dark
         }
     }
-    val nav = remember(navController) { placeNavigation(navController) }
+    // A house to open on the Home tab once its root is ready: with two or more houses
+    // it opens above the house list; with one, the root already shows it.
+    val pendingHouse = rememberSaveable { mutableStateOf<String?>(null) }
+    val nav = remember(navController) { placeNavigation(navController) { pendingHouse.value = it } }
     val app = appContainer()
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -160,7 +168,12 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
     LaunchedEffect(app) {
         if (!startApplied) {
             startApplied = true
-            if (app.preferences.startScreen.first() == StartScreen.Search) navController.navigateToTab(TrecosTab.Search)
+            if (app.preferences.startScreen.first() == StartScreen.Search) {
+                navController.navigateToTab(TrecosTab.Search)
+            } else {
+                // On app start Home opens the last-used house, above the house list when there is one.
+                app.preferences.lastHouseId.first()?.takeIf { app.database.houses().get(it) != null }?.let { pendingHouse.value = it }
+            }
         }
     }
     val activity = androidx.activity.compose.LocalActivity.current
@@ -218,7 +231,11 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                 composable(Routes.CURRENCY) { CurrencyScreen { navController.popBackStack() } }
                 composable(Routes.SYNC) {
                     SyncScreen(
-                        SyncNavigation(openConflicts = { navController.navigate(Routes.CONFLICTS) }, openHistory = { navController.navigate(Routes.HISTORY) }),
+                        SyncNavigation(
+                            openConflicts = { navController.navigate(Routes.CONFLICTS) },
+                            openHistory = { navController.navigate(Routes.HISTORY) },
+                            openDeleted = { navController.navigate(Routes.DELETED_HOUSES) },
+                        ),
                         onBack = { navController.popBackStack() },
                     )
                 }
@@ -228,12 +245,15 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                 composable(Routes.LICENSES) { LicensesScreen { navController.popBackStack() } }
                 composable(Routes.CONFLICTS) { ConflictsScreen { navController.popBackStack() } }
                 composable(Routes.HISTORY) { HistoryScreen { navController.popBackStack() } }
+                composable(Routes.DELETED_HOUSES) { DeletedHousesScreen { navController.popBackStack() } }
                 composable(Routes.BACKUP) { BackupScreen { navController.popBackStack() } }
                 composable(Routes.PROFILE) { ProfileScreen { navController.popBackStack() } }
                 composable(Routes.EXTRAS) { ExtrasScreen { navController.popBackStack() } }
                 composable(Routes.FIELDS, listOf(stringArg("house"))) { entry -> HouseFieldsScreen(entry.string("house")!!) { navController.popBackStack() } }
                 composable(rootRoute(TrecosTab.Home)) {
-                    Box(Modifier.fillMaxSize().testTag(rootScreenTag(TrecosTab.Home))) { HomeScreen(nav) }
+                    Box(Modifier.fillMaxSize().testTag(rootScreenTag(TrecosTab.Home))) {
+                        HomeScreen(nav, pendingHouse = pendingHouse.value, onPendingHandled = { pendingHouse.value = null })
+                    }
                 }
                 composable(Routes.PLACE, listOf(stringArg("house"), optionalArg("container"))) { entry ->
                     PlaceScreen(entry.string("house")!!, entry.string("container"), nav, isTabRoot = false)
@@ -304,11 +324,16 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
  * Builds the place screens' navigation actions on top of the controller.
  *
  * @param controller the navigation controller.
+ * @param requestHouse asks the Home root to show a house (see `HomeScreen`).
  * @return the actions.
  */
-private fun placeNavigation(controller: NavHostController) = PlaceNavigation(
+private fun placeNavigation(controller: NavHostController, requestHouse: (String) -> Unit) = PlaceNavigation(
     back = { controller.popBackStack() },
-    openHouse = { _ -> controller.popBackStack(rootRoute(TrecosTab.Home), inclusive = false) },
+    openHouse = { house ->
+        controller.popBackStack(rootRoute(TrecosTab.Home), inclusive = false)
+        requestHouse(house)
+    },
+    openHouseScreen = { house -> controller.navigate("place/$house") },
     openContainer = { house, container -> controller.navigate("place/$house?container=$container") },
     openItem = { item -> controller.navigate("item/$item") },
     addHouse = { controller.navigate("form/house") },

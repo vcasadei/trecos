@@ -197,6 +197,12 @@ the chosen image source live in Preferences DataStore. Nothing here syncs.
   "Photos only on Wi-Fi" is on. "Sync now" enqueues an expedited job.
 - **Retention**: each device keeps its last 30 commits on Drive. Objects no
   commit references are removed during sync.
+- **Deleted houses**: deleting a house never deletes it from Drive. It writes
+  `houses/<houseId>/deleted.json`; other devices remove the house at their
+  next sync unless they have unsynced changes to it or it is their only house,
+  in which case they keep it and delete the marker (an edit wins over a
+  delete). Settings > Sync lists marked houses with Restore, which deletes the
+  marker and pulls the house back; devices that removed it pull it back too.
 - The merge engine is plain Kotlin with no Android types, so it can be tested
   exhaustively as JVM unit tests.
 
@@ -266,7 +272,9 @@ There's no remote configuration (there is no server), so flags are build-time
   `apksigner verify --print-certs`, and publishes them on GitHub Releases
   with a `SHA256SUMS` file and the signing certificate's SHA-256 fingerprint
   in the release notes, so a sideloader can check what they install. From
-  0.7 it also builds the App Bundle for Play.
+  0.7 it also builds the App Bundle for Play. The tag sets the version: `v1.2.3` gives
+  `versionName` 1.2.3 and `versionCode` 10203 (major × 10000 + minor × 100 +
+  patch); local builds are `0.0.0-dev` with code 1.
 
 ### D21. Dependencies (approved at proposal time unless marked)
 AndroidX (Compose, Material 3, Navigation, WorkManager, DataStore, AppCompat,

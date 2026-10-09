@@ -11,6 +11,7 @@ import app.trecos.data.Item
 import app.trecos.data.ListView
 import app.trecos.categories.CategoryCatalog
 import app.trecos.places.PlaceTree
+import app.trecos.places.PlaceValue
 import app.trecos.ui.theme.PaletteColor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,25 +31,60 @@ sealed interface HomeState {
     data object FirstRun : HomeState
 
     /**
-     * Show a house's top level.
+     * Exactly one house: show its top level.
      *
-     * @property houseId the house to show: the last used, or the first one.
+     * @property houseId the house.
      */
     data class Ready(val houseId: String) : HomeState
+
+    /**
+     * Two or more houses: the house list.
+     *
+     * @property houses each house with its value and main photo, ordered by name.
+     * @property listView the app-wide list view.
+     * @property currency the display currency code.
+     */
+    data class Houses(val houses: List<HouseSummary>, val listView: ListView, val currency: String) : HomeState
 }
+
+/**
+ * One row of the house list.
+ *
+ * @property house the house.
+ * @property value its folded value and item count.
+ * @property photo its main photo's SHA-256, or `null`.
+ */
+data class HouseSummary(val house: House, val value: PlaceValue, val photo: String?)
 
 /**
  * Decides what the Home tab shows and creates the first house.
  *
  * @param app the app's container.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(private val app: AppContainer) : ViewModel() {
 
     /** The Home tab's state, updating as houses change. */
-    val state: StateFlow<HomeState> = combine(app.database.houses().observeAll(), app.preferences.lastHouseId) { houses, last ->
-        when {
-            houses.isEmpty() -> HomeState.FirstRun
-            else -> HomeState.Ready((houses.firstOrNull { it.id == last } ?: houses.first()).id)
+    val state: StateFlow<HomeState> = app.database.houses().observeAll().flatMapLatest { houses ->
+        when (houses.size) {
+            0 -> flowOf(HomeState.FirstRun)
+            1 -> flowOf(HomeState.Ready(houses.single().id))
+            else -> combine(
+                app.database.containers().observeAllHouses(),
+                app.database.items().observeAllTotals(),
+                app.database.photos().observeHouseMainPhotos(),
+                app.preferences.listView,
+                app.preferences.currency,
+            ) { containers, totals, photos, view, currency ->
+                val byHouse = containers.groupBy { it.houseId }
+                val totalsByHouse = totals.groupBy({ it.houseId }, { it.withoutHouse() })
+                val photoByHouse = photos.associate { it.ownerId to it.sha256 }
+                val rows = houses.map { house ->
+                    val tree = PlaceTree(byHouse[house.id].orEmpty(), totalsByHouse[house.id].orEmpty())
+                    HouseSummary(house, tree.houseValue, photoByHouse[house.id])
+                }
+                HomeState.Houses(rows, view, currency)
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeState.Loading)
 

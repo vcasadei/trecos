@@ -93,12 +93,12 @@ class BackupScenariosTest : PlacesTestBase() {
 
     private val files = FakeFiles()
 
-    @Before
-    fun useFakeFiles() {
-        rule.runOnUiThread {
-            rule.activity.setContent { CompositionLocalProvider(LocalBackupFiles provides files) { TrecosTheme { TrecosApp() } } }
-        }
+    override val appContent: @Composable () -> Unit = {
+        CompositionLocalProvider(LocalBackupFiles provides files) { TrecosTheme { TrecosApp() } }
     }
+
+    @Before
+    fun useFakes() = restartApp()
 
     /** Opens Settings > Backup. */
     private fun openBackup() {

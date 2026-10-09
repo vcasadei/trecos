@@ -123,6 +123,36 @@ A device MUST still read the previous format for at least one release.
 - **WHEN** it finds data written in a newer format
 - **THEN** it asks me to update and does not merge
 
+### Requirement: Deleted houses
+With sync connected, deleting a house SHALL NOT delete anything from Drive.
+The app MUST instead mark the house as deleted in Drive, at once or at the next
+sync when offline, and every other synced device MUST remove the house at its
+next sync. Settings > Sync MUST list the deleted houses with "Restore", which
+brings a house back as of its last sync onto this device and, through sync,
+onto the devices that removed it. A device that has unsynced changes to a house
+deleted elsewhere, or for which it is the only house, MUST keep the house and
+sync it, which takes it off the deleted list: an edit wins over a delete, as
+with items. A house marked as deleted MUST NOT be offered for restore when
+connecting.
+
+#### Scenario: Deleting a synced house
+- **AS A** user with sync on and two houses
+- **WHEN** I delete "Beach house" on my phone
+- **THEN** it is removed from my phone, and its data stays in my Drive
+- **AND** my tablet removes it at its next sync
+
+#### Scenario: Restoring a deleted house
+- **AS A** user who deleted "Beach house"
+- **WHEN** I open Settings > Sync > Deleted houses and tap "Restore" next to it
+- **THEN** "Beach house" is back on my phone as of its last sync
+- **AND** it comes back on my tablet at its next sync
+
+#### Scenario: Unsynced changes on another device
+- **AS A** user whose tablet changed "Beach house" without syncing yet
+- **WHEN** the tablet syncs after I deleted the house on my phone
+- **THEN** the tablet keeps "Beach house" and syncs its changes
+- **AND** "Beach house" is no longer on the deleted list
+
 ### Requirement: Folder changed outside the app
 If the Trecos folder in Drive is deleted or its files are altered outside the
 app, the next sync SHALL detect it, refuse to merge anything it cannot read, and

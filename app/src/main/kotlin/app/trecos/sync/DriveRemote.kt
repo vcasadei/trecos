@@ -5,7 +5,8 @@ import kotlinx.serialization.json.Json
 /**
  * [SyncRemote] in the user's Drive (design D14), in a visible folder:
  * `Trecos/houses/<houseId>/commits/<id>.jsonl.gz`,
- * `Trecos/houses/<houseId>/refs/<deviceId>.json` and `Trecos/objects/<sha256>.webp`.
+ * `Trecos/houses/<houseId>/refs/<deviceId>.json`, `Trecos/houses/<houseId>/deleted.json`
+ * while a house is deleted, and `Trecos/objects/<sha256>.webp`.
  * With the `drive.file` scope the app sees only files it created itself.
  *
  * @param drive the Drive API.
@@ -64,6 +65,23 @@ class DriveRemote(private val drive: DriveFiles) : SyncRemote {
         find(dir, "$commitId$COMMIT_EXT")?.let { drive.delete(it.id) }
     }
 
+    override suspend fun deletion(houseId: String): Deletion? {
+        val dir = folder(listOf(HOUSES, houseId), create = false) ?: return null
+        return find(dir, DELETED)?.let { json.decodeFromString(Deletion.serializer(), drive.download(it.id).decodeToString()) }
+    }
+
+    override suspend fun markDeleted(houseId: String, deletion: Deletion) {
+        val dir = folder(listOf(HOUSES, houseId), create = true)!!
+        val bytes = json.encodeToString(Deletion.serializer(), deletion).toByteArray()
+        val existing = find(dir, DELETED)
+        if (existing != null) drive.update(existing.id, bytes, "application/json") else drive.upload(DELETED, dir, bytes, "application/json")
+    }
+
+    override suspend fun clearDeleted(houseId: String) {
+        val dir = folder(listOf(HOUSES, houseId), create = false) ?: return
+        find(dir, DELETED)?.let { drive.delete(it.id) }
+    }
+
     override suspend fun objects(): Set<String> {
         val dir = folder(listOf(OBJECTS), create = false) ?: return emptySet()
         return children(dir).map { it.name }.filter { it.endsWith(PHOTO_EXT) }.map { it.removeSuffix(PHOTO_EXT) }.toSet()
@@ -118,6 +136,7 @@ class DriveRemote(private val drive: DriveFiles) : SyncRemote {
         const val REFS = "refs"
         const val COMMITS = "commits"
         const val OBJECTS = "objects"
+        const val DELETED = "deleted.json"
         const val COMMIT_EXT = ".jsonl.gz"
         const val PHOTO_EXT = ".webp"
     }

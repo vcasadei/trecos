@@ -66,14 +66,12 @@ class PhotoScenariosTest : PlacesTestBase() {
 
     private val fake = FakeSource()
 
-    @Before
-    fun useFakeSource() {
-        rule.runOnUiThread {
-            rule.activity.setContent {
-                CompositionLocalProvider(LocalPhotoSource provides fake) { TrecosTheme { TrecosApp() } }
-            }
-        }
+    override val appContent: @Composable () -> Unit = {
+        CompositionLocalProvider(LocalPhotoSource provides fake) { TrecosTheme { TrecosApp() } }
     }
+
+    @Before
+    fun useFakes() = restartApp()
 
     /**
      * Writes a JPEG.

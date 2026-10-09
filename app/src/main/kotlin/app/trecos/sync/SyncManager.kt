@@ -75,6 +75,15 @@ sealed interface ConnectResult {
 class DriveSession(val remote: SyncRemote, val user: suspend () -> DriveUser, val vault: KeyVault)
 
 /**
+ * A house deleted in Drive, for Settings > Sync > Deleted houses.
+ *
+ * @property id the house.
+ * @property name its name in its newest commit.
+ * @property time when it was deleted.
+ */
+data class DeletedHouse(val id: String, val name: String, val time: Long)
+
+/**
  * The sync status screens show.
  *
  * @property state the stored state.
@@ -143,7 +152,7 @@ class SyncManager(
         store.update { it.copy(connected = true, accountEmail = account.emailAddress) }
         if (!existed) return@run ConnectResult.Synced(syncWith(remote, account, create = true))
         val local = db.snapshots().houses().map { it.id }.toSet()
-        val onlyInDrive = remote.houses().filter { it !in local }
+        val onlyInDrive = remote.houses().filter { it !in local && remote.deletion(it) == null }
         if (onlyInDrive.isEmpty()) return@run ConnectResult.Synced(syncWith(remote, account))
         val names = houseNames(remote, onlyInDrive)
         if (hasOnlyAnEmptyHouse()) ConnectResult.OfferRestore(names) else ConnectResult.OfferMerge(names)
@@ -187,6 +196,56 @@ class SyncManager(
             ConnectResult.Synced(syncWith(session.remote, session.user()))
         }
         return result is ConnectResult.Synced
+    }
+
+    /**
+     * Records a house deleted on this phone. With sync connected it is marked as
+     * deleted in Drive right away, or at the next sync when that fails; its data
+     * stays in Drive (spec "Deleted houses").
+     *
+     * @param houseId the house.
+     */
+    suspend fun houseDeleted(houseId: String) {
+        val connected = store.load().connected
+        engine.houseDeleted(houseId, connected)
+        refresh()
+        if (connected) syncNow()
+    }
+
+    /**
+     * Lists the houses deleted in Drive.
+     *
+     * @param token a token, or `null` to get one silently.
+     * @return the houses, newest deletion first, or `null` when Drive can't be read.
+     */
+    suspend fun deletedHouses(token: String? = null): List<DeletedHouse>? {
+        if (!store.load().connected) return emptyList()
+        val access = token ?: auth.token(context) ?: return null
+        return runCatching {
+            mutex.withLock {
+                val remote = open(access).remote
+                remote.open(create = false)
+                val marked = engine.deletedHouses(remote)
+                val names = houseNames(remote, marked.keys.toList())
+                marked.map { (id, deletion) -> DeletedHouse(id, names[id] ?: id, deletion.time) }.sortedByDescending { it.time }
+            }
+        }.getOrNull()
+    }
+
+    /**
+     * Brings a deleted house back from Drive.
+     *
+     * @param houseId the house.
+     * @param token a token, or `null` to get one silently.
+     * @return what happened.
+     */
+    suspend fun restoreDeleted(houseId: String, token: String? = null): ConnectResult {
+        val access = token ?: auth.token(context) ?: return ConnectResult.Failed(resources.getString(R.string.sync_error_auth))
+        return run {
+            val session = open(access)
+            val photosAllowed = !preferences.photosOnlyOnWifi.first() || onUnmeteredNetwork()
+            ConnectResult.Synced(engine.restoreDeleted(session.remote, houseId, session.user(), photosAllowed))
+        }
     }
 
     /**

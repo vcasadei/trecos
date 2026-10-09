@@ -10,7 +10,7 @@ importar em qualquer celular. Funciona sem conta Google.
 3. Toque em **Exportar** e escolha onde salvar, por exemplo Downloads ou um
    pendrive. O arquivo tem um nome como `trecos-backup-2026-09-28.zip`.
 
-O backup contém todos os itens, compartimentos, categorias, etiquetas, campos
+O backup contém todos os itens, compartimentos, categorias, tags, campos
 personalizados e fotos em tamanho original das casas escolhidas, incluindo o
 que está na lixeira delas. As miniaturas ficam de fora e são refeitas depois
 da importação.

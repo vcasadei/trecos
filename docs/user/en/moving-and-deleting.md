@@ -41,3 +41,8 @@ whatever is left. Leaving without Finish deletes nothing.
 House menu ⋮ > **Delete**, then type the house's name. This is **permanent**:
 the house, its contents and its trash are removed. Export a backup first. The
 last house can't be deleted.
+
+With sync on, the house's copy in your Google Drive stays: your other devices
+remove the house at their next sync, and **Settings > Sync > Deleted houses**
+brings it back with **Restore**, as of its last sync, on every device. If
+another device changed the house without syncing yet, that device keeps it.

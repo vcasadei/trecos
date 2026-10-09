@@ -24,7 +24,7 @@ sempre opcional.
 - **Renomear** mantém todos os valores já preenchidos.
 - **Excluir** primeiro diz quantos itens têm valor. Nada muda sem sua
   confirmação, e confirmar remove esses valores.
-- Ao criar uma casa copiando categorias e etiquetas de outra, os campos também
+- Ao criar uma casa copiando categorias e tags de outra, os campos também
   são copiados (sem valores).
 
 ### Um campo só para um item
@@ -51,10 +51,10 @@ Os ajustes valem na hora e ficam só neste celular; não são sincronizados.
 | Aparência | Tema: Seguir o sistema, Branco, Escuro | Seguir o sistema |
 | Aparência | Faixa de cor da casa: Automática, Sempre, Nunca | Automática (duas ou mais casas) |
 | Aparência | Visualização da lista: Compacta ou Detalhada | Compacta |
-| Aparência | Extras da visualização detalhada: até 3 entre categorias, etiquetas, valor total, marca, modelo, número de série, código QR, data de inclusão, última alteração e campos personalizados | Categorias |
+| Aparência | Extras da visualização detalhada: até 3 entre categorias, tags, valor total, marca, modelo, número de série, código QR, data de inclusão, última alteração e campos personalizados | Categorias |
 | Itens e fotos | Novo item começa com: Formulário ou Foto | Formulário |
 | Itens e fotos | Origem da imagem: Câmera, Galeria, Perguntar sempre | definida na primeira vez |
-| Itens e fotos | Etiquetas da casa atual | |
+| Itens e fotos | Tags da casa atual | |
 | Campos personalizados | Campos para todos os itens da casa atual | |
 | Lixeira | A lixeira da casa atual | |
 | Sobre | Versão | |

@@ -14,6 +14,7 @@ scope the app sees only files it created.
 Trecos/
   houses/<houseId>/commits/<commitId>.jsonl.gz   full snapshots, one per sync
   houses/<houseId>/refs/<deviceId>.json          each device's latest commit
+  houses/<houseId>/deleted.json                  present while the house is deleted
   objects/<sha256>.webp                          full-size photos, stored once
 ```
 
@@ -83,6 +84,29 @@ When an account is connected and Drive has houses the device doesn't have:
   them, which replaces that empty house.
 - If the device has data, the app offers to **merge** (keep both) or to **keep
   only the Drive data**, which deletes the device's houses first.
+
+## Deleted houses
+
+Deleting a house never deletes anything from Drive. The device that deletes it
+writes `houses/<houseId>/deleted.json` (`{"time", "deviceId"}`, no house name,
+so nothing readable leaks when encryption is on) and forgets its own sync state
+for the house. When it is offline, the house waits in `SyncState.pendingDeletes`
+and is marked at the next sync. A house that never reached Drive is just dropped
+from that list.
+
+At each sync, for every local house with the marker:
+
+| This device | What it does |
+|---|---|
+| No changes since its last sync, and another house left | Removes the house locally, forgets its sync state and remembers it in `SyncState.droppedHouses` |
+| Unsynced changes, the house is its only one, or it never synced the house | Keeps the house, deletes the marker and syncs as usual: an edit wins over a delete |
+
+Houses with the marker are left out of the restore offer when connecting.
+Settings > Sync > Deleted houses lists them, with the name read from each
+house's newest commit. **Restore** deletes the marker and pulls the house from
+its newest commits, as on a new phone. Each device that had removed it sees, at
+its next sync, that a house in `droppedHouses` is no longer marked, and pulls it
+back the same way.
 
 ## Safety
 

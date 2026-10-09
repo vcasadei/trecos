@@ -8,7 +8,7 @@ digitado, lista todos os itens.
 | Campo de busca | Os resultados mudam enquanto você digita. Cada palavra casa com o começo de uma palavra, todas precisam casar, e maiúsculas e acentos não importam: "rasp 4" acha "Raspberry Pi 4", "cabeca" acha "Cabeça" |
 | **Itens / Compartimentos / Ambos** | O que listar; Itens por padrão |
 | **Buscar em** | Nome e descrição (padrão), só Nome ou só Descrição. "Nome" inclui marca, modelo, número de série e código QR |
-| **Filtros** | Casas, categorias e etiquetas. Vários valores no mesmo filtro casam com qualquer um; vários filtros precisam casar todos. Um grupo de categorias inclui as subcategorias. Os filtros ficam até você tocar em **Limpar tudo** |
+| **Filtros** | Casas, categorias e tags. Vários valores no mesmo filtro casam com qualquer um; vários filtros precisam casar todos. Um grupo de categorias inclui as subcategorias. Os filtros ficam até você tocar em **Limpar tudo** |
 | **Ordenar** | Nome (A a Z), data de inclusão ou preço unitário; a seta inverte a ordem. Itens sem preço sempre ficam por último |
 | Botão de QR | A leitura chega na versão 0.7 |
 

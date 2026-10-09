@@ -35,8 +35,8 @@ with the same key; Android refuses an update signed with another one.
 | Add a container | Tap **+**, then **Container**: a room, shelf, box or bag. Containers can go inside containers |
 | Add an item | Tap **+** inside a container, then **Item**. Only the name is required |
 | Add many items | Use **Save + new**: the next form stays in the same container |
-| Add another house | Tap the house name at the top, then **Add house** |
-| Switch houses | Tap the house name at the top and pick one |
+| Add another house | With one house, tap the house name at the top, then **Add house**. With two or more, tap **Add house** on the house list |
+| Switch houses | With two or more houses, Home lists them: go back to the list and tap another house. The app opens on the house you used last |
 | Go up | Tap any level of the path, such as "Apartment > Office" |
 | Change the list | Tap the view button in the top bar: condensed or detailed. The choice applies everywhere |
 

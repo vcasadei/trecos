@@ -44,6 +44,16 @@ data class CommitMeta(
 data class Ref(val commitId: String, val time: Long, val formatVersion: Int)
 
 /**
+ * The marker of a house deleted on some device: `houses/<houseId>/deleted.json`.
+ * It holds no name, so nothing readable is left when encryption is on.
+ *
+ * @property time when the house was deleted.
+ * @property deviceId the device that deleted it.
+ */
+@Serializable
+data class Deletion(val time: Long, val deviceId: String)
+
+/**
  * What this device remembers about one house's sync.
  *
  * @property head this device's latest commit, or `null` before the first sync.
@@ -74,6 +84,8 @@ data class StoredConflict(val houseId: String, val conflict: Conflict, val their
  * @property lastSuccess when the last sync finished, or `null`.
  * @property lastError the last failure, in plain language, or `null` after a success.
  * @property driveMissing whether the last sync found the Drive folder deleted or altered.
+ * @property pendingDeletes houses deleted here that Drive doesn't mark as deleted yet.
+ * @property droppedHouses houses removed here because another device deleted them; they come back if restored.
  */
 @Serializable
 data class SyncState(
@@ -86,6 +98,8 @@ data class SyncState(
     val lastSuccess: Long? = null,
     val lastError: String? = null,
     val driveMissing: Boolean = false,
+    val pendingDeletes: Set<String> = emptySet(),
+    val droppedHouses: Set<String> = emptySet(),
 )
 
 /**

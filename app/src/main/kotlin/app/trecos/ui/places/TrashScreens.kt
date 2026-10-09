@@ -374,6 +374,9 @@ fun DeleteHouseScreen(houseId: String, onBack: () -> Unit, onDeleted: () -> Unit
         TrecosTopBar(title = stringResource(R.string.delete_house_title, current.name), onBack = onBack)
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(stringResource(R.string.delete_house_body))
+            if (app.features.driveSync && app.sync.status.collectAsStateWithLifecycle().value.state.connected) {
+                Text(stringResource(R.string.delete_house_synced), modifier = Modifier.testTag("delete_house_synced"))
+            }
             OutlinedTextField(
                 value = typed,
                 onValueChange = { typed = it },
@@ -385,6 +388,7 @@ fun DeleteHouseScreen(houseId: String, onBack: () -> Unit, onDeleted: () -> Unit
                 onClick = {
                     scope.launch {
                         app.organize.deleteHouse(houseId)
+                        app.scope.launch { app.sync.houseDeleted(houseId) }
                         app.freeUnusedPhotos()
                         app.database.houses().observeAll().first().firstOrNull()?.let { app.preferences.setLastHouse(it.id) }
                         onDeleted()

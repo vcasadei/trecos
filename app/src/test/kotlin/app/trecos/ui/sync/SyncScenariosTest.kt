@@ -1,5 +1,8 @@
 package app.trecos.ui.sync
 
+import androidx.compose.ui.test.performTextInput
+import app.trecos.ui.places.rowTag
+import app.trecos.data.Fixtures
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assertTextContains
@@ -135,6 +138,38 @@ class SyncScenariosTest : PlacesTestBase() {
         click(tabTag(TrecosTab.Settings))
         tag(SETTINGS_LIST_TAG).performScrollToNode(hasTestTag("setting_backup"))
         assertFalse(exists("setting_sync"))
+    }
+
+    @Test
+    fun deletingAndRestoringASyncedHouse() {
+        seed(houses = listOf(Fixtures.house("beach", "Beach house"), Fixtures.house("h1", "Apartment")), items = listOf(item("towel", houseId = "beach").copy(name = "Towel")))
+        connect()
+        assertEquals(setOf("beach", "h1"), remote.commits.keys)
+
+        click(tabTag(TrecosTab.Home))
+        showHouseList()
+        click(rowTag("beach"))
+        clickDescription("More options")
+        click("menu_delete")
+        tag("delete_house_synced")
+        tag("type_house_name").performTextInput("Beach house")
+        click("confirm_delete_house")
+
+        eventually(10_000) { remote.deleted.containsKey("beach") }
+        assertTrue("nothing deleted from Drive", remote.commits["beach"]!!.isNotEmpty())
+        assertNull(runBlocking { app.database.houses().get("beach") })
+
+        // The Settings tab comes back on Settings > Sync, where connecting left it.
+        click(tabTag(TrecosTab.Settings))
+        click("open_deleted_houses")
+        tag("deleted_beach")
+        shows("Beach house")
+        click("restore_beach")
+
+        eventually(10_000) { runBlocking { app.database.houses().get("beach") } != null }
+        assertEquals("Towel", runBlocking { app.database.items().get("towel") }!!.name)
+        assertFalse(remote.deleted.containsKey("beach"))
+        tag("no_deleted_houses")
     }
 
     @Test

@@ -1,4 +1,4 @@
-# Categorias e etiquetas
+# Categorias e tags
 
 ## Categorias
 
@@ -22,19 +22,19 @@ e inglês ("cabo usb-c", "bateria externa", "luvas de látex") e aprendem as sua
 depois de marcar alguns itens chamados "rpi" como **SBCs e placas de
 desenvolvimento**, digitar "rpi" sugere essa categoria.
 
-## Etiquetas
+## Tags
 
-Etiquetas são o seu próprio sistema: "emprestado", "quebrado", "à venda"…
+Tags são o seu próprio sistema: "emprestado", "quebrado", "à venda"…
 
 | Tarefa | Como |
 |---|---|
-| Adicionar uma etiqueta | No formulário do item, toque em **Mais campos**, digite a etiqueta e toque em **+**. As existentes aparecem enquanto você digita |
-| Renomear ou excluir | Início > menu da casa (⋮) > **Etiquetas**. A mudança vale para todos os itens |
+| Adicionar uma tag | No formulário do item, toque em **Mais campos**, digite a tag e toque em **+**. As existentes aparecem enquanto você digita |
+| Renomear ou excluir | Início > menu da casa (⋮) > **Tags**. A mudança vale para todos os itens |
 
-"Emprestado", "emprestado" e "EMPRESTADO" são a mesma etiqueta. As etiquetas
+"Emprestado", "emprestado" e "EMPRESTADO" são a mesma tag. As tags
 pertencem à casa.
 
 ## Uma casa nova
 
-Ao adicionar uma casa, você pode copiar as categorias e etiquetas de outra
+Ao adicionar uma casa, você pode copiar as categorias e tags de outra
 casa. Os itens nunca são copiados.
