@@ -57,7 +57,7 @@ class NavigationTest {
     }
 
     @Test
-    fun returningToATabOnASubScreenSelectsIt() {
+    fun tappingAnotherTabAndBackOpensItsRoot() {
         appRule.onNodeWithTag(tabTag(TrecosTab.Settings)).performClick()
         appRule.waitUntil(10_000) { appRule.onAllNodesWithTag("setting_currency").fetchSemanticsNodes().isNotEmpty() }
         appRule.onNodeWithTag("setting_currency").performClick()
@@ -65,12 +65,29 @@ class NavigationTest {
         appRule.onNodeWithTag(tabTag(TrecosTab.Search)).performClick()
         appRule.onNodeWithTag(rootScreenTag(TrecosTab.Search)).assertIsDisplayed()
 
-        // Settings comes back on its sub-screen, which must still select the Settings tab.
+        // Settings opens on its root, not on the currency screen left open before.
         appRule.onNodeWithTag(tabTag(TrecosTab.Settings)).performClick()
-        appRule.waitUntil(10_000) { appRule.onAllNodesWithTag("currency_search").fetchSemanticsNodes().isNotEmpty() }
+        appRule.waitUntil(10_000) { appRule.onAllNodesWithTag("setting_currency").fetchSemanticsNodes().isNotEmpty() }
 
+        assertTrue(appRule.onAllNodesWithTag("currency_search").fetchSemanticsNodes().isEmpty())
         appRule.onNodeWithTag(tabTag(TrecosTab.Settings)).assertIsSelected()
         appRule.onNodeWithTag(tabTag(TrecosTab.Search)).assertIsNotSelected()
+    }
+
+    @Test
+    fun tappingTheSelectedTabOpensItsRoot() {
+        appRule.onNodeWithTag(tabTag(TrecosTab.Settings)).performClick()
+        appRule.waitUntil(10_000) { appRule.onAllNodesWithTag("setting_currency").fetchSemanticsNodes().isNotEmpty() }
+        appRule.onNodeWithTag("setting_currency").performClick()
+        appRule.waitUntil(10_000) { appRule.onAllNodesWithTag("currency_search").fetchSemanticsNodes().isNotEmpty() }
+
+        appRule.onNodeWithTag(tabTag(TrecosTab.Settings)).performClick()
+        appRule.waitUntil(10_000) { appRule.onAllNodesWithTag("currency_search").fetchSemanticsNodes().isEmpty() }
+
+        appRule.onNodeWithTag(rootScreenTag(TrecosTab.Settings)).assertIsDisplayed()
+        // The root is a fresh entry above Home, so back still returns to Home.
+        pressBack()
+        appRule.onNodeWithTag(rootScreenTag(TrecosTab.Home)).assertIsDisplayed()
     }
 
     @Test

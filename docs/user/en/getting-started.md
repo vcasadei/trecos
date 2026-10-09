@@ -36,6 +36,7 @@ with the same key; Android refuses an update signed with another one.
 | Add an item | Tap **+** inside a container, then **Item**. Only the name is required |
 | Add many items | Use **Save + new**: the next form stays in the same container |
 | Add another house | With one house, tap the house name at the top, then **Add house**. With two or more, tap **Add house** on the house list |
+| Move around | The bottom bar has Search, Home and Settings. Tapping a tab always opens its main screen: tapping Home from inside a container or item goes straight back to Home, or to the house list |
 | Switch houses | With two or more houses, Home lists them: go back to the list and tap another house. The app opens on the house you used last |
 | Go up | Tap any level of the path, such as "Apartment > Office" |
 | Change the list | Tap the view button in the top bar: condensed or detailed. The choice applies everywhere |

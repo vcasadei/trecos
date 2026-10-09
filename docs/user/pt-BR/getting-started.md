@@ -36,6 +36,7 @@ com a mesma chave; o Android recusa uma atualização assinada com outra.
 | Adicionar um item | Toque em **+** dentro de um compartimento e depois em **Item**. Só o nome é obrigatório |
 | Adicionar vários itens | Use **Salvar + novo**: o próximo formulário continua no mesmo compartimento |
 | Adicionar outra casa | Com uma casa, toque no nome dela no topo e depois em **Adicionar casa**. Com duas ou mais, toque em **Adicionar casa** na lista de casas |
+| Navegar | A barra inferior tem Buscar, Início e Ajustes. Tocar numa aba sempre abre a tela principal dela: tocar em Início de dentro de um compartimento ou item volta direto para o Início, ou para a lista de casas |
 | Trocar de casa | Com duas ou mais casas, o Início lista todas: volte para a lista e toque em outra casa. O app abre na casa usada por último |
 | Subir de nível | Toque em qualquer nível do caminho, como "Apartamento > Escritório" |
 | Mudar a lista | Toque no botão de visualização no topo: compacta ou detalhada. A escolha vale para o app todo |

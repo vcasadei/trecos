@@ -392,16 +392,16 @@ private fun optionalArg(name: String) = navArgument(name) {
 private fun androidx.navigation.NavBackStackEntry.string(name: String): String? = arguments?.getString(name)
 
 /**
- * Opens a tab's root, keeping one entry per tab above Home and restoring the
- * tab's previous state.
+ * Opens a tab's root, always on the root itself: screens opened below any tab
+ * are closed, also when tapping the tab already selected. Home stays at the
+ * bottom of the stack, so back from Search or Settings returns to it.
  *
  * @param tab the tab to open.
  */
 private fun NavHostController.navigateToTab(tab: TrecosTab) {
     navigate(rootRoute(tab)) {
-        popUpTo(graph.findStartDestination().id) { saveState = true }
+        popUpTo(graph.findStartDestination().id)
         launchSingleTop = true
-        restoreState = true
     }
 }
 
