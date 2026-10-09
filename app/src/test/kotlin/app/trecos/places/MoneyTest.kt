@@ -23,6 +23,14 @@ class MoneyTest {
     }
 
     @Test
+    fun symbolMatchesTheFormattedAmount() {
+        assertEquals("R$", Money.symbol("BRL", PortugueseBrazil))
+        assertEquals("R$", Money.symbol("BRL", English))
+        assertEquals("US$", Money.symbol("USD", PortugueseBrazil))
+        assertEquals("$", Money.symbol("USD", English))
+    }
+
+    @Test
     fun currencyDecimalsFollowTheCurrency() {
         assertEquals(0, Money.fractionDigits("JPY"))
         assertEquals("¥1,234", Money.format(1_234, "JPY", English))
