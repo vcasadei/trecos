@@ -57,6 +57,23 @@ class NavigationTest {
     }
 
     @Test
+    fun returningToATabOnASubScreenSelectsIt() {
+        appRule.onNodeWithTag(tabTag(TrecosTab.Settings)).performClick()
+        appRule.waitUntil(10_000) { appRule.onAllNodesWithTag("setting_currency").fetchSemanticsNodes().isNotEmpty() }
+        appRule.onNodeWithTag("setting_currency").performClick()
+        appRule.waitUntil(10_000) { appRule.onAllNodesWithTag("currency_search").fetchSemanticsNodes().isNotEmpty() }
+        appRule.onNodeWithTag(tabTag(TrecosTab.Search)).performClick()
+        appRule.onNodeWithTag(rootScreenTag(TrecosTab.Search)).assertIsDisplayed()
+
+        // Settings comes back on its sub-screen, which must still select the Settings tab.
+        appRule.onNodeWithTag(tabTag(TrecosTab.Settings)).performClick()
+        appRule.waitUntil(10_000) { appRule.onAllNodesWithTag("currency_search").fetchSemanticsNodes().isNotEmpty() }
+
+        appRule.onNodeWithTag(tabTag(TrecosTab.Settings)).assertIsSelected()
+        appRule.onNodeWithTag(tabTag(TrecosTab.Search)).assertIsNotSelected()
+    }
+
+    @Test
     fun backFromATabRoot() {
         listOf(TrecosTab.Search, TrecosTab.Settings).forEach { tab ->
             appRule.onNodeWithTag(tabTag(tab)).performClick()

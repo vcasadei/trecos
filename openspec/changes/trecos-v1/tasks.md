@@ -158,7 +158,7 @@ run at the end of **every** release group before it is tagged.
 ## 12. Release 0.11 — Google Drive sync (behind `FEATURE_DRIVE_SYNC`)
 
 - [x] 12.1 Add the `FEATURE_DRIVE_SYNC` build flag (default false) and hide every sync entry point behind it; verify with a test that Settings shows no Sync section when it's off
-- [ ] 12.2 Create the Google Cloud OAuth client for `app.trecos` (debug and release signing certificates, `drive.file` and `drive.appdata` scopes, consent screen), with no secret in the repository; document it in `docs/dev/release.md` and verify sign-in on a debug build
+- [x] 12.2 Create the Google Cloud OAuth client for `app.trecos` (debug and release signing certificates, `drive.file` and `drive.appdata` scopes, consent screen), with no secret in the repository; document it in `docs/dev/release.md` and verify sign-in on a debug build
 - [x] 12.3 Implement connect and disconnect with the Google authorization client, creating the visible "Trecos" folder; tests for scenarios "First connection" and "Sign-in cancelled"
 - [x] 12.4 Implement the Drive REST client over `HttpsURLConnection` (list, create, upload, download, retry with backoff); tests against a local JDK HTTP server, including error and retry cases
 - [x] 12.5 Implement the merge engine in plain Kotlin (three-way per field, same-field and edit-versus-delete conflicts, folding several devices, trash state); exhaustive unit tests including scenarios "No conflict", "Same field" and "Edit versus delete"
