@@ -137,6 +137,9 @@ class EncryptionScenariosTest : PlacesTestBase() {
 
     /** What the next start of the app does: finish the prepared swap. */
     private fun restart() {
+        // The change re-reads its status as it ends; let it end first, or that read can land
+        // after the swap finishes here and report the half-finished state.
+        eventually(10_000) { !app.encryption.status.value.working }
         app.encryption.swap.finish()
         app.encryption.refresh()
     }
