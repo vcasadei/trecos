@@ -106,4 +106,71 @@
         <item quantity="many">Ela será removida de %1$d itens, que mantêm suas outras categorias.</item>
         <item quantity="other">Ela será removida de %1$d itens, que mantêm suas outras categorias.</item>
     </plurals>
+
+    <!-- Organize and trash (0.4) -->
+    <string name="move_here">Mover para cá</string>
+    <string name="copy_here">Copiar para cá</string>
+    <string name="choose_destination">Escolha o destino</string>
+    <string name="search_places">Buscar compartimentos</string>
+    <string name="top_level">Nível principal</string>
+    <string name="cannot_move_inside">Um compartimento não pode ir para dentro dele mesmo nem de um dos seus compartimentos.</string>
+    <string name="qr_clash_title">Código QR já usado</string>
+    <string name="qr_clash_body">\"%1$s\" usa o código %2$s, que outra coisa naquela casa já tem.</string>
+    <string name="qr_clash_edit">Mudar o código</string>
+    <string name="qr_clash_remove">Remover o código</string>
+    <string name="moved">Movido</string>
+    <string name="copied">Copiado</string>
+    <string name="copy_suffix">\u0020(cópia)</string>
+    <string name="delete_item_title">Excluir \"%1$s\"?</string>
+    <string name="delete_item_body">Vai para a lixeira desta casa por 30 dias.</string>
+    <string name="deleted">Excluído</string>
+    <string name="action_undo">Desfazer</string>
+    <string name="delete_container_title">Excluir \"%1$s\"?</string>
+    <string name="delete_everything">Mandar tudo para a lixeira</string>
+    <string name="choose_what_to_keep">Escolher o que manter</string>
+    <string name="trash_title">Lixeira</string>
+    <string name="trash_empty">A lixeira está vazia.</string>
+    <string name="empty_trash">Esvaziar lixeira</string>
+    <string name="empty_trash_confirm">Excluir tudo o que está na lixeira para sempre? Não dá para desfazer.</string>
+    <string name="action_restore">Restaurar</string>
+    <string name="delete_permanently">Excluir para sempre</string>
+    <string name="delete_permanently_confirm">Excluir \"%1$s\" para sempre? Não dá para desfazer.</string>
+    <string name="restored">Restaurado</string>
+    <string name="restored_qr_removed">Restaurado sem o código QR, que agora é usado por outra coisa.</string>
+    <string name="restore_where">O lugar original não existe mais. Escolha onde restaurar.</string>
+    <string name="keep_title">Escolher o que manter</string>
+    <string name="keep_body">Marque o que manter, mova para algum lugar e repita. Concluir manda o resto para a lixeira.</string>
+    <string name="move_selected">Mover selecionados para…</string>
+    <string name="parent_level">Nível acima</string>
+    <string name="new_container_at_parent">Novo compartimento no nível acima…</string>
+    <string name="choose_container">Escolher um compartimento…</string>
+    <string name="finish">Concluir</string>
+    <string name="finish_confirm">Mandar \"%1$s\" e tudo o que ainda está na lista para a lixeira?</string>
+    <string name="new_container_name">Nome do novo compartimento</string>
+    <string name="delete_house_title">Excluir \"%1$s\" para sempre?</string>
+    <string name="delete_house_body">Tudo o que há nesta casa, a lixeira e as fotos serão removidos de vez. Considere exportar um backup antes. Digite o nome da casa para confirmar.</string>
+    <string name="type_house_name">Nome da casa</string>
+    <string name="select_all">Selecionar tudo</string>
+    <string name="clear_selection">Limpar seleção</string>
+    <string name="house">Casa</string>
+    <plurals name="selected_count">
+        <item quantity="one">%1$d selecionado</item>
+        <item quantity="many">%1$d selecionados</item>
+        <item quantity="other">%1$d selecionados</item>
+    </plurals>
+    <plurals name="delete_container_body">
+        <item quantity="one">Ele guarda %1$d coisa. O que fazer com ela?</item>
+        <item quantity="many">Ele guarda %1$d coisas. O que fazer com elas?</item>
+        <item quantity="other">Ele guarda %1$d coisas. O que fazer com elas?</item>
+    </plurals>
+    <plurals name="delete_selection_title">
+        <item quantity="one">Excluir %1$d coisa?</item>
+        <item quantity="many">Excluir %1$d coisas?</item>
+        <item quantity="other">Excluir %1$d coisas?</item>
+    </plurals>
+    <plurals name="days_left">
+        <item quantity="one">%1$d dia restante</item>
+        <item quantity="many">%1$d dias restantes</item>
+        <item quantity="other">%1$d dias restantes</item>
+    </plurals>
 </resources>

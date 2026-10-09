@@ -10,6 +10,9 @@ import app.trecos.data.TrecosDatabase
  */
 class TestTrecosApplication : TrecosApplication() {
 
+    /** No background maintenance in tests; the purge itself is tested directly. */
+    override fun scheduleMaintenance() = Unit
+
     /**
      * @return a container whose database lives in memory.
      */

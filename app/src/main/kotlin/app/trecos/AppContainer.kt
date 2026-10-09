@@ -8,7 +8,9 @@ import app.trecos.categories.Category
 import app.trecos.categories.CategorySuggester
 import app.trecos.data.AppPreferences
 import app.trecos.data.TrecosDatabase
+import app.trecos.places.OrganizeStore
 import java.util.UUID
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 /**
  * Holds the app's long-lived objects and hands them to ViewModels (design D2:
@@ -38,8 +40,22 @@ class AppContainer(
         CategorySuggester.parse(context.assets.open("category-keywords.json").bufferedReader().use { it.readText() })
     }
 
+    /** Moving, copying, the trash and house deletion. */
+    val organize: OrganizeStore by lazy { OrganizeStore(database, clock, newId) }
+
+    /** Short messages shown app-wide, such as "Deleted" with Undo. */
+    val messages = MutableSharedFlow<AppMessage>(extraBufferCapacity = 8)
+
     /** Device preferences. */
     val preferences: AppPreferences = AppPreferences(
         PreferenceDataStoreFactory.create { context.preferencesDataStoreFile("settings") },
     )
 }
+
+/**
+ * A short message shown at the bottom of the app.
+ *
+ * @property text the message.
+ * @property undoEntries trash entries restored when the user taps Undo; empty for no Undo.
+ */
+data class AppMessage(val text: String, val undoEntries: List<String> = emptyList())

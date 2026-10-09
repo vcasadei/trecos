@@ -6,6 +6,22 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - Unreleased
+
+### Added
+
+- Move items and containers anywhere, including another house, with a destination picker (browse, search, switch house); a container can't go inside itself.
+- Moving between houses carries custom categories and tags along and asks what to do when a QR code is already used there.
+- Copy (new identity, no QR code, containers with their contents) and Duplicate (" (copy)", opens the edit form).
+- Multi-select by long press: Select all, Move, Copy, Delete; back clears the selection.
+- Delete confirmation, Undo, and a per-house trash kept for 30 days with Restore (to the original place or a chosen one), Delete permanently and Empty trash; a daily job purges old trash.
+- "Choose what to keep" when deleting a container with contents, with several destinations and Finish.
+- Permanent house deletion after typing the house's name; never the last house.
+
+### Changed
+
+- Database schema 3 (trash). QR codes are unique among things not in the trash: a new item can reuse a trashed item's code, which is then dropped if that item is restored.
+
 ## [0.3.0] - Unreleased
 
 ### Added

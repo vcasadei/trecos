@@ -76,17 +76,17 @@ run at the end of **every** release group before it is tagged.
 
 ## 5. Release 0.4 — Organize and trash
 
-- [ ] 5.1 Build the destination picker (browse and search, starting in the current house, other houses) and Move, blocking moves into a container's own subtree; tests for scenarios "Moving an item" and "Moving a container into its own child"
-- [ ] 5.2 Implement moving between houses (creating missing categories and tags, and edit/remove/cancel on a QR clash); tests for scenarios "Carrying custom categories along" and "QR code clash"
-- [ ] 5.3 Implement Copy (new identities, no QR, containers with their contents) and Duplicate (" (copy)" suffix, opens the edit form); tests for scenarios "Copying a labelled box" and "Duplicating an item"
-- [ ] 5.4 Implement multi-select (long press, count, Select all, bulk Move, Copy and Delete, back clears); tests for scenarios "Moving several items" and "Leaving selection"
-- [ ] 5.5 Migration v2 → v3 (expand): add `TrashEntry`; verify with a migration test
-- [ ] 5.6 Implement delete confirmation, Undo for at least 5 s, and the per-house trash screen (from the house menu and Settings), hiding trashed things from lists and values; tests for scenarios "Deleting an item", "Cancelling", "Undoing a delete" and "Trashed items hidden"
-- [ ] 5.7 Implement restore (original location or a picker, QR removed when taken, with a notice); tests for scenarios "Normal restore" and "Original location gone"
-- [ ] 5.8 Add the daily purge job (older than 30 days, including photo files later); test for scenario "Automatic purge" with a fake clock
-- [ ] 5.9 Build the container delete flow ("Move everything to trash" or "Choose what to keep", checkboxes, drilling into sub-containers, several destinations including a new container at the parent level, Finish with confirmation); tests for scenarios "Keeping some things" and "Leaving the keep screen early"
-- [ ] 5.10 Implement house deletion (type the name, permanent, suggest export, never the last house); tests for scenarios "Deleting a house" and "Wrong name typed"
-- [ ] 5.11 Update the user docs on moving and deleting and draft FAQ answers 3 and 6 (both languages), and add the 0.4 entry to `CHANGELOG.md`
+- [x] 5.1 Build the destination picker (browse and search, starting in the current house, other houses) and Move, blocking moves into a container's own subtree; tests for scenarios "Moving an item" and "Moving a container into its own child"
+- [x] 5.2 Implement moving between houses (creating missing categories and tags, and edit/remove/cancel on a QR clash); tests for scenarios "Carrying custom categories along" and "QR code clash"
+- [x] 5.3 Implement Copy (new identities, no QR, containers with their contents) and Duplicate (" (copy)" suffix, opens the edit form); tests for scenarios "Copying a labelled box" and "Duplicating an item"
+- [x] 5.4 Implement multi-select (long press, count, Select all, bulk Move, Copy and Delete, back clears); tests for scenarios "Moving several items" and "Leaving selection"
+- [x] 5.5 Migration v2 → v3 (expand): add `TrashEntry`; verify with a migration test
+- [x] 5.6 Implement delete confirmation, Undo for at least 5 s, and the per-house trash screen (from the house menu and Settings), hiding trashed things from lists and values; tests for scenarios "Deleting an item", "Cancelling", "Undoing a delete" and "Trashed items hidden"
+- [x] 5.7 Implement restore (original location or a picker, QR removed when taken, with a notice); tests for scenarios "Normal restore" and "Original location gone"
+- [x] 5.8 Add the daily purge job (older than 30 days, including photo files later); test for scenario "Automatic purge" with a fake clock
+- [x] 5.9 Build the container delete flow ("Move everything to trash" or "Choose what to keep", checkboxes, drilling into sub-containers, several destinations including a new container at the parent level, Finish with confirmation); tests for scenarios "Keeping some things" and "Leaving the keep screen early"
+- [x] 5.10 Implement house deletion (type the name, permanent, suggest export, never the last house); tests for scenarios "Deleting a house" and "Wrong name typed"
+- [x] 5.11 Update the user docs on moving and deleting and draft FAQ answers 3 and 6 (both languages), and add the 0.4 entry to `CHANGELOG.md`
 
 ## 6. Release 0.5 — Photos
 

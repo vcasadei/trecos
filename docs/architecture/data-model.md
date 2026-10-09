@@ -17,7 +17,7 @@ committed in `app/schemas/app.trecos.data.TrecosDatabase/<version>.json`.
 | No foreign keys | Soft deletes and sync merges apply rows in any order; relations are enforced in code |
 | Inserts fail on a clash; updates are explicit | Room's upsert silently drops a row whose unique QR code clashes |
 
-## Tables (schema version 2)
+## Tables (schema version 3)
 
 ### `house`
 
@@ -40,13 +40,13 @@ committed in `app/schemas/app.trecos.data.TrecosDatabase/<version>.json`.
 | `parentId` | TEXT? | Parent container; null at the house's top level |
 | `name` | TEXT | Required |
 | `description` | TEXT? | |
-| `qrCode` | TEXT? | Unique in the house across containers and items |
+| `qrCode` | TEXT? | Unique in the house among containers and items not in the trash |
 | `icon` | TEXT | Container icon key (`box`, `drawer`, …) |
 | `colorKey` | TEXT? | Own colour; null inherits the nearest ancestor's |
 | `valueOverride` | INTEGER? | Manual value in minor units; null means automatic |
 | `createdAt`, `updatedAt`, `deletedAt` | INTEGER | |
 
-Indexes: `(houseId, parentId)`; unique `(houseId, qrCode)`.
+Indexes: `(houseId, parentId)`; `(houseId, qrCode)`.
 
 ### `item`
 
@@ -59,12 +59,12 @@ Indexes: `(houseId, parentId)`; unique `(houseId, qrCode)`.
 | `quantity` | INTEGER | Whole number, 0 to 999,999; default 1 |
 | `unitPrice` | INTEGER? | Minor units; null when unknown (no total, not zero) |
 | `brand`, `model`, `serial`, `description` | TEXT? | |
-| `qrCode` | TEXT? | Unique in the house across containers and items |
+| `qrCode` | TEXT? | Unique in the house among containers and items not in the trash |
 | `createdAt` | INTEGER | Shown as "Added" |
 | `updatedAt` | INTEGER | Shown as "Last changed"; set on every change, moves included |
 | `deletedAt` | INTEGER? | |
 
-Indexes: `(houseId, containerId)`; unique `(houseId, qrCode)`.
+Indexes: `(houseId, containerId)`; `(houseId, qrCode)`.
 
 ### Categories and tags (added in schema 2)
 
@@ -81,6 +81,12 @@ renamed or deleted.
 | `item_tag` | `id`, `houseId`, `itemId`, `tagId`, `createdAt` | Unique `(itemId, tagId)` |
 | `token_category_count` | `houseId`, `token`, `categoryId`, `count` | Learned suggestion counts (design D7); primary key `(houseId, token, categoryId)`; device only |
 
+### Trash (added in schema 3)
+
+| Table | Columns | Notes |
+|---|---|---|
+| `trash_entry` | `id`, `houseId`, `kind` (`item` or `container`), `targetId`, `name`, `parentId?`, `trashedAt` | One undoable delete. The trashed thing and everything trashed with it share `deletedAt = trashedAt`, which separates them from things trashed on their own. Purged after 30 days |
+
 Deleting a custom category or a tag removes its rows and its assignments.
 These tables get deletion markers when sync arrives (0.11), by expand and contract.
 
@@ -88,7 +94,7 @@ These tables get deletion markers when sync arrives (0.11), by expand and contra
 
 | Rule | Where |
 |---|---|
-| QR codes unique per house across both tables | `QrDao.countUses`, checked by the container and item forms; each table's unique index is the backstop |
+| QR codes unique per house across both tables, ignoring the trash | `QrDao.countUses` in the forms, `OrganizeDao.activeQrUses` when moving and restoring. Not a unique index: a trashed thing keeps its code, and loses it on restore if it was taken meanwhile (schema 3 dropped the unique indexes) |
 | At least one house exists | The house menu refuses to delete the last one |
 | Container value = override, or the recursive sum of quantity × unit price below | `PlaceTree` (design D5), folded in memory per house |
 | Colour inheritance: own colour, else the nearest ancestor's | `PlaceTree.colorKey` |
