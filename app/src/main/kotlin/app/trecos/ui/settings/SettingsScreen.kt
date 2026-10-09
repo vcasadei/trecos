@@ -2,6 +2,15 @@ package app.trecos.ui.settings
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
+import app.trecos.lock.LockTimeout
+import app.trecos.data.Profile
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Switch
+import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -61,6 +70,9 @@ import kotlinx.coroutines.launch
  * @property addFlow what adding an item starts with.
  * @property imageSource where photos come from.
  * @property house the house the per-house rows act on, or `null` before any house exists.
+ * @property appLock whether the app lock is on.
+ * @property lockTimeout the lock timeout.
+ * @property profile the optional profile, or `null`.
  */
 data class SettingsState(
     val currency: String,
@@ -72,6 +84,9 @@ data class SettingsState(
     val addFlow: AddFlow,
     val imageSource: ImageSource,
     val house: House?,
+    val appLock: Boolean = false,
+    val lockTimeout: LockTimeout = LockTimeout.OneMinute,
+    val profile: Profile? = null,
 )
 
 /**
@@ -90,11 +105,19 @@ class SettingsViewModel(private val app: AppContainer) : ViewModel() {
         houses.firstOrNull { it.id == last } ?: houses.firstOrNull()
     }
 
+    private val security = combine(prefs.appLock, prefs.lockTimeout, prefs.profile) { lock, timeout, profile -> Triple(lock, timeout, profile) }
+
     /** The settings, or `null` while loading. */
-    val state: StateFlow<SettingsState?> = combine(basics, prefs.detailExtras, prefs.addFlow, prefs.imageSource, house) { b, extras, flow, source, house ->
+    val state: StateFlow<SettingsState?> = combine(
+        basics,
+        combine(prefs.detailExtras, prefs.addFlow, prefs.imageSource) { extras, flow, source -> Triple(extras, flow, source) },
+        house,
+        security,
+    ) { b, (extras, flow, source), house, (lock, timeout, profile) ->
         SettingsState(
             currency = b[0] as String, start = b[1] as StartScreen, theme = b[2] as ThemeMode, band = b[3] as HouseBand,
             listView = b[4] as ListView, extras = extras, addFlow = flow, imageSource = source, house = house,
+            appLock = lock, lockTimeout = timeout, profile = profile,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
@@ -115,6 +138,12 @@ class SettingsViewModel(private val app: AppContainer) : ViewModel() {
 
     /** @param source where photos come from. */
     fun setImageSource(source: ImageSource) = launch { prefs.setImageSource(source) }
+
+    /** @param on whether the app lock is on (turning it on is confirmed by the phone's lock first). */
+    fun setAppLock(on: Boolean) = launch { prefs.setAppLock(on) }
+
+    /** @param timeout the lock timeout. */
+    fun setLockTimeout(timeout: LockTimeout) = launch { prefs.setLockTimeout(timeout) }
 
     /**
      * Saves the currency, then calls [then]; leaving the screen first would cancel the save.
@@ -156,6 +185,7 @@ class SettingsViewModel(private val app: AppContainer) : ViewModel() {
  * @property openFields opens a house's custom fields.
  * @property openTags opens a house's tags.
  * @property openTrash opens a house's trash.
+ * @property openProfile opens the optional profile.
  */
 data class SettingsNavigation(
     val openCurrency: () -> Unit,
@@ -163,11 +193,12 @@ data class SettingsNavigation(
     val openFields: (houseId: String) -> Unit,
     val openTags: (houseId: String) -> Unit,
     val openTrash: (houseId: String) -> Unit,
+    val openProfile: () -> Unit = {},
 )
 
 /**
  * The Settings tab, in the spec's section order. Sections whose features
- * haven't shipped yet (Security, Sync & backup, Help, Support) arrive with them.
+ * haven't shipped yet (Sync & backup, Help, Support) arrive with them.
  *
  * @param nav where the rows lead.
  */
@@ -258,6 +289,27 @@ fun SettingsScreen(nav: SettingsNavigation) {
             item {
                 LinkRow("fields", R.string.setting_house_fields, house?.name ?: stringResource(R.string.no_house_yet), house?.let { { nav.openFields(it.id) } })
             }
+            item { Section(R.string.settings_security) }
+            item { AppLockRow(current.appLock, vm) }
+            if (current.appLock) {
+                item {
+                    ChoiceRow(
+                        "lock_timeout", R.string.setting_lock_timeout, current.lockTimeout,
+                        listOf(
+                            LockTimeout.Immediately to stringResource(R.string.timeout_immediately),
+                            LockTimeout.OneMinute to stringResource(R.string.timeout_1),
+                            LockTimeout.FiveMinutes to stringResource(R.string.timeout_5),
+                            LockTimeout.FifteenMinutes to stringResource(R.string.timeout_15),
+                        ),
+                        vm::setLockTimeout,
+                    )
+                }
+            }
+            item {
+                val profile = current.profile
+                val summary = listOfNotNull(profile?.name, profile?.email).joinToString(" · ").ifEmpty { stringResource(R.string.profile_none) }
+                LinkRow("profile", R.string.setting_profile, summary, nav.openProfile)
+            }
             item { Section(R.string.settings_trash) }
             item {
                 LinkRow("trash", R.string.setting_open_trash, house?.name ?: stringResource(R.string.no_house_yet), house?.let { { nav.openTrash(it.id) } })
@@ -269,6 +321,54 @@ fun SettingsScreen(nav: SettingsNavigation) {
                 LinkRow("version", R.string.setting_version, version, null)
             }
         }
+    }
+}
+
+/**
+ * The app lock switch. Turning it on needs a phone screen lock and a
+ * successful unlock; without a screen lock, a note explains and it stays off.
+ *
+ * @param on whether the lock is on.
+ * @param vm the settings.
+ */
+@Composable
+private fun AppLockRow(on: Boolean, vm: SettingsViewModel) {
+    val app = app.trecos.ui.appContainer()
+    val activity = androidx.activity.compose.LocalActivity.current as? androidx.fragment.app.FragmentActivity
+    val title = stringResource(R.string.confirm_app_lock)
+    var needsScreenLock by remember { mutableStateOf(false) }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 64.dp)
+            .toggleable(value = on, role = Role.Switch) { wanted ->
+                when {
+                    !wanted -> vm.setAppLock(false)
+                    !app.security.isScreenLockSet() -> needsScreenLock = true
+                    activity != null -> app.security.authenticate(activity, title) { passed ->
+                        if (passed) {
+                            app.lock.unlocked()
+                            vm.setAppLock(true)
+                        }
+                    }
+                }
+            }
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .testTag("setting_app_lock"),
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.setting_app_lock), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.app_lock_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Switch(checked = on, onCheckedChange = null, modifier = Modifier.padding(start = 12.dp).testTag("app_lock_switch"))
+    }
+    if (needsScreenLock) {
+        AlertDialog(
+            onDismissRequest = { needsScreenLock = false },
+            text = { Text(stringResource(R.string.screen_lock_needed), modifier = Modifier.testTag("screen_lock_needed")) },
+            confirmButton = { TextButton(onClick = { needsScreenLock = false }) { Text(stringResource(R.string.action_ok)) } },
+        )
     }
 }
 

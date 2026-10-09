@@ -8,6 +8,9 @@ import app.trecos.categories.Category
 import app.trecos.categories.CategorySuggester
 import app.trecos.data.AppPreferences
 import app.trecos.data.TrecosDatabase
+import app.trecos.lock.AppLock
+import app.trecos.lock.DeviceSecurity
+import app.trecos.lock.SystemDeviceSecurity
 import app.trecos.places.FieldStore
 import app.trecos.places.OrganizeStore
 import app.trecos.places.PhotoStore
@@ -71,6 +74,12 @@ class AppContainer(
 
     /** Short messages shown app-wide, such as "Deleted" with Undo. */
     val messages = MutableSharedFlow<AppMessage>(extraBufferCapacity = 8)
+
+    /** The phone's own lock; tests replace it with a fake. */
+    var security: DeviceSecurity = SystemDeviceSecurity(context)
+
+    /** Whether the app is locked right now. */
+    val lock: AppLock = AppLock(clock)
 
     /** Device preferences. */
     val preferences: AppPreferences = AppPreferences(
