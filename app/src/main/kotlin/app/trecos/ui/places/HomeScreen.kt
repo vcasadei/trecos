@@ -39,7 +39,10 @@ fun HomeScreen(nav: PlaceNavigation) {
     val state by vm.state.collectAsStateWithLifecycle()
     when (val current = state) {
         HomeState.Loading -> Box(Modifier.fillMaxSize())
-        HomeState.FirstRun -> FirstRunPrompt(onConfirm = vm::createFirstHouse)
+        HomeState.FirstRun -> {
+            androidx.activity.compose.ReportDrawn()
+            FirstRunPrompt(onConfirm = vm::createFirstHouse)
+        }
         is HomeState.Ready -> PlaceScreen(houseId = current.houseId, containerId = null, nav = nav, isTabRoot = true)
     }
 }

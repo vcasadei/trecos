@@ -1,5 +1,6 @@
 package app.trecos.ui.places
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +19,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -30,7 +33,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.trecos.R
+import app.trecos.places.CustomFields
+import app.trecos.data.FieldType
 import app.trecos.places.Money
+import app.trecos.places.Selection
 import app.trecos.places.totalValue
 import app.trecos.ui.appViewModel
 import app.trecos.ui.language.AppLanguage
@@ -70,15 +76,22 @@ fun formatDate(epochMillis: Long, language: AppLanguage): String =
 fun ItemScreen(itemId: String, nav: PlaceNavigation) {
     val vm = appViewModel(key = "item/$itemId") { ItemViewModel(it, itemId) }
     val state by vm.state.collectAsStateWithLifecycle()
+    var loaded by remember { mutableStateOf(false) }
+    LaunchedEffect(state) { if (state != null) loaded = true else if (loaded) nav.back() }
+    val organize = rememberOrganizeController()
     val current = state ?: return
     val item = current.item
     val language = AppLanguage.current()
     var fullPathOpen by rememberSaveable { mutableStateOf(false) }
     var menuOpen by rememberSaveable { mutableStateOf(false) }
     var comingLater by rememberSaveable { mutableStateOf(false) }
+    var showQr by rememberSaveable { mutableStateOf(false) }
     val path = current.tree.path(item.containerId)
     val levels = listOf(current.house.name) + path.map { it.name } + item.name
     val fields = listOfNotNull(
+        current.categories.takeIf { it.isNotEmpty() }?.let { ids ->
+            R.string.field_categories to ids.mapNotNull { current.catalog.label(it, language) }.joinToString("\n")
+        },
         R.string.field_quantity to item.quantity.toString(),
         item.unitPrice?.let { R.string.field_unit_price to Money.format(it, current.currency, language) },
         totalValue(item.quantity, item.unitPrice)?.let { R.string.total_value to Money.format(it, current.currency, language) },
@@ -87,6 +100,7 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
         item.serial?.let { R.string.field_serial to it },
         item.qrCode?.let { R.string.field_qr to it },
         item.description?.let { R.string.field_description to it },
+        current.tags.takeIf { it.isNotEmpty() }?.let { R.string.field_tags to it.joinToString(", ") },
         R.string.date_added to formatDate(item.createdAt, language),
         R.string.date_changed to formatDate(item.updatedAt, language),
     )
@@ -100,13 +114,20 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
                     Icon(painterResource(R.drawable.ic_more), contentDescription = stringResource(R.string.action_more))
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    listOf(R.string.action_move, R.string.action_copy, R.string.action_duplicate, R.string.action_delete).forEach { label ->
+                    val here = Selection(itemIds = listOf(item.id))
+                    listOf<Pair<Int, () -> Unit>>(
+                        R.string.action_move to { organize.move(here, item.houseId) },
+                        R.string.action_copy to { organize.copy(here, item.houseId) },
+                        R.string.action_duplicate to { organize.duplicate(item.id) { nav.editItem(it) } },
+                        R.string.action_delete to { organize.delete(here, item.name) },
+                    ).forEach { (label, action) ->
                         DropdownMenuItem(
                             text = { Text(stringResource(label)) },
                             onClick = {
                                 menuOpen = false
-                                comingLater = true
+                                action()
                             },
+                            modifier = Modifier.testTag("menu_$label"),
                         )
                     }
                 }
@@ -116,6 +137,13 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = BottomBarClearance),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (current.photos.isNotEmpty()) {
+                item {
+                    var viewing by rememberSaveable { mutableStateOf<Int?>(null) }
+                    PhotoCarousel(current.photos) { viewing = it }
+                    viewing?.let { PhotoViewer(current.photos, it) { viewing = null } }
+                }
+            }
             item {
                 val houseColour = PaletteColor.fromKey(current.house.colorKey) ?: PaletteColor.Stone
                 Breadcrumb(
@@ -135,15 +163,26 @@ fun ItemScreen(itemId: String, nav: PlaceNavigation) {
                 Column(
                     Modifier
                         .fillMaxWidth()
+                        .then(if (label == R.string.field_qr) Modifier.clickable { showQr = true } else Modifier)
                         .semantics(mergeDescendants = true) {}
                         .testTag(detailTag(label)),
                 ) {
                     Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    SafeText(value, maxLines = if (label == R.string.field_description) 20 else 2, style = MaterialTheme.typography.bodyLarge)
+                    SafeText(value, maxLines = if (label == R.string.field_description || label == R.string.field_categories) 20 else 2, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+            items(current.customFields, key = { "custom_${it.fieldId}" }) { field ->
+                val type = runCatching { FieldType.valueOf(field.type) }.getOrDefault(FieldType.Text)
+                val text = CustomFields.display(type, field.value, field.unit, language, stringResource(R.string.answer_yes), stringResource(R.string.answer_no))
+                Column(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}.testTag("detail_custom_${field.name}")) {
+                    SafeText(field.name, maxLines = 1, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    SafeText(text, maxLines = if (type == FieldType.Text) 20 else 2, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
     }
+    OrganizeDialogs(organize, onChooseWhatToKeep = nav.keep)
+    if (showQr) item.qrCode?.let { QrLabelView(app.trecos.places.Label(it)) { showQr = false } }
     if (comingLater) {
         AlertDialog(
             onDismissRequest = { comingLater = false },

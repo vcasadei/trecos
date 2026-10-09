@@ -5,8 +5,10 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToString
 import androidx.test.core.app.ApplicationProvider
 import app.trecos.AppContainer
 import app.trecos.MainActivity
@@ -24,8 +26,21 @@ import org.junit.Rule
  */
 abstract class PlacesTestBase {
 
-    @get:Rule
+    @get:Rule(order = 1)
     val rule = createAndroidComposeRule<MainActivity>()
+
+    /** On failure, prints every window's semantics tree, to diagnose failures seen only on CI. */
+    @get:Rule(order = 2)
+    val dumpOnFailure = object : org.junit.rules.TestWatcher() {
+        override fun failed(e: Throwable?, description: org.junit.runner.Description?) {
+            runCatching {
+                val roots = rule.onAllNodes(androidx.compose.ui.test.isRoot(), useUnmergedTree = true)
+                val count = roots.fetchSemanticsNodes().size
+                println("SEMANTICS on failure of ${description?.methodName}: $count window(s)")
+                (0 until count).forEach { println(roots[it].printToString(maxDepth = Int.MAX_VALUE)) }
+            }.onFailure { println("SEMANTICS dump failed: $it") }
+        }
+    }
 
     /** The app's container, with its in-memory database. */
     protected val app: AppContainer get() = ApplicationProvider.getApplicationContext<TrecosApplication>().container
@@ -52,7 +67,7 @@ abstract class PlacesTestBase {
      * @return the node.
      */
     protected fun tag(tag: String): SemanticsNodeInteraction {
-        rule.waitUntil(10_000) {
+        eventually(10_000) {
             rule.onAllNodes(androidx.compose.ui.test.hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
         }
         return rule.onNodeWithTag(tag, useUnmergedTree = true)
@@ -77,7 +92,7 @@ abstract class PlacesTestBase {
      * @return the node.
      */
     protected fun text(text: String): SemanticsNodeInteraction {
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty() }
         return rule.onNode(hasText(text))
     }
 
@@ -87,18 +102,19 @@ abstract class PlacesTestBase {
      * @param text the text.
      */
     protected fun gone(text: String) {
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText(text)).fetchSemanticsNodes().isEmpty() }
     }
 
     /**
      * Replaces the text of a form field.
      *
-     * @param field the field's short name.
+     * @param field the field's short name, or a raw test tag followed by `_raw`.
      * @param value the new text.
      */
     protected fun type(field: String, value: String) {
-        tag(fieldTag(field)).performTextClearance()
-        rule.onNodeWithTag(fieldTag(field)).performTextInput(value)
+        val tag = if (field.endsWith("_raw")) field.removeSuffix("_raw") else fieldTag(field)
+        tag(tag).performTextClearance()
+        rule.onNodeWithTag(tag, useUnmergedTree = true).performTextInput(value)
     }
 
     /**
@@ -107,7 +123,11 @@ abstract class PlacesTestBase {
      * @param tag the test tag.
      */
     protected fun click(tag: String) {
-        tag(tag).performClick()
+        val node = tag(tag)
+        runCatching { node.performScrollTo() }
+        // Lazy lists scroll with an animation: tapping before it settles can hit the row that was there.
+        rule.waitForIdle()
+        node.performClick()
         rule.waitForIdle()
     }
 
@@ -118,7 +138,7 @@ abstract class PlacesTestBase {
      */
     protected fun clickDescription(description: String) {
         val matcher = androidx.compose.ui.test.hasContentDescription(description)
-        rule.waitUntil(10_000) { rule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty() }
         rule.onNode(matcher).performClick()
         rule.waitForIdle()
     }
@@ -126,10 +146,72 @@ abstract class PlacesTestBase {
     /** Taps Save on a form expected to be valid, then waits until the form has closed. */
     protected fun saveAndClose() {
         click("save")
-        rule.waitUntil(10_000) {
+        eventually(10_000) {
             rule.onAllNodes(androidx.compose.ui.test.hasTestTag("save"), useUnmergedTree = true).fetchSemanticsNodes().isEmpty()
         }
         rule.waitForIdle()
+    }
+
+    /**
+     * Waits until some node with the tag shows text containing [expected];
+     * needed right after navigating, while the previous screen may still be
+     * composed.
+     *
+     * @param tag the test tag.
+     * @param expected the text to wait for.
+     */
+    protected fun waitForTextIn(tag: String, expected: String) {
+        val matcher = androidx.compose.ui.test.hasTestTag(tag).and(androidx.compose.ui.test.hasText(expected, substring = true))
+        eventually(10_000) { rule.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    /**
+     * Waits until a form field shows exactly [expected]; forms load their
+     * values after they open.
+     *
+     * @param field the field's short name.
+     * @param expected the text to wait for.
+     */
+    protected fun waitForField(field: String, expected: String) {
+        eventually(10_000) {
+            rule.onAllNodes(androidx.compose.ui.test.hasTestTag(fieldTag(field)), useUnmergedTree = true).fetchSemanticsNodes().any {
+                it.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.EditableText) { androidx.compose.ui.text.AnnotatedString("") }.text == expected
+            }
+        }
+    }
+
+    /**
+     * Taps until [done] holds, at most three times, waiting long enough for a
+     * slow preference write on CI before tapping again. Only for taps that
+     * are safe to repeat, such as navigation (never for toggles).
+     *
+     * @param tag the test tag.
+     * @param done whether the tap took effect.
+     */
+    protected fun clickUntil(tag: String, done: () -> Boolean) {
+        repeat(3) {
+            if (done()) return
+            click(tag)
+            if (runCatching { eventually(PREFERENCE_WRITE_MS) { done() } }.isSuccess) return
+        }
+        throw AssertionError("Tapping $tag had no effect")
+    }
+
+    /**
+     * Waits until [condition] holds, running the main looper on every check.
+     * Coroutines that continue on the main dispatcher (a ViewModel finishing a
+     * preference or database write) only run when the paused Robolectric looper
+     * is idled; a plain `rule.waitUntil` around a `runBlocking` read doesn't
+     * always do that, so writes seemed to hang until the test ended.
+     *
+     * @param timeoutMs how long to wait.
+     * @param condition what to wait for.
+     */
+    protected fun eventually(timeoutMs: Long = 10_000, condition: () -> Boolean) {
+        rule.waitUntil(timeoutMs) {
+            org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+            condition()
+        }
     }
 
     /** Presses system back. */
@@ -138,3 +220,12 @@ abstract class PlacesTestBase {
         rule.waitForIdle()
     }
 }
+
+
+/** Matches photo thumbnails: test tags that are exactly `photo_` followed by a SHA-256. */
+val isPhotoThumb = androidx.compose.ui.test.SemanticsMatcher("is a photo thumbnail") { node ->
+    node.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.TestTag) { "" }.matches(Regex("photo_[0-9a-f]{64}"))
+}
+
+/** How long tests wait for stored data to change. */
+const val PREFERENCE_WRITE_MS = 30_000L

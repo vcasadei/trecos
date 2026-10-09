@@ -46,4 +46,23 @@ class SqlCipherEngineTest {
         val header = context.getDatabasePath(TrecosDatabase.FILE_NAME).inputStream().use { it.readNBytes(15) }
         assertEquals("SQLite format 3", String(header))
     }
+
+    @Test
+    fun fullTextSearchIgnoresAccentsOnTheSqlCipherEngine() = runBlocking {
+        db.houses().insert(House(id = "h1", name = "Apartment", icon = "house", createdAt = 1, updatedAt = 1))
+        db.items().insert(Item(id = "i1", houseId = "h1", name = "Cabeça de impressão", serial = "SN4478X21", createdAt = 1, updatedAt = 1))
+        assertEquals(listOf("i1"), db.search().matches("cabeca*").map { it.refId })
+        assertEquals(listOf("i1"), db.search().matches("name:sn4478*").map { it.refId })
+    }
+
+    @Test
+    fun customTextValuesAreSearchedOnTheSqlCipherEngine() = runBlocking {
+        db.houses().insert(House(id = "h1", name = "Apartment", icon = "house", createdAt = 1, updatedAt = 1))
+        db.items().insert(Item(id = "i1", houseId = "h1", name = "3D printer", createdAt = 1, updatedAt = 1))
+        db.fields().insertDef(FieldDef("f1", "h1", "i1", "Firmware", "Text", null, 0, 1, 1))
+        db.fields().insertValue(FieldValue("v1", "h1", "i1", "f1", "Klipper", 1, 1))
+        assertEquals(listOf("i1"), db.search().matches("description:klipper*").map { it.refId })
+        db.fields().deleteValue("v1")
+        assertEquals(emptyList<String>(), db.search().matches("klipper*").map { it.refId })
+    }
 }

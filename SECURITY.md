@@ -27,8 +27,10 @@ its export files, its Google Drive sync, and the release signing process.
 | Topic | What happens |
 |---|---|
 | Where data lives | On the phone, and in your own Google Drive only if you turn on sync |
-| App lock | Uses the phone's own biometrics or PIN; there is no Trecos password |
-| Database encryption | Optional. The key is kept in your Google Drive's hidden app folder so you can recover on a new phone. **If you lose access to that Google account, encrypted data can't be recovered** |
+| App lock | Off by default. Uses the phone's own fingerprint, face, PIN, pattern or password; there is no Trecos password. It needs a phone screen lock, and turns itself off (with a note) if that screen lock is removed. While the lock is on, the recent-apps preview shows no content (on Android 12 and older this also blocks screenshots of the app) |
+| Lock timing | Locks when the app starts, and after it was in the background longer than the chosen time: immediately, 1 minute (default), 5 or 15 minutes |
+| Profile | Optional name and e-mail, used only to label sync records. Kept on the phone (and in your own Drive when sync is on) until you delete them in Settings or uninstall; never written to logs |
+| Database encryption | Optional, and needs Google Drive sync. It encrypts the database on the phone and the data copies in Drive with a random 256-bit key. On the phone the key is protected by the Android Keystore; for recovery it is kept in your Drive's hidden app folder. While it is on, Google can't be disconnected. **If you lose access to that Google account, encrypted data can't be recovered.** See `docs/architecture/encryption.md` |
 | Photos | Never encrypted; location data is removed when a photo is added |
 | Export files | Never encrypted, even when database encryption is on; store them safely |
 | Verifying a download | Each GitHub release lists `SHA256SUMS` and the signing certificate's SHA-256 fingerprint |

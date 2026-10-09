@@ -13,6 +13,17 @@ sqlcipher = "4.19.1"
 sqlite = "2.7.1"
 datastore = "1.2.1"
 lifecycle = "2.11.0"
+work = "2.12.0"
+coil = "3.6.3"
+zxing = "3.5.4"
+codeScanner = "16.1.0"
+print = "1.1.0"
+biometric = "1.1.0"
+serialization = "1.11.0"
+playServicesAuth = "22.0.0"
+billing = "9.1.0"
+playReview = "2.0.2"
+aboutLibraries = "15.2.0"
 coreKtx = "1.19.1"
 appcompat = "1.8.0"
 profileInstaller = "1.4.1"
@@ -39,6 +50,17 @@ sqlcipher-android = { module = "net.zetetic:sqlcipher-android", version.ref = "s
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "work" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
+play-services-code-scanner = { module = "com.google.android.gms:play-services-code-scanner", version.ref = "codeScanner" }
+androidx-print = { module = "androidx.print:print", version.ref = "print" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
+play-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "playReview" }
+androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileInstaller" }
@@ -59,6 +81,8 @@ roborazzi-junit-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-test = { id = "com.android.test", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutLibraries" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

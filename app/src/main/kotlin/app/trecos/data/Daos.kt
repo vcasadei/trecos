@@ -32,8 +32,8 @@ interface HouseDao {
     suspend fun count(): Int
 
     /**
-     * Inserts a new house. Fails if its id or QR code is already taken, so
-     * nothing is ever overwritten silently.
+     * Inserts a new house. Fails if its id is already taken, so nothing is
+     * ever overwritten silently.
      *
      * @param house the house to add.
      * @throws android.database.sqlite.SQLiteConstraintException if the id or QR code is taken.
@@ -87,8 +87,8 @@ interface ContainerDao {
     suspend fun get(id: String): Container?
 
     /**
-     * Inserts a new container. Fails if its id or QR code is already taken, so
-     * nothing is ever overwritten silently.
+     * Inserts a new container. Fails if its id is already taken, so nothing
+     * is ever overwritten silently; QR codes are checked by [QrDao] first.
      *
      * @param container the container to add.
      * @throws android.database.sqlite.SQLiteConstraintException if the id or QR code is taken.
@@ -109,6 +109,10 @@ interface ContainerDao {
 /** Reads and writes items. Deleted items are never returned. */
 @Dao
 interface ItemDao {
+    /** @return how many items there are, not counting the trash. */
+    @Query("SELECT COUNT(*) FROM item WHERE deletedAt IS NULL")
+    suspend fun countActive(): Int
+
     /**
      * @param houseId the house.
      * @param containerId the container, or `null` for the house's top level.
@@ -148,8 +152,8 @@ interface ItemDao {
     fun observeTotals(houseId: String): Flow<List<ContainerTotal>>
 
     /**
-     * Inserts a new item. Fails if its id or QR code is already taken, so
-     * nothing is ever overwritten silently.
+     * Inserts a new item. Fails if its id is already taken, so nothing is
+     * ever overwritten silently; QR codes are checked by [QrDao] first.
      *
      * @param item the item to add.
      * @throws android.database.sqlite.SQLiteConstraintException if the id or QR code is taken.
@@ -174,11 +178,59 @@ interface QrDao {
      * @param houseId the house.
      * @param code the code to check.
      * @param exceptId the record being edited, which may keep its own code.
-     * @return how many other items or containers in the house use the code, trash included.
+     * @return how many other items or containers in the house use the code, not counting the trash
+     *   (a trashed thing keeps its code, but loses it on restore if it was taken meanwhile).
      */
     @Query(
-        "SELECT (SELECT COUNT(*) FROM item WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId) + " +
-            "(SELECT COUNT(*) FROM container WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId)",
+        "SELECT (SELECT COUNT(*) FROM item WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId AND deletedAt IS NULL) + " +
+            "(SELECT COUNT(*) FROM container WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId AND deletedAt IS NULL)",
     )
     suspend fun countUses(houseId: String, code: String, exceptId: String): Int
+
+    /**
+     * Finds who holds a code in a house, for the "already used by" message.
+     *
+     * @param houseId the house.
+     * @param code the code.
+     * @param exceptId the record being edited.
+     * @return the holder, or `null` when the code is free (the trash doesn't count).
+     */
+    @Query(
+        "SELECT 'item' AS kind, id, name, houseId FROM item WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId AND deletedAt IS NULL " +
+            "UNION ALL SELECT 'container' AS kind, id, name, houseId FROM container WHERE houseId = :houseId AND qrCode = :code AND id != :exceptId AND deletedAt IS NULL LIMIT 1",
+    )
+    suspend fun holder(houseId: String, code: String, exceptId: String): QrHolder?
+
+    /**
+     * Finds everything with a code in every house, trashed things included, for lookup after a scan.
+     *
+     * @param code the exact, case-sensitive code.
+     * @return every item and container holding it.
+     */
+    @Query(
+        "SELECT 'item' AS kind, id, name, houseId, deletedAt FROM item WHERE qrCode = :code " +
+            "UNION ALL SELECT 'container' AS kind, id, name, houseId, deletedAt FROM container WHERE qrCode = :code",
+    )
+    suspend fun lookup(code: String): List<QrMatch>
 }
+
+/**
+ * The item or container holding a QR code.
+ *
+ * @property kind `item` or `container`.
+ * @property id its id.
+ * @property name its name.
+ * @property houseId its house.
+ */
+data class QrHolder(val kind: String, val id: String, val name: String, val houseId: String)
+
+/**
+ * A thing found for a scanned code.
+ *
+ * @property kind `item` or `container`.
+ * @property id its id.
+ * @property name its name.
+ * @property houseId its house.
+ * @property deletedAt when it went to the trash, or `null`.
+ */
+data class QrMatch(val kind: String, val id: String, val name: String, val houseId: String, val deletedAt: Long?)

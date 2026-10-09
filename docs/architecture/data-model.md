@@ -17,7 +17,7 @@ committed in `app/schemas/app.trecos.data.TrecosDatabase/<version>.json`.
 | No foreign keys | Soft deletes and sync merges apply rows in any order; relations are enforced in code |
 | Inserts fail on a clash; updates are explicit | Room's upsert silently drops a row whose unique QR code clashes |
 
-## Tables (schema version 1)
+## Tables (schema version 5)
 
 ### `house`
 
@@ -40,13 +40,13 @@ committed in `app/schemas/app.trecos.data.TrecosDatabase/<version>.json`.
 | `parentId` | TEXT? | Parent container; null at the house's top level |
 | `name` | TEXT | Required |
 | `description` | TEXT? | |
-| `qrCode` | TEXT? | Unique in the house across containers and items |
+| `qrCode` | TEXT? | Unique in the house among containers and items not in the trash |
 | `icon` | TEXT | Container icon key (`box`, `drawer`, …) |
 | `colorKey` | TEXT? | Own colour; null inherits the nearest ancestor's |
 | `valueOverride` | INTEGER? | Manual value in minor units; null means automatic |
 | `createdAt`, `updatedAt`, `deletedAt` | INTEGER | |
 
-Indexes: `(houseId, parentId)`; unique `(houseId, qrCode)`.
+Indexes: `(houseId, parentId)`; `(houseId, qrCode)`.
 
 ### `item`
 
@@ -59,18 +59,54 @@ Indexes: `(houseId, parentId)`; unique `(houseId, qrCode)`.
 | `quantity` | INTEGER | Whole number, 0 to 999,999; default 1 |
 | `unitPrice` | INTEGER? | Minor units; null when unknown (no total, not zero) |
 | `brand`, `model`, `serial`, `description` | TEXT? | |
-| `qrCode` | TEXT? | Unique in the house across containers and items |
+| `qrCode` | TEXT? | Unique in the house among containers and items not in the trash |
 | `createdAt` | INTEGER | Shown as "Added" |
 | `updatedAt` | INTEGER | Shown as "Last changed"; set on every change, moves included |
 | `deletedAt` | INTEGER? | |
 
-Indexes: `(houseId, containerId)`; unique `(houseId, qrCode)`.
+Indexes: `(houseId, containerId)`; `(houseId, qrCode)`.
+
+### Categories and tags (added in schema 2)
+
+Built-in categories are **not** stored: they are read from the bundled asset
+`assets/categories.json` and referenced everywhere by their stable key, such as
+`cables.usb_c`, so every device resolves them identically and they can't be
+renamed or deleted.
+
+| Table | Columns | Notes |
+|---|---|---|
+| `category` | `id`, `houseId`, `parentId?`, `name`, `icon?`, `createdAt`, `updatedAt` | Custom categories of one house. `parentId` is a built-in top-level key or a custom top-level id; null makes it a top level. `icon` null shows the empty default icon |
+| `item_category` | `id`, `houseId`, `itemId`, `categoryId`, `position`, `createdAt` | `categoryId` is a built-in key or a custom id; position 0 is the main category. Unique `(itemId, categoryId)` |
+| `tag` | `id`, `houseId`, `name`, `normalized`, `createdAt`, `updatedAt` | `normalized` is lower case without accents; unique `(houseId, normalized)` |
+| `item_tag` | `id`, `houseId`, `itemId`, `tagId`, `createdAt` | Unique `(itemId, tagId)` |
+| `token_category_count` | `houseId`, `token`, `categoryId`, `count` | Learned suggestion counts (design D7); primary key `(houseId, token, categoryId)`; device only |
+
+### Trash (added in schema 3)
+
+| Table | Columns | Notes |
+|---|---|---|
+| `trash_entry` | `id`, `houseId`, `kind` (`item` or `container`), `targetId`, `name`, `parentId?`, `trashedAt` | One undoable delete. The trashed thing and everything trashed with it share `deletedAt = trashedAt`, which separates them from things trashed on their own. Purged after 30 days |
+
+### Photos (added in schema 4)
+
+| Table | Columns | Notes |
+|---|---|---|
+| `photo` | `id`, `houseId`, `ownerType`, `ownerId`, `sha256`, `position`, `createdAt` | Up to 3 per owner; position 0 is the main photo. Files live in `files/photos/<sha256>.webp`; see [photos.md](photos.md) |
+
+### Search (added in schema 5)
+
+| Table | Columns | Notes |
+|---|---|---|
+| `search_index` (FTS4, `unicode61`, `remove_diacritics=1`) | `kind`, `refId`, `houseId` (not indexed), `name`, `description` | One row per item or container not in the trash. `name` = name + brand + model + serial + QR code. Kept up to date by triggers on `item` and `container` (`SearchIndex`), created on a new database and by the 4 → 5 migration, which also backfills |
+
+Deleting a custom category or a tag removes its rows and its assignments.
+These tables get deletion markers when sync arrives (0.11), by expand and contract.
 
 ## Rules enforced in code
 
 | Rule | Where |
 |---|---|
-| QR codes unique per house across both tables | `QrDao.countUses`, checked by the container and item forms; each table's unique index is the backstop |
+| QR codes unique per house across both tables, ignoring the trash | `QrDao.countUses` in the forms, `OrganizeDao.activeQrUses` when moving and restoring. Not a unique index: a trashed thing keeps its code, and loses it on restore if it was taken meanwhile (schema 3 dropped the unique indexes) |
 | At least one house exists | The house menu refuses to delete the last one |
 | Container value = override, or the recursive sum of quantity × unit price below | `PlaceTree` (design D5), folded in memory per house |
 | Colour inheritance: own colour, else the nearest ancestor's | `PlaceTree.colorKey` |
@@ -89,7 +125,37 @@ Not in the database and never synced (DataStore, design D13):
 
 ## Migrations
 
-Schema changes follow the migration plan in the design: versioned Room
-migrations checked against the exported schemas, expand-and-contract for
-renames, and a pre-migration copy of the database as the "down" path. The
-per-release checklist is added with the migration harness (tasks 3.1-3.4).
+### Safety copy and the "down" path
+
+Android won't install an older app over a newer one, so rollback is
+data-level (`MigrationGuard`):
+
+| When | What happens |
+|---|---|
+| Opening a database older than the app's schema | The file is copied to `pre-migration-v<N>.db` first |
+| The migration fails | The copy is put back, the failure is logged (no personal data), and `MigrationFailedException` is raised |
+| The next launch that opens without migrating | Every `pre-migration-v*.db` is deleted |
+
+### Expand and contract
+
+A rename or removal is never done in one release, because devices on
+adjacent versions may sync the same house:
+
+1. **Expand** (release N): add the new column or table; write both the old and
+   the new shape; read the new one, falling back to the old.
+2. **Contract** (release N+1 or later): stop reading and writing the old shape,
+   then drop it in a migration.
+
+Adding a nullable column or a new table needs only step 1.
+
+### Checklist for every schema change
+
+1. Bump `version` in `@Database` and `TrecosDatabase.VERSION` together.
+2. Write the `Migration` (or an `AutoMigration` when Room can infer it).
+3. Build once, so Room exports `app/schemas/.../<version>.json`, and commit it.
+4. Add a test in `MigrationTest`: create the previous version with
+   `MigrationTestHelper`, insert rows, run the migration, validate against the
+   new schema and check the rows.
+5. If the change renames or removes something, follow expand and contract.
+6. Bump the sync `formatVersion` if the snapshot shape changes (design D14).
+7. Update the tables on this page.

@@ -55,11 +55,17 @@ sealed interface Crumb {
  *
  * @param levels the path from the house down, at least one level.
  * @param fitsOnOneLine whether the full path fits the available width.
+ * @param keepHouse keep the house and collapse between it and the last level
+ *   (search results), instead of collapsing everything before the last two.
  * @return the crumbs to show, in order.
  */
-fun breadcrumbCrumbs(levels: List<String>, fitsOnOneLine: Boolean): List<Crumb> {
+fun breadcrumbCrumbs(levels: List<String>, fitsOnOneLine: Boolean, keepHouse: Boolean = false): List<Crumb> {
     val all = levels.mapIndexed { index, label -> Crumb.Level(index, label) }
-    return if (fitsOnOneLine || levels.size <= 2) all else listOf(Crumb.Collapsed) + all.takeLast(2)
+    return when {
+        fitsOnOneLine || levels.size <= 2 -> all
+        keepHouse -> listOf(all.first(), Crumb.Collapsed, all.last())
+        else -> listOf(Crumb.Collapsed) + all.takeLast(2)
+    }
 }
 
 /**
@@ -74,6 +80,7 @@ fun breadcrumbCrumbs(levels: List<String>, fitsOnOneLine: Boolean): List<Crumb> 
  * @param housePill when not `null`, the first level (the house) is drawn as a
  *   pill in this colour, with [housePillText] as its text colour.
  * @param housePillText the text colour of the house pill.
+ * @param keepHouse keep the house visible when collapsing (search results).
  */
 @Composable
 fun Breadcrumb(
@@ -83,6 +90,7 @@ fun Breadcrumb(
     modifier: Modifier = Modifier,
     housePill: Color? = null,
     housePillText: Color = Color.White,
+    keepHouse: Boolean = false,
 ) {
     val style = LocalTextStyle.current.merge(MaterialTheme.typography.bodyMedium)
     val measurer = rememberTextMeasurer()
@@ -93,7 +101,7 @@ fun Breadcrumb(
             maxLines = 1,
             constraints = Constraints(),
         ).size.width
-        val crumbs = breadcrumbCrumbs(levels, fitsOnOneLine = fullWidth <= constraints.maxWidth)
+        val crumbs = breadcrumbCrumbs(levels, fitsOnOneLine = fullWidth <= constraints.maxWidth, keepHouse = keepHouse)
         Row(verticalAlignment = Alignment.CenterVertically) {
             crumbs.forEachIndexed { position, crumb ->
                 if (position > 0) Text(BREADCRUMB_SEPARATOR, style = style, maxLines = 1)

@@ -47,3 +47,12 @@ everything inside it, at every depth. You can type a manual value for a
 container in its edit form; it then counts toward the containers above it.
 **Clear override** goes back to the automatic value. Items without a price
 count as zero, and the container tells you how many there are.
+
+## Photos
+
+Each item, container or house can have up to 3 photos. In its form, tap
+**Add photo**: the first time, choose Camera or Gallery (tick **Remember my
+choice** to skip the question next time). Tap a photo to make it the main one
+or remove it, or long-press and drag to reorder. Photos are stored small
+(1920 px) and without location data; Trecos never needs camera or storage
+permission.

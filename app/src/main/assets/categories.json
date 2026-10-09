@@ -1,0 +1,872 @@
+{
+ "version": 1,
+ "categories": [
+  {
+   "key": "computers",
+   "icon": "computer",
+   "en": "Computers",
+   "pt": "Computadores",
+   "children": [
+    {
+     "key": "computers.desktops",
+     "icon": "desktop_windows",
+     "en": "Desktops",
+     "pt": "Desktops"
+    },
+    {
+     "key": "computers.laptops",
+     "icon": "laptop_mac",
+     "en": "Laptops",
+     "pt": "Notebooks"
+    },
+    {
+     "key": "computers.sbcs",
+     "icon": "developer_board",
+     "en": "SBCs & dev boards",
+     "pt": "SBCs e placas de desenvolvimento"
+    },
+    {
+     "key": "computers.components",
+     "icon": "memory",
+     "en": "Components",
+     "pt": "Componentes"
+    },
+    {
+     "key": "computers.peripherals",
+     "icon": "keyboard",
+     "en": "Peripherals",
+     "pt": "Periféricos"
+    }
+   ]
+  },
+  {
+   "key": "storage",
+   "icon": "save",
+   "en": "Storage",
+   "pt": "Armazenamento",
+   "children": [
+    {
+     "key": "storage.pendrives",
+     "icon": "usb",
+     "en": "Pendrives",
+     "pt": "Pendrives"
+    },
+    {
+     "key": "storage.sd_cards",
+     "icon": "sd_card",
+     "en": "SD & microSD cards",
+     "pt": "Cartões SD e microSD"
+    },
+    {
+     "key": "storage.ssds",
+     "icon": "hard_drive",
+     "en": "SSDs",
+     "pt": "SSDs"
+    },
+    {
+     "key": "storage.hdds",
+     "icon": "hard_drive",
+     "en": "HDDs",
+     "pt": "HDs"
+    },
+    {
+     "key": "storage.enclosures",
+     "icon": "dock",
+     "en": "Enclosures & docks",
+     "pt": "Cases e docks"
+    }
+   ]
+  },
+  {
+   "key": "cables",
+   "icon": "cable",
+   "en": "Cables",
+   "pt": "Cabos",
+   "children": [
+    {
+     "key": "cables.usb_a",
+     "icon": "usb",
+     "en": "USB-A",
+     "pt": "USB-A"
+    },
+    {
+     "key": "cables.usb_b",
+     "icon": "usb",
+     "en": "USB-B",
+     "pt": "USB-B"
+    },
+    {
+     "key": "cables.usb_c",
+     "icon": "usb",
+     "en": "USB-C",
+     "pt": "USB-C"
+    },
+    {
+     "key": "cables.micro_usb",
+     "icon": "usb",
+     "en": "Micro-USB",
+     "pt": "Micro-USB"
+    },
+    {
+     "key": "cables.mini_usb",
+     "icon": "usb",
+     "en": "Mini-USB",
+     "pt": "Mini-USB"
+    },
+    {
+     "key": "cables.lightning",
+     "icon": "bolt",
+     "en": "Lightning",
+     "pt": "Lightning"
+    },
+    {
+     "key": "cables.hdmi",
+     "icon": "settings_input_hdmi",
+     "en": "HDMI",
+     "pt": "HDMI"
+    },
+    {
+     "key": "cables.mini_hdmi",
+     "icon": "settings_input_hdmi",
+     "en": "Mini/Micro HDMI",
+     "pt": "Mini/Micro HDMI"
+    },
+    {
+     "key": "cables.displayport",
+     "icon": "tv",
+     "en": "DisplayPort",
+     "pt": "DisplayPort"
+    },
+    {
+     "key": "cables.mini_displayport",
+     "icon": "tv",
+     "en": "Mini DisplayPort",
+     "pt": "Mini DisplayPort"
+    },
+    {
+     "key": "cables.vga",
+     "icon": "tv",
+     "en": "VGA",
+     "pt": "VGA"
+    },
+    {
+     "key": "cables.dvi",
+     "icon": "tv",
+     "en": "DVI",
+     "pt": "DVI"
+    },
+    {
+     "key": "cables.ethernet",
+     "icon": "settings_ethernet",
+     "en": "Ethernet",
+     "pt": "Ethernet"
+    },
+    {
+     "key": "cables.serial",
+     "icon": "cable",
+     "en": "Serial/UART",
+     "pt": "Serial/UART"
+    },
+    {
+     "key": "cables.audio",
+     "icon": "headphones",
+     "en": "Audio",
+     "pt": "Áudio"
+    },
+    {
+     "key": "cables.sd",
+     "icon": "sd_card",
+     "en": "SD/microSD",
+     "pt": "SD/microSD"
+    },
+    {
+     "key": "cables.power_cords",
+     "icon": "power",
+     "en": "Power cords",
+     "pt": "Cabos de força"
+    }
+   ]
+  },
+  {
+   "key": "adapters",
+   "icon": "power_input",
+   "en": "Adapters",
+   "pt": "Adaptadores",
+   "children": [
+    {
+     "key": "adapters.usb_a",
+     "icon": "usb",
+     "en": "USB-A",
+     "pt": "USB-A"
+    },
+    {
+     "key": "adapters.usb_b",
+     "icon": "usb",
+     "en": "USB-B",
+     "pt": "USB-B"
+    },
+    {
+     "key": "adapters.usb_c",
+     "icon": "usb",
+     "en": "USB-C",
+     "pt": "USB-C"
+    },
+    {
+     "key": "adapters.micro_usb",
+     "icon": "usb",
+     "en": "Micro-USB",
+     "pt": "Micro-USB"
+    },
+    {
+     "key": "adapters.mini_usb",
+     "icon": "usb",
+     "en": "Mini-USB",
+     "pt": "Mini-USB"
+    },
+    {
+     "key": "adapters.lightning",
+     "icon": "bolt",
+     "en": "Lightning",
+     "pt": "Lightning"
+    },
+    {
+     "key": "adapters.hdmi",
+     "icon": "settings_input_hdmi",
+     "en": "HDMI",
+     "pt": "HDMI"
+    },
+    {
+     "key": "adapters.mini_hdmi",
+     "icon": "settings_input_hdmi",
+     "en": "Mini/Micro HDMI",
+     "pt": "Mini/Micro HDMI"
+    },
+    {
+     "key": "adapters.displayport",
+     "icon": "tv",
+     "en": "DisplayPort",
+     "pt": "DisplayPort"
+    },
+    {
+     "key": "adapters.mini_displayport",
+     "icon": "tv",
+     "en": "Mini DisplayPort",
+     "pt": "Mini DisplayPort"
+    },
+    {
+     "key": "adapters.vga",
+     "icon": "tv",
+     "en": "VGA",
+     "pt": "VGA"
+    },
+    {
+     "key": "adapters.dvi",
+     "icon": "tv",
+     "en": "DVI",
+     "pt": "DVI"
+    },
+    {
+     "key": "adapters.ethernet",
+     "icon": "settings_ethernet",
+     "en": "Ethernet",
+     "pt": "Ethernet"
+    },
+    {
+     "key": "adapters.serial",
+     "icon": "cable",
+     "en": "Serial/UART",
+     "pt": "Serial/UART"
+    },
+    {
+     "key": "adapters.audio",
+     "icon": "headphones",
+     "en": "Audio",
+     "pt": "Áudio"
+    },
+    {
+     "key": "adapters.sd",
+     "icon": "sd_card",
+     "en": "SD/microSD",
+     "pt": "SD/microSD"
+    },
+    {
+     "key": "adapters.hubs",
+     "icon": "hub",
+     "en": "USB hubs & docks",
+     "pt": "Hubs USB e docks"
+    }
+   ]
+  },
+  {
+   "key": "power",
+   "icon": "power",
+   "en": "Power",
+   "pt": "Energia",
+   "children": [
+    {
+     "key": "power.chargers",
+     "icon": "battery_charging_full",
+     "en": "Chargers",
+     "pt": "Carregadores"
+    },
+    {
+     "key": "power.power_supplies",
+     "icon": "power",
+     "en": "Power supplies",
+     "pt": "Fontes de alimentação"
+    },
+    {
+     "key": "power.plug_adapters",
+     "icon": "power_input",
+     "en": "Plug adapters",
+     "pt": "Adaptadores de tomada"
+    },
+    {
+     "key": "power.power_strips",
+     "icon": "electrical_services",
+     "en": "Power strips & extensions",
+     "pt": "Filtros de linha e extensões"
+    },
+    {
+     "key": "power.batteries",
+     "icon": "battery_full",
+     "en": "Batteries",
+     "pt": "Pilhas e baterias"
+    },
+    {
+     "key": "power.power_banks",
+     "icon": "battery_charging_full",
+     "en": "Power banks",
+     "pt": "Power banks"
+    }
+   ]
+  },
+  {
+   "key": "electrical",
+   "icon": "electrical_services",
+   "en": "Electrical",
+   "pt": "Elétrica",
+   "children": [
+    {
+     "key": "electrical.wire_nuts",
+     "icon": "electrical_services",
+     "en": "Wire nuts",
+     "pt": "Conectores de torção"
+    },
+    {
+     "key": "electrical.lever_connectors",
+     "icon": "electrical_services",
+     "en": "Wago & lever connectors",
+     "pt": "Conectores Wago e de alavanca"
+    },
+    {
+     "key": "electrical.heat_shrink",
+     "icon": "electrical_services",
+     "en": "Heat shrink",
+     "pt": "Espaguete termorretrátil"
+    },
+    {
+     "key": "electrical.terminals",
+     "icon": "electrical_services",
+     "en": "Terminals & crimps",
+     "pt": "Terminais e crimpagem"
+    },
+    {
+     "key": "electrical.plugs",
+     "icon": "power",
+     "en": "Plugs (male/female)",
+     "pt": "Plugues (macho/fêmea)"
+    },
+    {
+     "key": "electrical.outlets",
+     "icon": "power",
+     "en": "Outlets & sockets",
+     "pt": "Tomadas"
+    },
+    {
+     "key": "electrical.switches",
+     "icon": "electrical_services",
+     "en": "Switches",
+     "pt": "Interruptores"
+    },
+    {
+     "key": "electrical.wire",
+     "icon": "cable",
+     "en": "Wire & cable",
+     "pt": "Fios e cabos"
+    },
+    {
+     "key": "electrical.tape",
+     "icon": "electrical_services",
+     "en": "Electrical tape",
+     "pt": "Fita isolante"
+    },
+    {
+     "key": "electrical.breakers",
+     "icon": "bolt",
+     "en": "Breakers & fuses",
+     "pt": "Disjuntores e fusíveis"
+    }
+   ]
+  },
+  {
+   "key": "electronics",
+   "icon": "memory",
+   "en": "Electronics parts",
+   "pt": "Peças eletrônicas",
+   "children": [
+    {
+     "key": "electronics.components",
+     "icon": "memory",
+     "en": "Components",
+     "pt": "Componentes"
+    },
+    {
+     "key": "electronics.modules",
+     "icon": "sensors",
+     "en": "Modules & sensors",
+     "pt": "Módulos e sensores"
+    },
+    {
+     "key": "electronics.prototyping",
+     "icon": "developer_board",
+     "en": "Prototyping",
+     "pt": "Prototipagem"
+    },
+    {
+     "key": "electronics.soldering",
+     "icon": "handyman",
+     "en": "Soldering supplies",
+     "pt": "Materiais de solda"
+    }
+   ]
+  },
+  {
+   "key": "networking",
+   "icon": "router",
+   "en": "Networking",
+   "pt": "Redes",
+   "children": [
+    {
+     "key": "networking.routers",
+     "icon": "router",
+     "en": "Routers",
+     "pt": "Roteadores"
+    },
+    {
+     "key": "networking.switches",
+     "icon": "lan",
+     "en": "Switches",
+     "pt": "Switches"
+    },
+    {
+     "key": "networking.access_points",
+     "icon": "wifi",
+     "en": "Access points & mesh",
+     "pt": "Access points e mesh"
+    },
+    {
+     "key": "networking.modems",
+     "icon": "router",
+     "en": "Modems",
+     "pt": "Modems"
+    }
+   ]
+  },
+  {
+   "key": "smart_home",
+   "icon": "home_iot_device",
+   "en": "Smart home",
+   "pt": "Casa inteligente",
+   "children": [
+    {
+     "key": "smart_home.plugs",
+     "icon": "power",
+     "en": "Smart plugs",
+     "pt": "Tomadas inteligentes"
+    },
+    {
+     "key": "smart_home.bulbs",
+     "icon": "lightbulb",
+     "en": "Smart bulbs",
+     "pt": "Lâmpadas inteligentes"
+    },
+    {
+     "key": "smart_home.sensors",
+     "icon": "sensors",
+     "en": "Sensors",
+     "pt": "Sensores"
+    },
+    {
+     "key": "smart_home.hubs",
+     "icon": "hub",
+     "en": "Hubs & bridges",
+     "pt": "Hubs e pontes"
+    },
+    {
+     "key": "smart_home.cameras",
+     "icon": "videocam",
+     "en": "Cameras",
+     "pt": "Câmeras"
+    }
+   ]
+  },
+  {
+   "key": "lighting",
+   "icon": "lightbulb",
+   "en": "Lighting",
+   "pt": "Iluminação",
+   "children": [
+    {
+     "key": "lighting.lamps",
+     "icon": "lightbulb",
+     "en": "Lamps",
+     "pt": "Luminárias"
+    },
+    {
+     "key": "lighting.bulbs",
+     "icon": "lightbulb",
+     "en": "Light bulbs",
+     "pt": "Lâmpadas"
+    },
+    {
+     "key": "lighting.flashlights",
+     "icon": "flashlight_on",
+     "en": "Flashlights",
+     "pt": "Lanternas"
+    },
+    {
+     "key": "lighting.led_strips",
+     "icon": "lightbulb",
+     "en": "LED strips",
+     "pt": "Fitas de LED"
+    }
+   ]
+  },
+  {
+   "key": "printing3d",
+   "icon": "view_in_ar",
+   "en": "3D printing",
+   "pt": "Impressão 3D",
+   "children": [
+    {
+     "key": "printing3d.filaments",
+     "icon": "view_in_ar",
+     "en": "Filaments",
+     "pt": "Filamentos"
+    },
+    {
+     "key": "printing3d.nozzles",
+     "icon": "view_in_ar",
+     "en": "Nozzles",
+     "pt": "Bicos"
+    },
+    {
+     "key": "printing3d.parts",
+     "icon": "build",
+     "en": "Replacement parts",
+     "pt": "Peças de reposição"
+    },
+    {
+     "key": "printing3d.tools",
+     "icon": "handyman",
+     "en": "Tools",
+     "pt": "Ferramentas"
+    },
+    {
+     "key": "printing3d.maintenance",
+     "icon": "cleaning_services",
+     "en": "Cleaning & maintenance",
+     "pt": "Limpeza e manutenção"
+    },
+    {
+     "key": "printing3d.build_plates",
+     "icon": "view_in_ar",
+     "en": "Build plates",
+     "pt": "Mesas de impressão"
+    }
+   ]
+  },
+  {
+   "key": "devices",
+   "icon": "devices",
+   "en": "Devices",
+   "pt": "Aparelhos",
+   "children": [
+    {
+     "key": "devices.phones",
+     "icon": "smartphone",
+     "en": "Phones & tablets",
+     "pt": "Celulares e tablets"
+    },
+    {
+     "key": "devices.audio_video",
+     "icon": "headphones",
+     "en": "Audio & video",
+     "pt": "Áudio e vídeo"
+    },
+    {
+     "key": "devices.games",
+     "icon": "videogame_asset",
+     "en": "Games & consoles",
+     "pt": "Jogos e consoles"
+    },
+    {
+     "key": "devices.cameras",
+     "icon": "photo_camera",
+     "en": "Cameras",
+     "pt": "Câmeras"
+    },
+    {
+     "key": "devices.wearables",
+     "icon": "watch",
+     "en": "Wearables",
+     "pt": "Vestíveis"
+    }
+   ]
+  },
+  {
+   "key": "tools",
+   "icon": "handyman",
+   "en": "Tools",
+   "pt": "Ferramentas",
+   "children": [
+    {
+     "key": "tools.hand",
+     "icon": "build",
+     "en": "Hand tools",
+     "pt": "Ferramentas manuais"
+    },
+    {
+     "key": "tools.power",
+     "icon": "construction",
+     "en": "Power tools",
+     "pt": "Ferramentas elétricas"
+    },
+    {
+     "key": "tools.measuring",
+     "icon": "straighten",
+     "en": "Measuring",
+     "pt": "Medição"
+    },
+    {
+     "key": "tools.hardware",
+     "icon": "build",
+     "en": "Hardware",
+     "pt": "Ferragens"
+    },
+    {
+     "key": "tools.safety",
+     "icon": "health_and_safety",
+     "en": "Safety & PPE",
+     "pt": "Segurança e EPI"
+    }
+   ]
+  },
+  {
+   "key": "home",
+   "icon": "weekend",
+   "en": "Home",
+   "pt": "Casa",
+   "children": [
+    {
+     "key": "home.kitchen",
+     "icon": "kitchen",
+     "en": "Kitchen",
+     "pt": "Cozinha"
+    },
+    {
+     "key": "home.appliances",
+     "icon": "kitchen",
+     "en": "Appliances",
+     "pt": "Eletrodomésticos"
+    },
+    {
+     "key": "home.furniture",
+     "icon": "chair",
+     "en": "Furniture",
+     "pt": "Móveis"
+    },
+    {
+     "key": "home.decor",
+     "icon": "palette",
+     "en": "Decor",
+     "pt": "Decoração"
+    },
+    {
+     "key": "home.bedding",
+     "icon": "bed",
+     "en": "Bedding & towels",
+     "pt": "Cama, mesa e banho"
+    },
+    {
+     "key": "home.cleaning",
+     "icon": "cleaning_services",
+     "en": "Cleaning",
+     "pt": "Limpeza"
+    },
+    {
+     "key": "home.supplies",
+     "icon": "home",
+     "en": "Household supplies",
+     "pt": "Utilidades domésticas"
+    }
+   ]
+  },
+  {
+   "key": "personal",
+   "icon": "checkroom",
+   "en": "Personal",
+   "pt": "Pessoal",
+   "children": [
+    {
+     "key": "personal.clothing",
+     "icon": "checkroom",
+     "en": "Clothing",
+     "pt": "Roupas"
+    },
+    {
+     "key": "personal.shoes",
+     "icon": "styler",
+     "en": "Shoes",
+     "pt": "Calçados"
+    },
+    {
+     "key": "personal.bags",
+     "icon": "backpack",
+     "en": "Bags",
+     "pt": "Bolsas"
+    },
+    {
+     "key": "personal.jewelry",
+     "icon": "diamond",
+     "en": "Jewelry & watches",
+     "pt": "Joias e relógios"
+    }
+   ]
+  },
+  {
+   "key": "documents",
+   "icon": "description",
+   "en": "Documents",
+   "pt": "Documentos",
+   "children": [
+    {
+     "key": "documents.manuals",
+     "icon": "menu_book",
+     "en": "Manuals",
+     "pt": "Manuais"
+    },
+    {
+     "key": "documents.warranties",
+     "icon": "description",
+     "en": "Warranties",
+     "pt": "Garantias"
+    },
+    {
+     "key": "documents.personal",
+     "icon": "description",
+     "en": "Personal documents",
+     "pt": "Documentos pessoais"
+    }
+   ]
+  },
+  {
+   "key": "hobbies",
+   "icon": "palette",
+   "en": "Hobbies",
+   "pt": "Hobbies",
+   "children": [
+    {
+     "key": "hobbies.books",
+     "icon": "menu_book",
+     "en": "Books",
+     "pt": "Livros"
+    },
+    {
+     "key": "hobbies.music",
+     "icon": "music_note",
+     "en": "Music instruments",
+     "pt": "Instrumentos musicais"
+    },
+    {
+     "key": "hobbies.sports",
+     "icon": "sports_soccer",
+     "en": "Sports",
+     "pt": "Esportes"
+    },
+    {
+     "key": "hobbies.crafts",
+     "icon": "palette",
+     "en": "Crafts",
+     "pt": "Artesanato"
+    },
+    {
+     "key": "hobbies.collectibles",
+     "icon": "diamond",
+     "en": "Collectibles",
+     "pt": "Colecionáveis"
+    },
+    {
+     "key": "hobbies.toys",
+     "icon": "toys",
+     "en": "Toys",
+     "pt": "Brinquedos"
+    }
+   ]
+  },
+  {
+   "key": "outdoor",
+   "icon": "park",
+   "en": "Outdoor",
+   "pt": "Ar livre",
+   "children": [
+    {
+     "key": "outdoor.garden",
+     "icon": "yard",
+     "en": "Garden",
+     "pt": "Jardim"
+    },
+    {
+     "key": "outdoor.camping",
+     "icon": "camping",
+     "en": "Camping",
+     "pt": "Camping"
+    },
+    {
+     "key": "outdoor.vehicles",
+     "icon": "directions_car",
+     "en": "Car & bike",
+     "pt": "Carro e bicicleta"
+    }
+   ]
+  },
+  {
+   "key": "health",
+   "icon": "medical_services",
+   "en": "Health",
+   "pt": "Saúde",
+   "children": [
+    {
+     "key": "health.medicine",
+     "icon": "medication",
+     "en": "Medicine",
+     "pt": "Remédios"
+    },
+    {
+     "key": "health.first_aid",
+     "icon": "medical_services",
+     "en": "First aid",
+     "pt": "Primeiros socorros"
+    }
+   ]
+  },
+  {
+   "key": "other",
+   "icon": "more_horiz",
+   "en": "Other",
+   "pt": "Outros",
+   "children": []
+  }
+ ]
+}

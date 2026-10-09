@@ -20,6 +20,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /**
  * Scenarios of the places "Container value", "Colours", "House indicator" and
@@ -27,6 +28,7 @@ import org.robolectric.RobolectricTestRunner
  * Robolectric reports a status bar of height 0, so the band's presence is checked, not its size.
  */
 @RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "w360dp-h800dp-xhdpi")
 class PlaceLookScenariosTest : PlacesTestBase() {
 
     /** @return whether any node with the tag exists. */
@@ -57,14 +59,14 @@ class PlaceLookScenariosTest : PlacesTestBase() {
         )
         runBlocking { app.preferences.setCurrency("BRL") }
         click(rowTag("office"))
-        tag("place_value").assertTextContains("R$4,220.00 · automatic", substring = true)
+        waitForTextIn("place_value", "R$4,220.00 · automatic")
 
         click(rowTag("boxB"))
-        tag("place_value").assertTextContains("R$500.00 · manual", substring = true)
+        waitForTextIn("place_value", "R$500.00 · manual")
         tag("unpriced_hint").assertTextContains("1 item has no price")
 
         click("clear_override")
-        rule.waitUntil(10_000) { rule.onAllNodes(hasText("R$0.00 · automatic", substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        eventually(10_000) { rule.onAllNodes(hasText("R$0.00 · automatic", substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
         assertEquals(null, runBlocking { app.database.containers().get("boxB")?.valueOverride })
     }
 
@@ -123,7 +125,7 @@ class PlaceLookScenariosTest : PlacesTestBase() {
             app.database.houses().insert(house("h2", "Parents"))
             app.preferences.setHouseBand(HouseBand.Never)
         }
-        rule.waitUntil(10_000) { !exists(HOUSE_BAND_TAG) }
+        eventually(10_000) { !exists(HOUSE_BAND_TAG) }
     }
 
     @Test
@@ -141,7 +143,7 @@ class PlaceLookScenariosTest : PlacesTestBase() {
         click(VIEW_TOGGLE_TAG)
 
         text("The home office").assertIsDisplayed()
-        rule.waitUntil(10_000) { runBlocking { app.preferences.listView.first() } == ListView.Detailed }
+        eventually(PREFERENCE_WRITE_MS) { runBlocking { app.preferences.listView.first() } == ListView.Detailed }
 
         rule.activityRule.scenario.recreate()
         text("The home office").assertIsDisplayed()

@@ -1,6 +1,7 @@
 package app.trecos
 
 import androidx.room.Room
+import app.trecos.data.SearchIndex
 import app.trecos.data.TrecosDatabase
 
 /**
@@ -10,13 +11,16 @@ import app.trecos.data.TrecosDatabase
  */
 class TestTrecosApplication : TrecosApplication() {
 
+    /** No background maintenance in tests; the purge itself is tested directly. */
+    override fun scheduleMaintenance() = Unit
+
     /**
      * @return a container whose database lives in memory.
      */
     override fun createContainer(): AppContainer = AppContainer(
         context = this,
         openDatabase = {
-            Room.inMemoryDatabaseBuilder(this, TrecosDatabase::class.java).allowMainThreadQueries().build()
+            Room.inMemoryDatabaseBuilder(this, TrecosDatabase::class.java).allowMainThreadQueries().addCallback(SearchIndex.onCreate).build()
         },
     )
 }

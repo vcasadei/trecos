@@ -1,6 +1,7 @@
 package app.trecos.data
 
 import androidx.room.Entity
+import kotlinx.serialization.Serializable
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
@@ -18,6 +19,7 @@ import androidx.room.PrimaryKey
  * @property updatedAt last change time, epoch milliseconds.
  * @property deletedAt deletion time, or `null` while the house exists.
  */
+@Serializable
 @Entity(tableName = "house")
 data class House(
     @PrimaryKey val id: String,
@@ -39,7 +41,7 @@ data class House(
  * @property parentId the container it sits in, or `null` at the house's top level.
  * @property name required display name.
  * @property description optional description.
- * @property qrCode optional code, unique within the house across items and containers.
+ * @property qrCode optional code, unique within the house among items and containers that are not in the trash.
  * @property icon key of the container icon shown when there is no photo.
  * @property colorKey own palette colour key, or `null` to inherit the nearest ancestor's.
  * @property valueOverride manual value in minor units, or `null` for the automatic value.
@@ -47,11 +49,12 @@ data class House(
  * @property updatedAt last change time, epoch milliseconds.
  * @property deletedAt deletion time, or `null` while it exists.
  */
+@Serializable
 @Entity(
     tableName = "container",
     indices = [
         Index(value = ["houseId", "parentId"]),
-        Index(value = ["houseId", "qrCode"], unique = true),
+        Index(value = ["houseId", "qrCode"]),
     ],
 )
 data class Container(
@@ -82,17 +85,18 @@ data class Container(
  * @property brand optional brand.
  * @property model optional model.
  * @property serial optional serial number.
- * @property qrCode optional code, unique within the house across items and containers.
+ * @property qrCode optional code, unique within the house among items and containers that are not in the trash.
  * @property description optional description.
  * @property createdAt when the item was added, epoch milliseconds.
  * @property updatedAt when any field last changed, epoch milliseconds.
  * @property deletedAt deletion time, or `null` while it exists.
  */
+@Serializable
 @Entity(
     tableName = "item",
     indices = [
         Index(value = ["houseId", "containerId"]),
-        Index(value = ["houseId", "qrCode"], unique = true),
+        Index(value = ["houseId", "qrCode"]),
     ],
 )
 data class Item(
