@@ -43,10 +43,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import app.trecos.R
 import app.trecos.places.FieldError
+import app.trecos.places.Money
 import app.trecos.data.AddFlow
 import app.trecos.data.QrHolder
 import app.trecos.ui.appContainer
 import app.trecos.ui.appViewModel
+import app.trecos.ui.language.AppLanguage
 import app.trecos.ui.shell.TrecosTopBar
 
 /**
@@ -99,6 +101,7 @@ private fun FormFrame(title: String, onBack: () -> Unit, buttons: @Composable ()
  * @param keyboard the keyboard type.
  * @param singleLine whether the field is one line.
  * @param focus lets the form move the cursor into this field.
+ * @param prefix text shown before the value and after the label, such as the currency symbol.
  */
 @Composable
 private fun Field(
@@ -110,11 +113,14 @@ private fun Field(
     keyboard: KeyboardType = KeyboardType.Text,
     singleLine: Boolean = true,
     focus: FocusRequester? = null,
+    prefix: String? = null,
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(stringResource(label)) },
+        // The label carries the symbol too, since the prefix shows only once the field has focus or text.
+        label = { Text(stringResource(label) + prefix?.let { " ($it)" }.orEmpty()) },
+        prefix = prefix?.let { { Text("$it ", modifier = Modifier.testTag("prefix_$tag")) } },
         isError = error != null,
         supportingText = error?.let { { Text(stringResource(it), modifier = Modifier.testTag("error_$tag")) } },
         keyboardOptions = KeyboardOptions(keyboardType = keyboard),
@@ -122,6 +128,14 @@ private fun Field(
         maxLines = if (singleLine) 1 else 5,
         modifier = Modifier.fillMaxWidth().then(if (focus != null) Modifier.focusRequester(focus) else Modifier).testTag(fieldTag(tag)),
     )
+}
+
+/** @return the display currency's symbol for money fields, or `null` until it has loaded. */
+@Composable
+private fun currencySymbol(): String? {
+    val currency by appContainer().preferences.currency.collectAsState(initial = null)
+    val language = AppLanguage.current()
+    return currency?.let { Money.symbol(it, language) }
 }
 
 /**
@@ -277,6 +291,7 @@ fun ContainerFormScreen(
         Field(
             R.string.field_value_override, vm.valueOverride, { vm.valueOverride = it }, "override",
             R.string.error_price.takeIf { FieldError.PriceInvalid in vm.errors }, KeyboardType.Decimal,
+            prefix = currencySymbol(),
         )
         PickerLabel(R.string.field_icon)
         IconPicker(PlaceIcons.containers, vm.icon) { vm.icon = it }
@@ -350,6 +365,7 @@ fun ItemFormScreen(
         Field(
             R.string.field_unit_price, vm.unitPrice, { vm.unitPrice = it }, "price",
             R.string.error_price.takeIf { FieldError.PriceInvalid in vm.errors }, KeyboardType.Decimal,
+            prefix = currencySymbol(),
         )
         TextButton(onClick = { vm.moreFields = !vm.moreFields }, modifier = Modifier.testTag("more_fields")) {
             Text(stringResource(if (vm.moreFields) R.string.fewer_fields else R.string.more_fields))

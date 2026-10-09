@@ -48,6 +48,14 @@ object Money {
     }
 
     /**
+     * @param currencyCode the display currency.
+     * @param language the app language.
+     * @return the currency's symbol as [format] shows it, such as "R$", or "US$" for dollars in Portuguese.
+     */
+    fun symbol(currencyCode: String, language: AppLanguage): String =
+        Currency.getInstance(currencyCode).getSymbol(localeOf(language))
+
+    /**
      * Formats an amount for an input field: separators of the language, no symbol.
      *
      * @param minor the amount in minor units.
