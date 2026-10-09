@@ -12,12 +12,21 @@ recoverable on a new phone.
 Database encryption SHALL be a setting, off by default. Turning it on MUST
 require a connected Google account, and MUST show progress while the data is
 encrypted. If encryption fails at any point, the data MUST remain unencrypted,
-intact and usable, and the app MUST report the failure.
+intact and usable, and the app MUST report the failure. Until design D19's
+removal criteria are met, the setting MUST be labelled "Experimental", and the
+confirmation MUST warn that it has been tested on few phones and suggest
+exporting a backup first.
 
 #### Scenario: Turning encryption on
 - **AS A** user with Google Drive sync connected
 - **WHEN** I enable encryption
 - **THEN** a progress indicator is shown, and afterwards the setting reads "On"
+
+#### Scenario: Experimental warning
+- **AS A** user with Google Drive sync connected
+- **WHEN** I tap the encryption setting, which is labelled "Experimental"
+- **THEN** the confirmation warns that encryption is experimental and suggests exporting a backup first
+- **AND** nothing is encrypted until I confirm
 
 #### Scenario: No Google account
 - **AS A** user who never connected Google Drive

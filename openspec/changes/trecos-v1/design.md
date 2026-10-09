@@ -255,6 +255,11 @@ There's no remote configuration (there is no server), so flags are build-time
 - `FEATURE_ENCRYPTION`: default `false`, turned on in 0.12. Removal: at 1.0,
   after on/off round trips pass on a physical Android 9 phone and on a current
   Android phone.
+- Since 2026-10-09 both flags default to `true`: the developer tested sync,
+  encryption and restore on their phone. Encryption is shown as
+  "Experimental" until its removal criteria are met. The flags stay as an
+  emergency off switch (`-Ptrecos.driveSync=false`, `-Ptrecos.encryption=false`),
+  and the removal criteria above are unchanged (task 14.7).
 
 ### D20. Testing, performance and CI
 - **Tests**: JVM unit tests (merge engine, value folding, suggestion scoring,

@@ -31,10 +31,11 @@ android {
         versionCode = appVersion.second
         versionName = appVersion.first
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        // Feature flags (design D19): off until their releases are ready. Turn one on
-        // for a local build with -Ptrecos.driveSync=true or -Ptrecos.encryption=true.
-        buildConfigField("boolean", "FEATURE_DRIVE_SYNC", (findProperty("trecos.driveSync") ?: "false").toString())
-        buildConfigField("boolean", "FEATURE_ENCRYPTION", (findProperty("trecos.encryption") ?: "false").toString())
+        // Feature flags (design D19): on since the developer's phone test on 2026-10-09
+        // (encryption is shown as experimental). They stay as an emergency off switch until
+        // their removal criteria are met: -Ptrecos.driveSync=false or -Ptrecos.encryption=false.
+        buildConfigField("boolean", "FEATURE_DRIVE_SYNC", (findProperty("trecos.driveSync") ?: "true").toString())
+        buildConfigField("boolean", "FEATURE_ENCRYPTION", (findProperty("trecos.encryption") ?: "true").toString())
         // The benchmark seed receiver (task 14.8) is on only in benchmarkRelease; see androidComponents below.
         buildConfigField("boolean", "BENCHMARK_SEED", "false")
         manifestPlaceholders["benchmarkSeed"] = "false"

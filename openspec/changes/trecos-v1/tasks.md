@@ -196,6 +196,7 @@ run at the end of **every** release group before it is tagged.
 - [ ] 14.10 Prepare the Play listing ("Trecos: Home Inventory", English and Portuguese texts and screenshots, data safety form, privacy policy URL) and publish 1.0 to production; verify that the listing is live
 - [x] 14.11 Complete the user guide in both languages, update `docs/product/roadmap.md` (1.1 OCR to multi-user), and add the 1.0 entry to `CHANGELOG.md`
 - [x] 14.12 Make every tab tap open that tab's root, closing screens opened below any tab (also when tapping the selected tab), as asked by the developer after testing on a phone; update the app-shell spec and cover it with navigation tests
+- [x] 14.13 Switch `FEATURE_DRIVE_SYNC` and `FEATURE_ENCRYPTION` on by default after the developer's phone test (sync, encryption, restore), keeping them as an emergency off switch until task 14.7; label encryption "Experimental" with a warning and a backup suggestion in its confirmation; update the encryption spec, D19, the docs and the changelog
 
 ## 15. Quality Gates
 

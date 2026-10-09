@@ -2,8 +2,8 @@
 
 How Trecos keeps houses in step across a user's devices through their own
 Google Drive (design D14). The code is in `app/src/main/kotlin/app/trecos/sync/`.
-Sync is behind the `FEATURE_DRIVE_SYNC` build flag (off by default; build with
-`-Ptrecos.driveSync=true`).
+Sync is behind the `FEATURE_DRIVE_SYNC` build flag, on by default since
+2026-10-09; build with `-Ptrecos.driveSync=false` to switch it off (design D19).
 
 ## Storage layout
 
