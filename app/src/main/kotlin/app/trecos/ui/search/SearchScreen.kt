@@ -56,6 +56,10 @@ import app.trecos.ui.places.ContainerRow
 import app.trecos.ui.places.ItemRow
 import app.trecos.ui.places.NO_CATEGORY
 import app.trecos.ui.places.PlaceNavigation
+import app.trecos.ui.places.LocalQrScanner
+import app.trecos.ui.places.ScanDialogs
+import app.trecos.ui.places.rememberScanController
+import androidx.compose.ui.platform.LocalContext
 import app.trecos.ui.text.Breadcrumb
 import app.trecos.ui.text.SafeText
 import app.trecos.ui.theme.PaletteColor
@@ -79,7 +83,9 @@ fun SearchScreen(nav: PlaceNavigation) {
     val state by vm.state.collectAsStateWithLifecycle()
     val query by vm.query.collectAsState()
     var filtersOpen by rememberSaveable { mutableStateOf(false) }
-    var scanNotice by remember { mutableStateOf(false) }
+    val scan = rememberScanController(nav)
+    val scanner = LocalQrScanner.current
+    val context = LocalContext.current
     val language = AppLanguage.current()
     val current = state
 
@@ -92,7 +98,7 @@ fun SearchScreen(nav: PlaceNavigation) {
                 singleLine = true,
                 modifier = Modifier.weight(1f).testTag(SEARCH_FIELD_TAG),
             )
-            IconButton(onClick = { scanNotice = true }, modifier = Modifier.testTag("scan_qr")) {
+            IconButton(onClick = { scan.scan(scanner, context) }, modifier = Modifier.testTag("scan_qr")) {
                 Icon(painterResource(R.drawable.ic_qr), contentDescription = stringResource(R.string.scan_qr))
             }
         }
@@ -203,13 +209,7 @@ fun SearchScreen(nav: PlaceNavigation) {
         }
     }
     if (filtersOpen && current != null) FiltersDialog(current, vm) { filtersOpen = false }
-    if (scanNotice) {
-        AlertDialog(
-            onDismissRequest = { scanNotice = false },
-            confirmButton = { TextButton(onClick = { scanNotice = false }) { Text(stringResource(R.string.close)) } },
-            text = { Text(stringResource(R.string.coming_later)) },
-        )
-    }
+    ScanDialogs(scan)
 }
 
 /**
