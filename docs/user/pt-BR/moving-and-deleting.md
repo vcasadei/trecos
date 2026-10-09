@@ -10,7 +10,7 @@ Abra um item ou compartimento, toque em ⋮ e escolha:
 | **Copiar** | Mesmo seletor. A cópia é uma coisa nova **sem código QR**, porque uma etiqueta identifica um único objeto físico. Um compartimento copiado inclui cópias de tudo o que tem dentro |
 | **Duplicar** | Uma cópia no mesmo lugar, chamada "… (cópia)", aberta para edição |
 
-Ao mover para outra casa, as categorias e etiquetas próprias do item vão junto;
+Ao mover para outra casa, as categorias e tags próprias do item vão junto;
 as que não existirem lá são criadas. Se um código QR já estiver em uso naquela
 casa, você escolhe mudar o código, removê-lo ou cancelar.
 
