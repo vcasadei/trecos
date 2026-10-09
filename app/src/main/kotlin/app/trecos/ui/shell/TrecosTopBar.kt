@@ -1,6 +1,9 @@
 package app.trecos.ui.shell
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -12,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -20,20 +24,31 @@ import app.trecos.R
 
 /**
  * The top bar of every screen: a back arrow on screens other than the tab
- * roots, then the title on one line.
+ * roots, the title on one line, and optional actions at the end.
  *
  * @param title the screen title; truncated with "…" when it doesn't fit.
  * @param onBack called when the back arrow is tapped, or `null` on a tab root, which shows no arrow.
  * @param modifier modifier for the bar.
+ * @param background the bar's colour, such as a container's tint; transparent by default.
+ * @param onTitleClick makes the title a switcher (with a down arrow) when not `null`.
+ * @param actions icon buttons shown at the end of the bar.
  */
 @Composable
-fun TrecosTopBar(title: String, onBack: (() -> Unit)?, modifier: Modifier = Modifier) {
+fun TrecosTopBar(
+    title: String,
+    onBack: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    background: Color = Color.Transparent,
+    onTitleClick: (() -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {},
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .background(background)
             .statusBarsPadding()
             .height(56.dp)
-            .padding(horizontal = if (onBack == null) 16.dp else 4.dp),
+            .padding(start = if (onBack == null) 16.dp else 4.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (onBack != null) {
@@ -41,12 +56,28 @@ fun TrecosTopBar(title: String, onBack: (() -> Unit)?, modifier: Modifier = Modi
                 Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.action_back))
             }
         }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .then(if (onTitleClick != null) Modifier.clickable(onClick = onTitleClick) else Modifier),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            if (onTitleClick != null) {
+                Icon(
+                    painterResource(R.drawable.ic_expand),
+                    contentDescription = stringResource(R.string.switch_house),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+        }
+        actions()
     }
 }

@@ -23,7 +23,7 @@ A new library needs the maintainer's approval first (see `CONTRIBUTING.md`).
 | Goal | Command | Output |
 |---|---|---|
 | Debug APK | `./gradlew assembleDebug` | `app/build/outputs/apk/debug/app-debug.apk` |
-| Release APK (unsigned until signing is set up in 0.2) | `./gradlew assembleRelease` | `app/build/outputs/apk/release/app-release-unsigned.apk` |
+| Release APKs (unsigned locally; CI signs them) | `./gradlew assembleRelease` | `app/build/outputs/apk/release/app-<abi>-release-unsigned.apk`, one per ABI plus `universal` |
 | Lint | `./gradlew lintDebug` | `app/build/reports/lint-results-debug.html` |
 | Unit, Robolectric and screenshot tests | `./gradlew testDebugUnitTest` | `app/build/reports/tests/testDebugUnitTest/` |
 | Screenshot verification | `./gradlew verifyRoborazziDebug` | fails on any change from `app/src/test/screenshots/` |
@@ -50,5 +50,7 @@ benchmarks: [testing.md](testing.md).
 `ubuntu-24.04`: build, lint, unit tests, coverage, screenshot verification,
 release build and the release log check. `.github/workflows/secret-scan.yml`
 scans the whole history with gitleaks. `.github/workflows/dependency-graph.yml`
-submits the resolved Gradle dependencies to GitHub on every push to `master`,
-so Dependabot alerts cover transitive libraries too.
+submits the app's runtime dependencies (every `*RuntimeClasspath`) to GitHub on
+every push to `master`, so Dependabot alerts cover every shipped library,
+transitive ones included. Gradle plugin classpaths are not submitted: they
+never ship, and Dependabot can't update them.
