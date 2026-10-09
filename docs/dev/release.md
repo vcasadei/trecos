@@ -4,11 +4,17 @@ Until 1.0 every release is a signed APK on GitHub Releases, for sideloading.
 1.0 goes to Google Play signed with the same key, so sideloaded installs keep
 updating (design D22). Local builds are debug builds and need no secret.
 
-> **Status (2026-10-09):** the signing key is encrypted in `vcasadei/trecos-signing`,
-> and the four CI secrets live in the `release` environment. Still pending: the
-> offline backup of the age key, the Google Drive copy of the encrypted file, and
-> the first tagged release (tasks 2.19, 2.20 and 2.23). The secret values below
-> are placeholders.
+> **Status:** set up on 2026-10-09. The age key is backed up offline (printed
+> and on a NAS), the encrypted file is in `vcasadei/trecos-signing` and in Google
+> Drive, and the first signed release is `v0.12.0`. The secret values below are
+> placeholders.
+
+Release certificate fingerprints (public):
+
+| | |
+|---|---|
+| SHA-256 | `2F:CE:99:B6:6D:22:8B:E5:D9:F9:B0:6F:4A:C7:AD:04:05:53:1E:0D:C4:A1:11:29:85:78:78:AC:0F:DD:78:65` |
+| SHA-1 (for the OAuth client) | `90:3F:05:D5:C2:7F:73:FA:5D:01:07:0C:F2:20:4F:5A:34:C6:6E:44` |
 
 ## The signing key
 
