@@ -18,7 +18,13 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -133,6 +139,41 @@ fun HouseFormScreen(houseId: String?, onDone: (String?) -> Unit) {
         IconPicker(PlaceIcons.houses, vm.icon) { vm.icon = it }
         PickerLabel(R.string.field_colour)
         ColourPicker(vm.colour) { vm.colour = it }
+        if (vm.otherHouses.isNotEmpty()) {
+            PickerLabel(R.string.copy_from)
+            CopyFromPicker(vm)
+        }
+    }
+}
+
+/**
+ * Chooses a house to copy custom categories and tags from, or none.
+ *
+ * @param vm the house form's ViewModel.
+ */
+@Composable
+private fun CopyFromPicker(vm: HouseFormViewModel) {
+    var open by remember { mutableStateOf(false) }
+    Column {
+        OutlinedButton(onClick = { open = true }, modifier = Modifier.testTag("copy_from")) {
+            Text(vm.otherHouses.firstOrNull { it.id == vm.copyFrom }?.name ?: stringResource(R.string.copy_none))
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            DropdownMenuItem(text = { Text(stringResource(R.string.copy_none)) }, onClick = {
+                vm.copyFrom = null
+                open = false
+            })
+            vm.otherHouses.forEach { house ->
+                DropdownMenuItem(
+                    text = { Text(house.name) },
+                    onClick = {
+                        vm.copyFrom = house.id
+                        open = false
+                    },
+                    modifier = Modifier.testTag("copy_from_${house.id}"),
+                )
+            }
+        }
     }
 }
 
@@ -190,6 +231,7 @@ fun ItemFormScreen(houseId: String, containerId: String?, itemId: String?, onDon
         },
     ) {
         Field(R.string.field_name, vm.name, { vm.name = it }, "name", R.string.error_name_required.takeIf { FieldError.NameRequired in vm.errors })
+        CategoriesField(vm)
         Field(
             R.string.field_quantity, vm.quantity, { vm.quantity = it }, "quantity",
             R.string.error_quantity.takeIf { FieldError.QuantityInvalid in vm.errors }, KeyboardType.Number,
@@ -207,6 +249,7 @@ fun ItemFormScreen(houseId: String, containerId: String?, itemId: String?, onDon
             Field(R.string.field_serial, vm.serial, { vm.serial = it }, "serial")
             Field(R.string.field_qr, vm.qrCode, { vm.qrCode = it }, "qr", R.string.error_qr_in_use.takeIf { FieldError.QrInUse in vm.errors })
             Field(R.string.field_description, vm.description, { vm.description = it }, "description", singleLine = false)
+            TagsField(vm)
         }
     }
 }

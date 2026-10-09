@@ -7,6 +7,7 @@ import app.trecos.data.Container
 import app.trecos.data.House
 import app.trecos.data.Item
 import app.trecos.data.ListView
+import app.trecos.categories.CategoryCatalog
 import app.trecos.places.PlaceTree
 import app.trecos.ui.theme.PaletteColor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -79,6 +80,8 @@ class HomeViewModel(private val app: AppContainer) : ViewModel() {
  * @property tree the house's container tree, for values, paths and colours.
  * @property listView the app-wide list view.
  * @property currency the display currency code.
+ * @property catalog the house's categories.
+ * @property itemCategories each item's category ids, main first.
  */
 data class PlaceState(
     val house: House,
@@ -89,6 +92,8 @@ data class PlaceState(
     val tree: PlaceTree,
     val listView: ListView,
     val currency: String,
+    val catalog: CategoryCatalog,
+    val itemCategories: Map<String, List<String>>,
 )
 
 /**
@@ -109,18 +114,22 @@ class PlaceViewModel(private val app: AppContainer, private val houseId: String,
         combine(db.containers().observeAllInHouse(houseId), db.items().observeTotals(houseId), ::PlaceTree),
     ) { containers, items, tree -> Triple(containers, items, tree) }
 
+    private val categories = combine(db.categories().observeCustom(houseId), db.categories().observeAssignments(houseId)) { custom, rows ->
+        CategoryCatalog(app.builtInCategories, custom) to rows.groupBy({ it.itemId }, { it.categoryId })
+    }
+
     /** The screen's state, or `null` while loading or when the house or container is gone. */
     val state: StateFlow<PlaceState?> = combine(
         db.houses().observe(houseId),
         containerId?.let { db.containers().observe(it) } ?: flowOf(null),
         db.houses().observeAll(),
         contents,
-        combine(app.preferences.listView, app.preferences.currency) { view, currency -> view to currency },
-    ) { house, container, houses, (containers, items, tree), (view, currency) ->
+        combine(app.preferences.listView, app.preferences.currency, categories) { view, currency, cats -> Triple(view, currency, cats) },
+    ) { house, container, houses, (containers, items, tree), (view, currency, cats) ->
         if (house == null || (containerId != null && container == null)) {
             null
         } else {
-            PlaceState(house, container, houses, containers, items, tree, view, currency)
+            PlaceState(house, container, houses, containers, items, tree, view, currency, cats.first, cats.second)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
@@ -165,8 +174,20 @@ class PlaceViewModel(private val app: AppContainer, private val houseId: String,
  * @property houses every house, to decide whether the house pill shows.
  * @property tree the house's container tree, for the location path.
  * @property currency the display currency code.
+ * @property catalog the house's categories.
+ * @property categories the item's category ids, main first.
+ * @property tags the item's tag names.
  */
-data class ItemState(val item: Item, val house: House, val houses: List<House>, val tree: PlaceTree, val currency: String)
+data class ItemState(
+    val item: Item,
+    val house: House,
+    val houses: List<House>,
+    val tree: PlaceTree,
+    val currency: String,
+    val catalog: CategoryCatalog,
+    val categories: List<String>,
+    val tags: List<String>,
+)
 
 /**
  * Loads one item for the item screen.
@@ -175,7 +196,7 @@ data class ItemState(val item: Item, val house: House, val houses: List<House>, 
  * @param itemId the item.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ItemViewModel(app: AppContainer, itemId: String) : ViewModel() {
+class ItemViewModel(private val app: AppContainer, itemId: String) : ViewModel() {
 
     private val db = app.database
 
@@ -189,7 +210,12 @@ class ItemViewModel(app: AppContainer, itemId: String) : ViewModel() {
                 db.houses().observeAll(),
                 combine(db.containers().observeAllInHouse(item.houseId), db.items().observeTotals(item.houseId), ::PlaceTree),
                 app.preferences.currency,
-            ) { house, houses, tree, currency -> house?.let { ItemState(item, it, houses, tree, currency) } }
+                combine(db.categories().observeCustom(item.houseId), db.categories().observeForItem(item.id), db.tags().observeForItem(item.id)) { custom, rows, tags ->
+                    Triple(CategoryCatalog(app.builtInCategories, custom), rows.map { it.categoryId }, tags.map { it.name })
+                },
+            ) { house, houses, tree, currency, (catalog, categories, tags) ->
+                house?.let { ItemState(item, it, houses, tree, currency, catalog, categories, tags) }
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 }

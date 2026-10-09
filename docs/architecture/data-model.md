@@ -17,7 +17,7 @@ committed in `app/schemas/app.trecos.data.TrecosDatabase/<version>.json`.
 | No foreign keys | Soft deletes and sync merges apply rows in any order; relations are enforced in code |
 | Inserts fail on a clash; updates are explicit | Room's upsert silently drops a row whose unique QR code clashes |
 
-## Tables (schema version 1)
+## Tables (schema version 2)
 
 ### `house`
 
@@ -66,6 +66,24 @@ Indexes: `(houseId, parentId)`; unique `(houseId, qrCode)`.
 
 Indexes: `(houseId, containerId)`; unique `(houseId, qrCode)`.
 
+### Categories and tags (added in schema 2)
+
+Built-in categories are **not** stored: they are read from the bundled asset
+`assets/categories.json` and referenced everywhere by their stable key, such as
+`cables.usb_c`, so every device resolves them identically and they can't be
+renamed or deleted.
+
+| Table | Columns | Notes |
+|---|---|---|
+| `category` | `id`, `houseId`, `parentId?`, `name`, `icon?`, `createdAt`, `updatedAt` | Custom categories of one house. `parentId` is a built-in top-level key or a custom top-level id; null makes it a top level. `icon` null shows the empty default icon |
+| `item_category` | `id`, `houseId`, `itemId`, `categoryId`, `position`, `createdAt` | `categoryId` is a built-in key or a custom id; position 0 is the main category. Unique `(itemId, categoryId)` |
+| `tag` | `id`, `houseId`, `name`, `normalized`, `createdAt`, `updatedAt` | `normalized` is lower case without accents; unique `(houseId, normalized)` |
+| `item_tag` | `id`, `houseId`, `itemId`, `tagId`, `createdAt` | Unique `(itemId, tagId)` |
+| `token_category_count` | `houseId`, `token`, `categoryId`, `count` | Learned suggestion counts (design D7); primary key `(houseId, token, categoryId)`; device only |
+
+Deleting a custom category or a tag removes its rows and its assignments.
+These tables get deletion markers when sync arrives (0.11), by expand and contract.
+
 ## Rules enforced in code
 
 | Rule | Where |
@@ -89,7 +107,37 @@ Not in the database and never synced (DataStore, design D13):
 
 ## Migrations
 
-Schema changes follow the migration plan in the design: versioned Room
-migrations checked against the exported schemas, expand-and-contract for
-renames, and a pre-migration copy of the database as the "down" path. The
-per-release checklist is added with the migration harness (tasks 3.1-3.4).
+### Safety copy and the "down" path
+
+Android won't install an older app over a newer one, so rollback is
+data-level (`MigrationGuard`):
+
+| When | What happens |
+|---|---|
+| Opening a database older than the app's schema | The file is copied to `pre-migration-v<N>.db` first |
+| The migration fails | The copy is put back, the failure is logged (no personal data), and `MigrationFailedException` is raised |
+| The next launch that opens without migrating | Every `pre-migration-v*.db` is deleted |
+
+### Expand and contract
+
+A rename or removal is never done in one release, because devices on
+adjacent versions may sync the same house:
+
+1. **Expand** (release N): add the new column or table; write both the old and
+   the new shape; read the new one, falling back to the old.
+2. **Contract** (release N+1 or later): stop reading and writing the old shape,
+   then drop it in a migration.
+
+Adding a nullable column or a new table needs only step 1.
+
+### Checklist for every schema change
+
+1. Bump `version` in `@Database` and `TrecosDatabase.VERSION` together.
+2. Write the `Migration` (or an `AutoMigration` when Room can infer it).
+3. Build once, so Room exports `app/schemas/.../<version>.json`, and commit it.
+4. Add a test in `MigrationTest`: create the previous version with
+   `MigrationTestHelper`, insert rows, run the migration, validate against the
+   new schema and check the rows.
+5. If the change renames or removes something, follow expand and contract.
+6. Bump the sync `formatVersion` if the snapshot shape changes (design D14).
+7. Update the tables on this page.

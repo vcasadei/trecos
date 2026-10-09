@@ -95,7 +95,11 @@ class ItemScenariosTest : PlacesTestBase() {
         saveAndClose()
 
         val today = formatDate(System.currentTimeMillis(), AppLanguage.English)
-        detail(R.string.date_changed).assertTextContains(today, substring = true)
+        rule.waitUntil(10_000) {
+            rule.onAllNodes(
+                androidx.compose.ui.test.hasTestTag(detailTag(R.string.date_changed)).and(androidx.compose.ui.test.hasText(today, substring = true)),
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
         detail(R.string.date_added).assertTextContains(formatDate(newYear, AppLanguage.English), substring = true)
         val saved = runBlocking { app.database.items().get("pi")!! }
         assertEquals(5, saved.quantity)

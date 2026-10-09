@@ -38,6 +38,7 @@ import app.trecos.ui.places.ItemFormScreen
 import app.trecos.ui.places.ItemScreen
 import app.trecos.ui.places.PlaceNavigation
 import app.trecos.ui.places.PlaceScreen
+import app.trecos.ui.places.TagsScreen
 import app.trecos.ui.theme.LocalDarkTheme
 
 /** Test tag of the house band behind the status bar. */
@@ -63,6 +64,7 @@ fun rootScreenTag(tab: TrecosTab): String = "screen_${rootRoute(tab)}"
 private object Routes {
     const val PLACE = "place/{house}?container={container}"
     const val ITEM = "item/{item}"
+    const val TAGS = "tags/{house}"
     const val HOUSE_FORM = "form/house?id={id}"
     const val CONTAINER_FORM = "form/container?house={house}&parent={parent}&id={id}"
     const val ITEM_FORM = "form/item?house={house}&container={container}&id={id}"
@@ -106,6 +108,7 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                     PlaceScreen(entry.string("house")!!, entry.string("container"), nav, isTabRoot = false)
                 }
                 composable(Routes.ITEM, listOf(stringArg("item"))) { entry -> ItemScreen(entry.string("item")!!, nav) }
+                composable(Routes.TAGS, listOf(stringArg("house"))) { entry -> TagsScreen(entry.string("house")!!) { navController.popBackStack() } }
                 composable(Routes.HOUSE_FORM, listOf(optionalArg("id"))) { entry ->
                     HouseFormScreen(entry.string("id")) { savedId ->
                         navController.popBackStack()
@@ -156,6 +159,7 @@ private fun placeNavigation(controller: NavHostController) = PlaceNavigation(
     editContainer = { container -> controller.navigate("form/container?id=$container") },
     addItem = { house, container -> controller.navigate("form/item?house=$house" + (container?.let { "&container=$it" } ?: "")) },
     editItem = { item -> controller.navigate("form/item?id=$item") },
+    openTags = { house -> controller.navigate("tags/$house") },
 )
 
 /**

@@ -82,4 +82,31 @@
         <item quantity="one">%1$d item</item>
         <item quantity="other">%1$d items</item>
     </plurals>
+
+    <!-- Categories and tags (0.3) -->
+    <string name="field_categories">Categories</string>
+    <string name="add_category">Add category</string>
+    <string name="main_category">Main</string>
+    <string name="set_main">Set as main</string>
+    <string name="action_remove">Remove</string>
+    <string name="search_categories">Search categories</string>
+    <string name="new_category">New category</string>
+    <string name="category_parent">Put it under</string>
+    <string name="category_top_level">Its own top level</string>
+    <string name="delete_category">Delete category</string>
+    <string name="suggestions">Suggestions</string>
+    <string name="field_tags">Tags</string>
+    <string name="add_tag">Add a tag</string>
+    <string name="tags_title">Tags</string>
+    <string name="action_rename">Rename</string>
+    <string name="delete_tag_confirm">Remove this tag from every item?</string>
+    <string name="no_tags">No tags yet. Add them on an item.</string>
+    <string name="copy_from">Copy categories and tags from</string>
+    <string name="copy_none">Don\'t copy</string>
+    <string name="action_done">Done</string>
+    <string name="no_categories">No categories</string>
+    <plurals name="delete_category_confirm">
+        <item quantity="one">It will be removed from %1$d item, which keeps its other categories.</item>
+        <item quantity="other">It will be removed from %1$d items, which keep their other categories.</item>
+    </plurals>
 </resources>

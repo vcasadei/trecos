@@ -111,6 +111,14 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                         }
                         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                             if (current.container == null) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.tags_title)) },
+                                    onClick = {
+                                        menuOpen = false
+                                        nav.openTags(current.house.id)
+                                    },
+                                    modifier = Modifier.testTag("menu_tags"),
+                                )
                                 val lastHouse = current.houses.size <= 1
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.action_delete)) },
@@ -196,7 +204,14 @@ fun PlaceScreen(houseId: String, containerId: String?, nav: PlaceNavigation, isT
                 if (current.items.isNotEmpty()) {
                     item(key = "items") { SectionTitle(stringResource(R.string.section_items, current.items.size)) }
                     items(current.items, key = { it.id }) { item ->
-                        ItemRow(item, current.listView, current.currency) { nav.openItem(item.id) }
+                        val ids = current.itemCategories[item.id].orEmpty()
+                        ItemRow(
+                            item = item,
+                            listView = current.listView,
+                            currency = current.currency,
+                            mainIcon = ids.firstOrNull()?.let { current.catalog[it]?.icon } ?: NO_CATEGORY,
+                            categoryLabels = ids.mapNotNull { current.catalog.label(it, language) },
+                        ) { nav.openItem(item.id) }
                     }
                 }
                 if (current.containers.isEmpty() && current.items.isEmpty()) {
