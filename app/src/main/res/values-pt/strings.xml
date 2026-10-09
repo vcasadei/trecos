@@ -440,6 +440,8 @@
     <string name="encryption_enable_title">Criptografar seus dados?</string>
     <string name="encryption_enable_body">Seu inventário neste celular e as cópias no Drive serão criptografados. As fotos não são criptografadas. O Trecos reinicia quando terminar.</string>
     <string name="encryption_enable_action">Criptografar</string>
+    <string name="encryption_experimental">Experimental</string>
+    <string name="encryption_experimental_warning">A criptografia é experimental: até agora foi testada em poucos celulares. Exporte um backup antes (Ajustes &gt; Sincronização e backup &gt; Backup) para poder recuperar seus dados se algo der errado.</string>
     <string name="encryption_disable_title">Desligar a criptografia?</string>
     <string name="encryption_disable_body">Seus dados neste celular são descriptografados, a chave é removida do seu Drive, e as próximas cópias no Drive não são criptografadas. O Trecos reinicia quando terminar.</string>
     <string name="encryption_disable_action">Desligar</string>

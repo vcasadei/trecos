@@ -429,6 +429,8 @@
     <string name="encryption_enable_title">Encrypt your data?</string>
     <string name="encryption_enable_body">Your inventory on this phone and its copies in Drive will be encrypted. Photos are not encrypted. Trecos restarts when it\'s done.</string>
     <string name="encryption_enable_action">Encrypt</string>
+    <string name="encryption_experimental">Experimental</string>
+    <string name="encryption_experimental_warning">Encryption is experimental: it has been tested on few phones so far. Export a backup first (Settings &gt; Sync &amp; backup &gt; Backup) so you can recover your data if something goes wrong.</string>
     <string name="encryption_disable_title">Turn encryption off?</string>
     <string name="encryption_disable_body">Your data on this phone is decrypted, the key is removed from your Drive, and later Drive copies aren\'t encrypted. Trecos restarts when it\'s done.</string>
     <string name="encryption_disable_action">Turn off</string>

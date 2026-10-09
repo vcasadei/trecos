@@ -1,6 +1,7 @@
 package app.trecos.ui.settings
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import app.trecos.lock.LockTimeout
 import app.trecos.data.Profile
@@ -356,6 +357,22 @@ fun SettingsScreen(nav: SettingsNavigation) {
 @Composable
 private fun appFeatures() = app.trecos.ui.appContainer().features
 
+/** A small "Experimental" tag after a setting's name (encryption, until design D19's criteria are met). */
+@Composable
+private fun ExperimentalLabel() {
+    Text(
+        stringResource(R.string.encryption_experimental),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
+        maxLines = 1,
+        modifier = Modifier
+            .padding(start = 8.dp)
+            .background(MaterialTheme.colorScheme.secondaryContainer, androidx.compose.foundation.shape.RoundedCornerShape(50))
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .testTag("encryption_experimental"),
+    )
+}
+
 /**
  * The encryption setting (encryption spec): needs a connected Google account,
  * confirms, shows progress, then the app restarts to finish.
@@ -386,7 +403,10 @@ private fun EncryptionRow(openSync: () -> Unit) {
             }
         }.padding(horizontal = 16.dp, vertical = 10.dp).testTag("setting_encryption"),
     ) {
-        Text(stringResource(R.string.setting_encryption), style = MaterialTheme.typography.bodyLarge)
+        androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.setting_encryption), style = MaterialTheme.typography.bodyLarge)
+            ExperimentalLabel()
+        }
         Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.testTag("value_encryption"))
     }
     fun run(enable: Boolean) {
@@ -412,7 +432,16 @@ private fun EncryptionRow(openSync: () -> Unit) {
         "enable" -> AlertDialog(
             onDismissRequest = { dialog = null },
             title = { Text(stringResource(R.string.encryption_enable_title)) },
-            text = { Text(stringResource(R.string.encryption_enable_body)) },
+            text = {
+                Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.encryption_enable_body))
+                    Text(
+                        stringResource(R.string.encryption_experimental_warning),
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.testTag("encryption_experimental_warning"),
+                    )
+                }
+            },
             confirmButton = { TextButton(onClick = { run(enable = true) }, modifier = Modifier.testTag("confirm_encryption")) { Text(stringResource(R.string.encryption_enable_action)) } },
             dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.action_cancel)) } },
         )

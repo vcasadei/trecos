@@ -2,9 +2,10 @@
 
 Optional database encryption with a key the user can recover on a new phone
 (design D16). The code is in `app/src/main/kotlin/app/trecos/crypto/`.
-Encryption is behind the `FEATURE_ENCRYPTION` build flag (off by default;
-build with `-Ptrecos.encryption=true`) and needs Google Drive sync to be
-connected.
+Encryption is behind the `FEATURE_ENCRYPTION` build flag, on by default since
+2026-10-09 (build with `-Ptrecos.encryption=false` to switch it off). The
+setting itself is off by default, is labelled "Experimental" until design D19's
+criteria are met, and needs Google Drive sync to be connected.
 
 ## The key
 

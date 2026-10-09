@@ -171,6 +171,18 @@ class EncryptionScenariosTest : PlacesTestBase() {
     }
 
     @Test
+    fun encryptionIsMarkedExperimental() {
+        seed()
+        connectSync()
+        openEncryption()
+        tag("encryption_experimental")
+
+        click("setting_encryption")
+        tag("encryption_experimental_warning")
+        assertFalse("nothing is encrypted before confirming", app.encryption.keys.isEncrypted())
+    }
+
+    @Test
     fun noGoogleAccount() {
         seed()
         openEncryption()

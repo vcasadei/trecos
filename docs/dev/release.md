@@ -76,7 +76,7 @@ On compromise only. Android 9+ supports APK Signature Scheme v3 key rotation
 
 ## Google Drive sign-in (OAuth client)
 
-Sync (release 0.11, `FEATURE_DRIVE_SYNC`) signs in with Google Identity's
+Sync (release 0.11, `FEATURE_DRIVE_SYNC`, on by default) signs in with Google Identity's
 `AuthorizationClient`. Android OAuth clients have **no client secret**: Google
 recognises the app by its package name and signing certificate. Nothing is
 added to the repository.
@@ -99,8 +99,7 @@ added to the repository.
      or `./gradlew signingReport`.
    Once enrolled in Play App Signing (task 8.7), add a third client with the
    **Play app signing** certificate's SHA-1 from the Play Console.
-4. Verify on a debug build with sync switched on:
-   `./gradlew :app:installDebug -Ptrecos.driveSync=true`. Then go to Settings >
+4. Verify on a debug build: `./gradlew :app:installDebug`. Then go to Settings >
    Sync & backup > Sync > Connect Google Drive, pick the account and allow
    access. A "Trecos" folder appears in My Drive, and Sync shows "Last sync".
 

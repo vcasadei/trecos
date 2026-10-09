@@ -25,6 +25,9 @@ Settings > **Security** > **Encrypt data** encrypts your inventory on this
 phone and its copies in Google Drive. It needs sync connected: the key is kept
 in your Google account so you can recover your data on a new phone.
 
+Encryption is **experimental** for now: it has been tested on few phones.
+Export a backup before turning it on (Settings > Sync & backup > Backup).
+
 - Trecos restarts to finish, and your data stays intact if it is interrupted.
 - Photos aren't encrypted, and backup files never are (Trecos warns you before
   exporting).

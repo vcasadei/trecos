@@ -27,6 +27,10 @@ neste celular e as cópias no Google Drive. Precisa da sincronização conectada
 a chave fica guardada na sua conta Google para você recuperar os dados num
 celular novo.
 
+Por enquanto a criptografia é **experimental**: foi testada em poucos
+celulares. Exporte um backup antes de ativá-la (Ajustes > Sincronização e
+backup > Backup).
+
 - O Trecos reinicia para terminar, e seus dados continuam intactos se algo
   interromper.
 - As fotos não são criptografadas, e os arquivos de backup nunca são (o Trecos
