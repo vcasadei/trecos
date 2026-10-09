@@ -346,4 +346,71 @@
         <item quantity="one">%1$d photo</item>
         <item quantity="other">%1$d photos</item>
     </plurals>
+    <!-- Sync (0.11) -->
+    <string name="sync_error_network">Couldn\'t reach Google Drive. Trecos will try again later.</string>
+    <string name="sync_error_auth">Google needs you to connect again.</string>
+    <string name="sync_error_newer">Another device uses a newer version of Trecos. Update the app to keep syncing.</string>
+    <string name="sync_error_missing">The Trecos folder in your Drive is missing or was changed outside the app.</string>
+    <string name="sync_error_other">Sync didn\'t finish. Trecos will try again later.</string>
+    <string name="setting_sync">Sync</string>
+    <string name="setting_sync_off">Off</string>
+    <string name="setting_sync_on">Connected as %1$s</string>
+    <string name="sync_title">Sync</string>
+    <string name="sync_intro">Keep your inventory in step across your devices through a visible Trecos folder in your own Google Drive. Trecos only sees files it created.</string>
+    <string name="sync_connect">Connect Google Drive</string>
+    <string name="sync_connected_as">Connected as %1$s</string>
+    <string name="sync_last">Last sync: %1$s</string>
+    <string name="sync_never">Not synced yet</string>
+    <string name="sync_running">Syncing…</string>
+    <string name="sync_retry_scheduled">Trecos will try again automatically.</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_frequency">Sync automatically</string>
+    <string name="frequency_daily">Every day</string>
+    <string name="frequency_5">Every 5 days</string>
+    <string name="frequency_15">Every 15 days</string>
+    <string name="frequency_30">Every 30 days</string>
+    <string name="frequency_never">Never</string>
+    <string name="sync_photos_wifi">Photos only on Wi-Fi</string>
+    <string name="sync_photos_wifi_hint">Data still syncs on mobile data; photos wait for Wi-Fi.</string>
+    <string name="sync_device_name">This device\'s name</string>
+    <string name="sync_history">Sync history</string>
+    <string name="sync_disconnect">Disconnect</string>
+    <string name="sync_disconnected">Sync is off. Everything stays on this phone.</string>
+    <string name="sync_missing_action">Upload my data again</string>
+    <string name="sync_done">Synced.</string>
+    <string name="restore_title">Restore from Drive?</string>
+    <string name="restore_body">Your Drive has Trecos data: %1$s. Restore it on this phone?</string>
+    <string name="restore_action">Restore</string>
+    <string name="restore_not_now">Not now</string>
+    <string name="merge_title">Drive has other houses</string>
+    <string name="merge_body">Your Drive has houses that aren\'t on this phone: %1$s. Merge them with this phone\'s houses, or keep only the Drive data? Keeping only the Drive data deletes this phone\'s houses.</string>
+    <string name="merge_action">Merge</string>
+    <string name="keep_drive_action">Keep only Drive data</string>
+    <string name="conflicts_title">Conflicts</string>
+    <string name="conflicts_none">No conflicts.</string>
+    <string name="conflict_same_field">%1$s: %2$s or %3$s?</string>
+    <string name="conflict_deleted_here">Deleted or trashed on this phone, changed on %1$s. Delete it or keep it?</string>
+    <string name="conflict_deleted_there">Changed on this phone, deleted or trashed on %1$s. Delete it or keep it?</string>
+    <string name="conflict_keep_mine">Keep mine</string>
+    <string name="conflict_keep_theirs">Keep theirs</string>
+    <string name="conflict_delete">Delete it</string>
+    <string name="conflict_keep">Keep it</string>
+    <string name="conflict_other_device">another device</string>
+    <string name="value_empty">(empty)</string>
+    <string name="field_location">Location</string>
+    <string name="field_in_trash">In the trash</string>
+    <string name="field_value">Value</string>
+    <plurals name="sync_conflicts_count">
+        <item quantity="one">%1$d conflict to resolve</item>
+        <item quantity="other">%1$d conflicts to resolve</item>
+    </plurals>
+    <plurals name="history_changes">
+        <item quantity="one">%1$d change</item>
+        <item quantity="other">%1$d changes</item>
+    </plurals>
+    <plurals name="history_conflicts">
+        <item quantity="one">%1$d conflict</item>
+        <item quantity="other">%1$d conflicts</item>
+    </plurals>
+    <string name="import_replace_sync_warning">Sync is on, so your other devices will receive this data at the next sync.</string>
 </resources>

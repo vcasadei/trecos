@@ -29,8 +29,15 @@ code are skipped.
 **Backup**: Settings > **Sync & backup** > **Backup** saves one `.zip` file
 with your houses and photos wherever you choose. Import it on any phone, adding
 its houses as new ones or replacing everything. It needs no account, and the
-file is not encrypted. See [Backup](backup.md). Sync with your own Google Drive
-arrives in a later version; this answer will cover it then.
+file is not encrypted. See [Backup](backup.md).
+
+**Sync**: Settings > **Sync & backup** > **Sync** > **Connect Google Drive**
+keeps your devices in step through a visible **Trecos** folder in your own
+Drive. Trecos only sees files it created. It syncs every day by default (or
+every 5, 15 or 30 days, or never), and you can tap **Sync now** at any time.
+Photos wait for Wi-Fi unless you turn that off. Changes to different details
+merge by themselves. If the same detail changed on two devices, Trecos asks
+which to keep. Drive keeps each device's last 30 syncs.
 
 ## 6. What happens when I delete something?
 
@@ -46,3 +53,15 @@ Settings > **Security** > **App lock**. Trecos uses your phone's own lock (finge
 ## 9. Do I need an account?
 
 No. Everything except Google Drive sync works without any account, name or e-mail. Sync (when it arrives) uses your own Google account. In Settings you can add an optional name and e-mail to label your sync records; you can change or delete them at any time.
+
+## 10. How do I get my data back after losing or changing phones?
+
+On the new phone, install Trecos and either:
+
+- **With sync**: Settings > **Sync & backup** > **Sync** > **Connect Google
+  Drive** with the same Google account. Trecos offers to restore your houses
+  from Drive.
+- **With a backup file**: Settings > **Sync & backup** > **Backup** > **Import
+  a backup**, and pick your `trecos-backup-….zip`.
+
+Without sync or a backup file, data on a lost phone can't be recovered.

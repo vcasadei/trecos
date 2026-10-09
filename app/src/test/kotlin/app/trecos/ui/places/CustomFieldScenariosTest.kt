@@ -223,6 +223,7 @@ class CustomFieldScenariosTest : PlacesTestBase() {
         settingsRow("extras")
         pickExtra(DetailExtras.TAGS, listOf(DetailExtras.CATEGORIES, DetailExtras.TAGS))
         pickExtra(DetailExtras.BRAND, listOf(DetailExtras.CATEGORIES, DetailExtras.TAGS, DetailExtras.BRAND))
+        assertEquals(listOf(DetailExtras.CATEGORIES, DetailExtras.TAGS, DetailExtras.BRAND), runBlocking { app.preferences.detailExtras.first() })
         pressBack()
         tag(SETTINGS_LIST_TAG).performScrollToNode(hasTestTag("setting_extras"))
         waitForTextIn("value_extras", "Categories, Tags, Brand")

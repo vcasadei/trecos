@@ -187,6 +187,7 @@ class SettingsViewModel(private val app: AppContainer) : ViewModel() {
  * @property openTrash opens a house's trash.
  * @property openProfile opens the optional profile.
  * @property openBackup opens export and import.
+ * @property openSync opens Google Drive sync.
  */
 data class SettingsNavigation(
     val openCurrency: () -> Unit,
@@ -196,6 +197,7 @@ data class SettingsNavigation(
     val openTrash: (houseId: String) -> Unit,
     val openProfile: () -> Unit = {},
     val openBackup: () -> Unit = {},
+    val openSync: () -> Unit = {},
 )
 
 /**
@@ -212,6 +214,7 @@ fun SettingsScreen(nav: SettingsNavigation) {
         TrecosTopBar(title = stringResource(R.string.tab_settings), onBack = null)
         val current = state ?: return@Column
         val language = AppLanguage.current()
+        val driveSync = appFeatures().driveSync
         LazyColumn(contentPadding = PaddingValues(bottom = BottomBarClearance), modifier = Modifier.testTag(SETTINGS_LIST_TAG)) {
             item { Section(R.string.settings_general) }
             item {
@@ -313,6 +316,7 @@ fun SettingsScreen(nav: SettingsNavigation) {
                 LinkRow("profile", R.string.setting_profile, summary, nav.openProfile)
             }
             item { Section(R.string.settings_backup) }
+            if (driveSync) item { SyncRow(nav.openSync) }
             item { LinkRow("backup", R.string.setting_backup, stringResource(R.string.setting_backup_hint), nav.openBackup) }
             item { Section(R.string.settings_trash) }
             item {
@@ -324,6 +328,36 @@ fun SettingsScreen(nav: SettingsNavigation) {
                 val version = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty() }
                 LinkRow("version", R.string.setting_version, version, null)
             }
+        }
+    }
+}
+
+/** @return the feature flags. */
+@Composable
+private fun appFeatures() = app.trecos.ui.appContainer().features
+
+/**
+ * The Sync row: off, or the account, with a badge counting conflicts to resolve.
+ *
+ * @param onClick opens Sync.
+ */
+@Composable
+private fun SyncRow(onClick: () -> Unit) {
+    val sync = app.trecos.ui.appContainer().sync
+    val status by sync.status.collectAsStateWithLifecycle()
+    val state = status.state
+    val conflicts = state.conflicts.size
+    Column(Modifier.fillMaxWidth().heightIn(min = 64.dp).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp).testTag("setting_sync")) {
+        Text(stringResource(R.string.setting_sync), style = MaterialTheme.typography.bodyLarge)
+        Text(
+            if (state.connected) stringResource(R.string.setting_sync_on, state.accountEmail) else stringResource(R.string.setting_sync_off),
+            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (conflicts > 0) {
+            Text(
+                androidx.compose.ui.res.pluralStringResource(R.plurals.sync_conflicts_count, conflicts, conflicts),
+                style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("sync_badge"),
+            )
         }
     }
 }

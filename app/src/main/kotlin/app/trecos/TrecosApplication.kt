@@ -2,6 +2,9 @@ package app.trecos
 
 import android.app.Application
 import app.trecos.places.PurgeWorker
+import app.trecos.sync.SyncWorker
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 /**
  * The application: creates the [AppContainer] once per process.
@@ -19,8 +22,15 @@ open class TrecosApplication : Application() {
         scheduleMaintenance()
     }
 
-    /** Schedules background maintenance (the daily trash purge); tests turn it off. */
-    protected open fun scheduleMaintenance() = PurgeWorker.schedule(this)
+    /** Schedules background maintenance (the daily trash purge) and, when connected, sync; tests turn it off. */
+    protected open fun scheduleMaintenance() {
+        PurgeWorker.schedule(this)
+        if (container.features.driveSync) {
+            container.scope.launch {
+                if (container.sync.store.load().connected) SyncWorker.schedule(this@TrecosApplication, container.preferences.syncFrequency.first())
+            }
+        }
+    }
 
     /**
      * Builds the container; tests override this to use an in-memory database.

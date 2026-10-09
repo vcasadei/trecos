@@ -155,18 +155,18 @@ run at the end of **every** release group before it is tagged.
 
 ## 12. Release 0.11 — Google Drive sync (behind `FEATURE_DRIVE_SYNC`)
 
-- [ ] 12.1 Add the `FEATURE_DRIVE_SYNC` build flag (default false) and hide every sync entry point behind it; verify with a test that Settings shows no Sync section when it's off
+- [x] 12.1 Add the `FEATURE_DRIVE_SYNC` build flag (default false) and hide every sync entry point behind it; verify with a test that Settings shows no Sync section when it's off
 - [ ] 12.2 Create the Google Cloud OAuth client for `app.trecos` (debug and release signing certificates, `drive.file` and `drive.appdata` scopes, consent screen), with no secret in the repository; document it in `docs/dev/release.md` and verify sign-in on a debug build
-- [ ] 12.3 Implement connect and disconnect with the Google authorization client, creating the visible "Trecos" folder; tests for scenarios "First connection" and "Sign-in cancelled"
-- [ ] 12.4 Implement the Drive REST client over `HttpsURLConnection` (list, create, upload, download, retry with backoff); tests against a local JDK HTTP server, including error and retry cases
-- [ ] 12.5 Implement the merge engine in plain Kotlin (three-way per field, same-field and edit-versus-delete conflicts, folding several devices, trash state); exhaustive unit tests including scenarios "No conflict", "Same field" and "Edit versus delete"
-- [ ] 12.6 Implement commits, refs and content-addressed objects (idempotent, no commit when nothing changed, each photo uploaded once, garbage collection keeping 30 commits per device); tests for scenarios "Interrupted sync" (fault injection at each step) and "Nothing changed"
-- [ ] 12.7 Build the conflict screen (both values, Keep mine / Keep theirs, local value kept until resolved, Settings badge); UI tests for resolving each conflict type
-- [ ] 12.8 Implement scheduling (every day default, 5, 15, 30 days or never, network required, photos only on Wi-Fi by default, expedited Sync now); tests with the WorkManager test helpers for scenarios "Daily sync" and "Mobile data"
-- [ ] 12.9 Build the sync status and history screens (last success, errors in plain language, retries, entries with time, user, device name and summary, editable device name, app-generated device id); tests for scenarios "Drive unreachable" and "Viewing history"
-- [ ] 12.10 Implement restore onto a device (offer restore, merge or keep Drive data), the format-version refusal, and detection of a deleted or altered folder; tests for scenarios "New phone", "Old app, new data" and "Folder deleted"
-- [ ] 12.11 Add the replace-with-sync warning to import; test for scenario "Replacing with sync on"
-- [ ] 12.12 Write `docs/architecture/sync-protocol.md`, update `PRIVACY.md` (Drive data, 30-sync retention), write FAQ answers 5 (sync part) and 10 (both languages), and add the 0.11 entry to `CHANGELOG.md`
+- [x] 12.3 Implement connect and disconnect with the Google authorization client, creating the visible "Trecos" folder; tests for scenarios "First connection" and "Sign-in cancelled"
+- [x] 12.4 Implement the Drive REST client over `HttpsURLConnection` (list, create, upload, download, retry with backoff); tests against a local JDK HTTP server, including error and retry cases
+- [x] 12.5 Implement the merge engine in plain Kotlin (three-way per field, same-field and edit-versus-delete conflicts, folding several devices, trash state); exhaustive unit tests including scenarios "No conflict", "Same field" and "Edit versus delete"
+- [x] 12.6 Implement commits, refs and content-addressed objects (idempotent, no commit when nothing changed, each photo uploaded once, garbage collection keeping 30 commits per device); tests for scenarios "Interrupted sync" (fault injection at each step) and "Nothing changed"
+- [x] 12.7 Build the conflict screen (both values, Keep mine / Keep theirs, local value kept until resolved, Settings badge); UI tests for resolving each conflict type
+- [x] 12.8 Implement scheduling (every day default, 5, 15, 30 days or never, network required, photos only on Wi-Fi by default, expedited Sync now); tests with the WorkManager test helpers for scenarios "Daily sync" and "Mobile data"
+- [x] 12.9 Build the sync status and history screens (last success, errors in plain language, retries, entries with time, user, device name and summary, editable device name, app-generated device id); tests for scenarios "Drive unreachable" and "Viewing history"
+- [x] 12.10 Implement restore onto a device (offer restore, merge or keep Drive data), the format-version refusal, and detection of a deleted or altered folder; tests for scenarios "New phone", "Old app, new data" and "Folder deleted"
+- [x] 12.11 Add the replace-with-sync warning to import; test for scenario "Replacing with sync on"
+- [x] 12.12 Write `docs/architecture/sync-protocol.md`, update `PRIVACY.md` (Drive data, 30-sync retention), write FAQ answers 5 (sync part) and 10 (both languages), and add the 0.11 entry to `CHANGELOG.md`
 
 ## 13. Release 0.12 — Encryption (behind `FEATURE_ENCRYPTION`)
 
