@@ -351,6 +351,8 @@ private fun syncConnected(): Boolean {
 private fun encryptedHere(): Boolean {
     val app = app.trecos.ui.appContainer()
     if (!app.features.encryption) return false
+    // The status is only read on demand, so read it here too: Backup can open before the encryption row ever showed.
+    androidx.compose.runtime.LaunchedEffect(Unit) { app.encryption.refresh() }
     val status by app.encryption.status.collectAsStateWithLifecycle()
     return status.on
 }

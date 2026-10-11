@@ -175,7 +175,9 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
                 navController.navigateToTab(TrecosTab.Search)
             } else {
                 // On app start Home opens the last-used house, above the house list when there is one.
-                app.preferences.lastHouseId.first()?.takeIf { app.database.houses().get(it) != null }?.let { pendingHouse.value = it }
+                val last = app.preferences.lastHouseId.first()?.takeIf { app.database.houses().get(it) != null }
+                // Skipped if the user already left the Home root while this was loading.
+                if (last != null && navController.currentDestination?.route == rootRoute(TrecosTab.Home)) pendingHouse.value = last
             }
         }
     }
@@ -315,7 +317,12 @@ fun TrecosApp(navController: NavHostController = rememberNavController()) {
             if (!Routes.isForm(route)) {
                 TrecosBottomBar(
                     selected = currentTab,
-                    onSelect = { tab -> navController.navigateToTab(tab) },
+                    onSelect = { tab ->
+                        // A tab tap opens the tab's root, so drop a house still waiting to open (such as the
+                        // last-used one on start, when the user switched tabs before Home showed it).
+                        pendingHouse.value = null
+                        navController.navigateToTab(tab)
+                    },
                     modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }
