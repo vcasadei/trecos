@@ -66,8 +66,11 @@ maestro --device emulator-5556 test --include-tags smoke maestro           # one
   the fixture named in `FIXTURE`.
 - Find controls by `id:` (the Compose test tag) or by the text a user sees.
   Never use screen coordinates.
-- Dialogs are separate windows without resource ids, so find their buttons by
-  text.
+- Type only ASCII with `inputText`. Non-ASCII text needs Maestro's own
+  keyboard, which can't be kept active on Android 9 once the emulator's
+  keyboards are disabled. Names with accents come from the fixtures.
+- Full-screen dialogs expose their test tags (`exposeTestTags()`); alert
+  dialogs and popup menus don't, so find their buttons by text.
 - List the scenarios the flow checks and the screens it visits in its header:
 
   ```yaml
@@ -84,7 +87,7 @@ Debug and benchmark builds can store fixture data. Release builds ignore it.
 | Fixture | Data |
 |---|---|
 | `one-house` | Apartment: Office with Box A and Box B, four items (laptop, two USB items, one item without a price) |
-| `two-houses` | `one-house` plus Parents' house with an attic and two items |
+| `two-houses` | `one-house` plus Parents' house with an attic and three items, one named "Cabeça de impressão" |
 | `photos` | `one-house` with three photos on the laptop |
 | `1000-items` | One house with 20 boxes and 1,000 items, for the benchmark |
 

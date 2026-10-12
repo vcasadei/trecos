@@ -14,11 +14,7 @@ tags:
     file: ../../common/start.yaml
     env:
       FIXTURE: two-houses
-# Items whose names test accents and partial words.
-- runFlow:
-    file: ../../common/add-item.yaml
-    env:
-      NAME: Cabeça de impressão
+# Items whose names test partial words; the fixture has "Cabeça de impressão".
 - runFlow:
     file: ../../common/add-item.yaml
     env:

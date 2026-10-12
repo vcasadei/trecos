@@ -1,0 +1,88 @@
+# covers: organize: Moving an item
+# covers: organize: Moving a container into its own child
+# covers: organize: Duplicating an item
+# covers: organize: Leaving selection
+# covers: organize: Moving several items
+# screens: place, item, item_form
+appId: app.trecos
+tags:
+  - smoke
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# Move the cable from Box A to Box B; its last-changed date becomes today.
+- tapOn:
+    id: row_office
+- tapOn:
+    id: row_box-a
+- tapOn: USB-C cable 1m
+- tapOn: More options
+- tapOn: Move
+- tapOn:
+    id: dest_office
+- tapOn:
+    id: dest_box-b
+- tapOn:
+    id: dest_confirm
+- assertVisible:
+    text: .*Box B.*
+- assertVisible:
+    text: "${new Date().toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}"
+    below: Last changed
+# Duplicate creates "(copy)" in the same container and opens its edit form.
+- tapOn: More options
+- tapOn: Duplicate
+- assertVisible:
+    id: field_name
+    text: USB-C cable 1m \(copy\)
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn: Box B
+- assertVisible: USB-C cable 1m
+- assertVisible: USB-C cable 1m \(copy\)
+# A container can't go inside itself.
+- tapOn: Office
+- tapOn: More options
+- tapOn: Move
+- tapOn:
+    id: dest_office
+- assertVisible:
+    id: dest_blocked
+- tapOn: Cancel
+# Selection: back clears it and changes nothing.
+- longPressOn:
+    id: row_laptop
+- tapOn:
+    id: row_usb-hub
+- back
+- assertVisible:
+    id: row_laptop
+- assertVisible:
+    id: row_usb-hub
+# Several items at once, then selection mode ends.
+- longPressOn:
+    id: row_laptop
+- tapOn:
+    id: row_usb-hub
+- tapOn: Move
+- tapOn:
+    id: dest_office
+- tapOn:
+    id: dest_box-a
+- tapOn:
+    id: dest_confirm
+- assertNotVisible:
+    id: row_laptop
+- assertNotVisible:
+    id: row_usb-hub
+- tapOn:
+    id: row_box-a
+- assertVisible:
+    id: row_laptop
+- assertVisible:
+    id: row_usb-hub

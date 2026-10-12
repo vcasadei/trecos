@@ -1,0 +1,133 @@
+# covers: organize: Copying a labelled box
+# covers: organize: QR code clash
+# covers: organize: Carrying custom categories along
+# screens: place, container_form, item_form, item
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: two-houses
+# Box A gets the label "BOX-A", then is copied to the Parents' attic.
+- tapOn:
+    id: row_office
+- tapOn:
+    id: row_box-a
+- tapOn: Edit
+- tapOn:
+    id: field_qr
+- eraseText
+- inputText: BOX-A
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn: More options
+- tapOn: Copy
+- tapOn:
+    id: dest_house
+- tapOn: Parents' house
+- tapOn:
+    id: dest_attic
+- tapOn:
+    id: dest_confirm
+# The copy has the items and no QR code; the original keeps "BOX-A".
+- tapOn:
+    id: tab_Home
+- tapOn: Parents' house
+- tapOn: Attic
+- tapOn: Box A
+- assertVisible: USB-C cable 1m
+- assertNotVisible: .*BOX-A.*
+- tapOn:
+    id: tab_Home
+- tapOn: Apartment
+- tapOn: Office
+- tapOn: Box A
+- assertVisible: .*BOX-A.*
+# Moving a box whose code is taken in the destination asks first.
+- tapOn: Office
+- tapOn:
+    id: row_box-b
+- tapOn: Edit
+- tapOn:
+    id: field_qr
+- eraseText
+- inputText: ATTIC-1
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn:
+    id: tab_Home
+- tapOn: Parents' house
+- tapOn: Attic
+- tapOn: Edit
+- tapOn:
+    id: field_qr
+- eraseText
+- inputText: ATTIC-1
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn:
+    id: tab_Home
+- tapOn: Apartment
+- tapOn: Office
+- tapOn:
+    id: row_box-b
+- tapOn: More options
+- tapOn: Move
+- tapOn:
+    id: dest_house
+- tapOn: Parents' house
+- tapOn:
+    id: dest_confirm
+- assertVisible: .*ATTIC-1.*
+- tapOn: Cancel
+- assertVisible: Box B
+# A drill in Parents' house with a custom category and a tag moves to Apartment with both.
+- tapOn:
+    id: tab_Home
+- tapOn: Parents' house
+- runFlow:
+    file: ../../common/open-tag-field.yaml
+    env:
+      NAME: Drill
+- inputText: borrowed
+- tapOn:
+    id: add_tag
+- scrollUntilVisible:
+    element:
+      id: add_category
+    direction: UP
+- tapOn:
+    id: add_category
+- tapOn:
+    id: new_category
+- tapOn:
+    id: new_category_name
+- inputText: Power tools
+- tapOn: Save
+- tapOn:
+    id: picker_done
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn: Drill
+- tapOn: More options
+- tapOn: Move
+- tapOn:
+    id: dest_house
+- tapOn: Apartment
+- tapOn:
+    id: dest_confirm
+- assertVisible: .*Power tools.*
+- assertVisible: .*borrowed.*
+- assertVisible:
+    id: house_pill
+    text: Apartment

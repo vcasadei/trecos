@@ -43,7 +43,7 @@ class TestSeedReceiverTest {
     @Test
     fun twoHouses() {
         seed("two-houses")
-        eventually { runBlocking { db.items().countActive() } == 6 }
+        eventually { runBlocking { db.items().countActive() } == 7 }
         runBlocking { assertEquals(setOf("Apartment", "Parents' house"), db.houses().observeAll().first().map { it.name }.toSet()) }
     }
 

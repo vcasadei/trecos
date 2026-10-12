@@ -34,6 +34,7 @@ FLOW_TIMEOUT_S = 600
 # Apps that provide input methods on the emulator images: Gboard, the AOSP keyboard, and
 # the Google app, whose voice input Android 9 switches to when no keyboard is left.
 KEYBOARDS = ("com.google.android.inputmethod.latin", "com.android.inputmethod.latin", "com.google.android.googlequicksearchbox")
+MAESTRO_IME_PACKAGE = "dev.mobile.maestro/"
 SECRET_ENV = ("TEST_GOOGLE_PASSWORD", "TEST_GOOGLE_DRIVE_TOKEN", "TEST_GOOGLE_OAUTH_CLIENT")
 # The environment variables passed into flows; secret ones are redacted from outputs.
 FLOW_ENV = ("TEST_GOOGLE_ACCOUNT",) + SECRET_ENV
@@ -139,9 +140,11 @@ def prepare(device):
     for package in KEYBOARDS:
         adb(device, "shell", "pm", "disable-user", "--user", "0", package)
     # Whatever input method is left (Android 9 falls back to Google's voice input, whose
-    # panel covers the screen) is switched off too, so typed text goes straight to the field.
+    # panel covers the screen) is switched off too, except Maestro's own, which types
+    # non-ASCII text such as "Cabeça" and neither autocorrects nor covers the screen.
     for ime in adb(device, "shell", "ime", "list", "-s").stdout.split():
-        adb(device, "shell", "ime", "disable", ime)
+        if not ime.startswith(MAESTRO_IME_PACKAGE):
+            adb(device, "shell", "ime", "disable", ime)
     for scale in ("window_animation_scale", "transition_animation_scale", "animator_duration_scale"):
         adb(device, "shell", "settings", "put", "global", scale, "0")
     adb(device, "shell", "input", "keyevent", "KEYCODE_WAKEUP")

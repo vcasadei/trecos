@@ -107,13 +107,15 @@ class TestSeedReceiver : BroadcastReceiver() {
             db.items().insert(Item("mystery", APARTMENT, "box-b", "Unlabelled cable", createdAt = 1, updatedAt = 1))
         }
 
-        /** A second house with one box and two items, for the house list and moves between houses. */
+        /** A second house with one box and three items, for the house list, moves between houses and accents. */
         private suspend fun insertParents(app: AppContainer) {
             val db = app.database
             db.houses().insert(House(PARENTS, "Parents' house", icon = "house", colorKey = "coral", createdAt = 2, updatedAt = 2))
             db.containers().insert(Container("attic", PARENTS, null, "Attic", icon = "box", createdAt = 2, updatedAt = 2))
             db.items().insert(Item("lamp", PARENTS, "attic", "Desk lamp", unitPrice = 12_000, createdAt = 2, updatedAt = 2))
             db.items().insert(Item("usb-cable-2", PARENTS, "attic", "USB-C cable 2m", createdAt = 2, updatedAt = 2))
+            // Accented, because flows type only ASCII (see docs/dev/device-tests.md).
+            db.items().insert(Item("print-head", PARENTS, "attic", "Cabeça de impressão", createdAt = 2, updatedAt = 2))
         }
 
         /** Gives the laptop three generated photos, stored through the real photo pipeline. */
