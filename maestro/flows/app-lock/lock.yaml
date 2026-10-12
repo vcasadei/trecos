@@ -30,6 +30,7 @@ tags:
     file: ../../common/device.yaml
     env:
       ACTION: screen-lock-on
+- assertTrue: ${output.device.verified}
 - tapOn:
     id: setting_app_lock
 - runFlow: ../../common/enter-pin.yaml

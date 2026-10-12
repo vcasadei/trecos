@@ -62,13 +62,19 @@ def screen_lock_on(device):
         device (str): the device serial.
 
     Returns:
-        dict: the PIN, for the flow to type at the unlock prompt.
+        dict: the PIN, for the flow to type at the unlock prompt, and whether
+        Android confirmed it.
     """
     # A disabled lock screen (seen on Android 9 emulators) makes the phone look
-    # unsecured even with a PIN, so it is turned back on first.
-    adb(device, "shell", "locksettings", "set-disabled", "false")
-    adb(device, "shell", "locksettings", "set-pin", PIN)
-    return {"pin": PIN}
+    # unsecured even with a PIN, so it is turned back on first. The PIN is then
+    # verified, and set again if Android didn't take it.
+    for _ in range(3):
+        adb(device, "shell", "locksettings", "set-disabled", "false")
+        adb(device, "shell", "locksettings", "set-pin", PIN)
+        if "verified successfully" in adb(device, "shell", "locksettings", "verify", "--old", PIN):
+            return {"pin": PIN, "verified": True}
+        time.sleep(2)
+    return {"pin": PIN, "verified": False}
 
 
 def screen_lock_off(device):

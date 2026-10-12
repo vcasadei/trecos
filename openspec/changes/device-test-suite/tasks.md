@@ -25,7 +25,7 @@ Android 16 / 6 GB.
 - [x] 3.2 Test scenario "The nightly run rotates memory": seven consecutive days give every API level all four memory sizes (in `test_device_matrix.py`)
 - [x] 3.3 Write `scripts/run-device-tests.py --device <serial> --tier <tier>`: installs the APK, runs `connectedDebugAndroidTest`, runs Maestro with JUnit output and a printed shuffle seed, reruns failures once, collects screenshots, step logs and `logcat --pid`, writes `result.json`; verify on both local cells with the `smoke` tag
 - [x] 3.4 Test scenario "A flaky flow": a fixture flow that fails on its first attempt only is reported `flaky` and the run passes (check `result.json`)
-- [ ] 3.5 Test scenario "Flows run in any order": two full runs on a local cell with different shuffle seeds give the same per-flow results
+- [x] 3.5 Test scenario "Flows run in any order": two full runs on a local cell with different shuffle seeds give the same per-flow results
 - [x] 3.6 Write `scripts/summarize-device-results.py` merging `result.json` files into a Markdown table (cell, Android version, memory, passed, failed, flaky, infrastructure), with redaction of known secret values; verify with unit tests including scenario "Secrets in a failing sign-in flow" (a planted password value never survives in any output)
 - [x] 3.7 Update `docs/dev/device-tests.md` with the tiers, the matrix, `result.json` and how to reproduce a CI run locally from its shuffle seed
 
