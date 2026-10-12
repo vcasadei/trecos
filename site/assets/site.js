@@ -16,3 +16,14 @@ document.querySelectorAll("button[data-copy]").forEach((button) => {
     }
   });
 });
+
+// Screenshot theme switch: starts on the visitor's theme, then follows the buttons.
+document.querySelectorAll(".features").forEach((section) => {
+  const buttons = section.querySelectorAll(".theme-switch button");
+  const show = (theme) => {
+    section.dataset.shots = theme;
+    buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.shots === theme)));
+  };
+  show(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  buttons.forEach((b) => b.addEventListener("click", () => show(b.dataset.shots)));
+});

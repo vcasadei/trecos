@@ -157,7 +157,14 @@ class HouseScenariosTest : PlacesTestBase() {
 
     @Test
     @Config(qualifiers = "w360dp-h800dp-xhdpi")
-    fun houseListScreenshot() {
+    fun houseListScreenshot() = captureHouseList("White")
+
+    @Test
+    @Config(qualifiers = "w360dp-h800dp-night-xhdpi")
+    fun houseListScreenshotDark() = captureHouseList("Dark")
+
+    /** Seeds three houses, shows the house list and captures it in the qualifiers' theme. */
+    private fun captureHouseList(theme: String) {
         seed(
             houses = listOf(
                 house("h1", "Apartment").copy(colorKey = "sky", address = "Rua Augusta, 1500, apto 42"),
@@ -170,7 +177,7 @@ class HouseScenariosTest : PlacesTestBase() {
         runBlocking { app.preferences.setCurrency("BRL") }
         showHouseList()
         rowShows("h1", "2 items")
-        rule.onRoot().captureRoboImage("src/test/screenshots/HouseList_White.png")
+        rule.onRoot().captureRoboImage("src/test/screenshots/HouseList_$theme.png")
     }
 
     /** Checks that a row's text contains [text]. */

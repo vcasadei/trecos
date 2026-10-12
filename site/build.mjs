@@ -62,8 +62,16 @@ function doc(markdown) {
   return { title, html: `<article class="doc">${marked.parse(markdown)}</article>` };
 }
 
+// {{shot name|alt}} becomes the light and dark screenshot pair; CSS shows the
+// one matching the theme switch above the screenshots.
+const shot = (name, alt) =>
+  `<span class="shot"><img class="shot-light" src="/assets/screens/${name}.png" alt="${alt}" width="360" height="800" loading="lazy">` +
+  `<img class="shot-dark" src="/assets/screens/${name}-dark.png" alt="${alt}" width="360" height="800" loading="lazy"></span>`;
+
 async function home(lang) {
-  const html = read(join(SITE, `content/home.${lang}.html`)).replace("{{support}}", await support(lang));
+  const html = read(join(SITE, `content/home.${lang}.html`))
+    .replace("{{support}}", await support(lang))
+    .replace(/\{\{shot ([a-z-]+)\|([^}]+)\}\}/g, (_, name, alt) => shot(name, alt));
   return { title: null, html };
 }
 

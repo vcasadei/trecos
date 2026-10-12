@@ -1,7 +1,7 @@
 <section class="hero">
   <div class="hero-text">
     <h1>Saiba o que tem em cada caixa.</h1>
-    <p class="lead">Trecos é um inventário da casa para Android. Registre o que você tem, em qual caixa, gaveta ou prateleira está guardado e quanto vale, em todas as casas que você cuida.</p>
+    <p class="lead">Trecos é um inventário da casa para Android. Registre o que você tem, em qual caixa, gaveta ou prateleira está guardado e quanto vale. Tudo fica no seu celular, sem conta e sem anúncios.</p>
     <p class="cta">
       <a class="button" href="https://github.com/vcasadei/trecos/releases">Baixar o APK</a>
       <span class="note">Gratuito. Android 9 ou mais recente. Em breve no Google Play.</span>
@@ -10,33 +10,75 @@
   <img class="hero-logo" src="/assets/trecos-logo.svg" alt="Uma caixa de papelão com tampa e uma etiqueta escrita trecos" width="340" height="280">
 </section>
 
-<section class="facts">
-  <div>
-    <h2>Caixas dentro de caixas</h2>
-    <p>Casas têm cômodos, cômodos têm prateleiras, prateleiras têm caixas, em quantos níveis você precisar. Cada item mostra o caminho completo: <em>Apartamento › Escritório › Caixa A</em>.</p>
+<section class="features" id="recursos">
+  <div class="section-head">
+    <h2>Recursos</h2>
+    <div class="theme-switch" role="group" aria-label="Tema das capturas de tela">
+      <button type="button" data-shots="light">Claro</button>
+      <button type="button" data-shots="dark">Escuro</button>
+    </div>
   </div>
-  <div>
-    <h2>Valores para o seguro</h2>
-    <p>Quantidade, preço unitário, marca, modelo, número de série e fotos. Os totais somam por caixa e por casa, na sua moeda.</p>
+
+  <div class="feature">
+    {{shot house-list|A lista de casas: Apartment, Beach house e Parents' house, com quantidade de itens e valores}}
+    <div class="feature-text">
+      <h3>Cada casa, cada caixa</h3>
+      <p>Mantenha separados o apartamento, a casa de praia e o sótão dos seus pais. Dentro de cada casa, coloque caixas em prateleiras em cômodos, em quantos níveis você precisar.</p>
+      <ul>
+        <li>Cada item mostra o caminho completo: <em>Apartamento › Escritório › Caixa A</em></li>
+        <li>Mova, copie ou duplique itens e caixas, inclusive entre casas</li>
+        <li>O que você exclui espera 30 dias na lixeira</li>
+      </ul>
+    </div>
   </div>
-  <div>
-    <h2>Etiquetas QR</h2>
-    <p>Imprima uma etiqueta, cole na caixa e escaneie depois para ver o que tem dentro sem abrir.</p>
+
+  <div class="feature">
+    {{shot item|Um item com quantidade, preço unitário, valor total, marca, modelo e número de série}}
+    <div class="feature-text">
+      <h3>Os detalhes que o seguro pede</h3>
+      <p>Quantidade, preço unitário, marca, modelo, número de série, fotos e campos seus. Os valores somam por caixa e por casa, na sua moeda.</p>
+      <ul>
+        <li>Categorias em dois níveis, com sugestões que funcionam offline, e tags livres</li>
+        <li>As fotos são guardadas sem os dados de localização</li>
+      </ul>
+    </div>
   </div>
-  <div>
-    <h2>Seus dados são seus</h2>
-    <p>Funciona offline, sem conta e sem servidor. A sincronização opcional vai para o seu próprio Google Drive. Sem anúncios, sem análise de uso, sem rastreamento.</p>
+
+  <div class="feature">
+    {{shot search|Resultados da busca por “usb” em duas casas, com o caminho de cada item}}
+    <div class="feature-text">
+      <h3>Ache qualquer coisa em segundos</h3>
+      <p>Digite parte de um nome e o Trecos busca em todas as casas, ignorando acentos. Filtre por casa, categoria ou tag, ou busque só dentro de uma caixa.</p>
+      <ul>
+        <li>Imprima etiquetas QR, cole nas caixas e escaneie uma para ver o que tem dentro</li>
+        <li>Ele também lê códigos QR feitos por outros programas</li>
+      </ul>
+    </div>
   </div>
+
+  <ul class="more">
+    <li><strong>Backups</strong> Exporte tudo para um arquivo e restaure em qualquer celular.</li>
+    <li><strong>Sincronização com o Google Drive</strong> Opcional, no seu próprio Drive, entre seus celulares.</li>
+    <li><strong>Claro e Escuro</strong> Um tema branco suave e um preto puro.</li>
+    <li><strong>Português e inglês</strong> Todo em português do Brasil.</li>
+  </ul>
 </section>
 
-<section class="screens" aria-label="Capturas de tela">
-  <img src="/assets/screens/house-list.png" alt="A lista de casas com duas casas" width="360" height="800" loading="lazy">
-  <img src="/assets/screens/container.png" alt="Um compartimento de escritório com duas caixas e três itens, valendo R$ 3.520,00" width="360" height="800" loading="lazy">
-  <img src="/assets/screens/item.png" alt="Um item com quantidade, preço, marca, modelo e número de série" width="360" height="800" loading="lazy">
-  <img src="/assets/screens/container-dark.png" alt="O mesmo compartimento no tema Escuro, preto puro" width="360" height="800" loading="lazy">
+<section class="privacy" id="privacidade">
+  <h2>Privado desde o início</h2>
+  <p class="privacy-lead">Seu inventário diz o que você tem e onde está. O Trecos foi feito para que ninguém mais veja isso, nem nós.</p>
+  <ul class="tags">
+    <li><strong>Sem conta, sem servidor</strong> Não existe servidor do Trecos. O desenvolvedor nunca recebe seus dados.</li>
+    <li><strong>Funciona offline</strong> Tudo fica no seu celular e funciona sem conexão.</li>
+    <li><strong>Sem anúncios, sem rastreamento</strong> Sem análise de uso, sem relatório de falhas, sem código de anúncios. Uma verificação em cada build garante isso.</li>
+    <li><strong>Seu próprio Drive</strong> A sincronização é opcional e vai para o seu Google Drive. O Trecos só consegue abrir os arquivos que ele criou.</li>
+    <li><strong>Bloqueio do app</strong> Desbloqueie com digital, rosto, PIN, padrão ou senha.</li>
+    <li><strong>Poucas permissões</strong> Sem permissão de câmera nem de armazenamento: as fotos vêm da câmera do sistema e do seletor de fotos.</li>
+  </ul>
+  <p class="privacy-more">A criptografia do banco de dados está disponível como opção experimental. O código-fonte é público, então qualquer pessoa pode conferir tudo isso. <a href="/pt/privacidade/">Leia a política de privacidade</a></p>
 </section>
 
-<section class="support">
+<section class="support" id="apoie">
   <h2>Apoie o Trecos</h2>
   <p>O Trecos é gratuito e não tem anúncios. Se ele ajuda você a organizar suas coisas, você pode ajudar a mantê-lo.</p>
   {{support}}

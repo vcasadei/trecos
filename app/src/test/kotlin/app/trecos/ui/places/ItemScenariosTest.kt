@@ -148,7 +148,15 @@ class ItemScenariosTest : PlacesTestBase() {
     @Test
     @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
     @Config(qualifiers = "w360dp-h800dp-xhdpi")
-    fun itemScreenScreenshot() {
+    fun itemScreenScreenshot() = captureItemScreen("White")
+
+    @Test
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Config(qualifiers = "w360dp-h800dp-night-xhdpi")
+    fun itemScreenScreenshotDark() = captureItemScreen("Dark")
+
+    /** Seeds a priced item with every detail, opens it and captures it in the qualifiers' theme. */
+    private fun captureItemScreen(theme: String) {
         seed(
             containers = listOf(boxA),
             items = listOf(
@@ -162,7 +170,7 @@ class ItemScenariosTest : PlacesTestBase() {
         click(rowTag("boxA"))
         click(rowTag("pi"))
         detail(R.string.total_value)
-        rule.onRoot().captureRoboImage("src/test/screenshots/ItemScreen_White.png")
+        rule.onRoot().captureRoboImage("src/test/screenshots/ItemScreen_$theme.png")
     }
 
     @Test

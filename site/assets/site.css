@@ -1,5 +1,5 @@
 /* Layout: one centred column; the hero pairs the headline with the box logo,
-   the four facts sit on tilted white labels like the one on the box. */
+   features alternate screenshot and text, privacy points sit on tilted labels. */
 :root {
   --paper: #F7F5FB;
   --card: #FFFFFF;
@@ -74,34 +74,66 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance;
 .note { color: var(--muted); font-size: 0.95rem; }
 .hero-logo { width: 100%; max-width: 420px; justify-self: center; }
 
-/* Facts on labels */
-.facts {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 28px;
-  padding-block: 16px 64px;
+/* Features: screenshot beside text, alternating sides */
+.section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
+.section-head h2, .privacy h2, .support h2 { font-size: clamp(1.9rem, 4.5vw, 2.6rem); font-weight: 800; margin: 0; letter-spacing: -0.01em; }
+.theme-switch { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); }
+.theme-switch button {
+  border: 0; background: transparent; color: var(--muted); cursor: pointer;
+  font: 700 0.95rem var(--body); padding: 8px 18px; border-radius: 999px;
 }
-.facts > div {
+.theme-switch button[aria-pressed="true"] { background: var(--violet); color: var(--on-violet); }
+
+.features { padding-block: 24px 48px; }
+.feature {
+  display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 56px; align-items: center;
+  padding-block: 32px;
+}
+.feature:nth-of-type(even) { grid-template-columns: minmax(0, 1fr) minmax(0, 260px); }
+.feature:nth-of-type(even) .shot { order: 2; }
+.feature-text { max-width: 34em; }
+.feature h3 { font-size: 1.6rem; margin: 0 0 12px; }
+.feature p { margin: 0; color: var(--muted); }
+.feature ul { margin: 16px 0 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.feature li::marker { color: var(--kraft); }
+
+.shot { display: block; }
+.shot img { display: block; width: 100%; border-radius: 26px; border: 1px solid var(--line); box-shadow: 0 12px 32px -18px rgb(0 0 0 / 0.45); }
+.shot-dark { display: none !important; }
+@media (prefers-color-scheme: dark) {
+  .shot-light { display: none !important; }
+  .shot-dark { display: block !important; }
+}
+.features[data-shots="light"] .shot-light { display: block !important; }
+.features[data-shots="light"] .shot-dark { display: none !important; }
+.features[data-shots="dark"] .shot-light { display: none !important; }
+.features[data-shots="dark"] .shot-dark { display: block !important; }
+
+.more {
+  list-style: none; margin: 32px 0 0; padding: 28px 0 0; border-top: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px 28px;
+}
+.more li { color: var(--muted); }
+.more strong { display: block; color: var(--ink); font-family: var(--display); font-size: 1.1rem; margin-bottom: 2px; }
+
+/* Privacy: the points sit on tilted white labels like the one on the box */
+.privacy { padding-block: 64px; }
+.privacy-lead { font-size: 1.2rem; color: var(--muted); max-width: 36em; margin: 12px 0 36px; }
+.tags { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; }
+.tags li {
   background: var(--card); border: 2px solid var(--outline); border-radius: 10px;
-  padding: 20px 22px; box-shadow: 3px 4px 0 color-mix(in srgb, var(--outline) 30%, transparent);
+  padding: 18px 22px; color: var(--muted);
+  box-shadow: 3px 4px 0 color-mix(in srgb, var(--outline) 30%, transparent);
   transform: rotate(-1.2deg);
 }
-.facts > div:nth-child(even) { transform: rotate(1deg); }
-.facts h2 { font-size: 1.3rem; margin: 0 0 8px; }
-.facts p { margin: 0; color: var(--muted); }
-
-/* Screenshots */
-.screens {
-  display: flex; gap: 20px; overflow-x: auto; padding-block: 8px 24px;
-  scroll-snap-type: x mandatory;
-}
-.screens img {
-  flex: 0 0 auto; width: min(240px, 62vw); border-radius: 22px;
-  border: 1px solid var(--line); scroll-snap-align: start;
-}
+.tags li:nth-child(even) { transform: rotate(1deg); }
+.tags strong { display: block; color: var(--ink); font-family: var(--display); font-size: 1.25rem; margin-bottom: 6px; }
+.privacy-more { margin: 36px 0 0; color: var(--muted); max-width: 40em; }
+.privacy-more a { font-weight: 700; white-space: nowrap; }
 
 /* Support */
-.support { padding-block: 48px 24px; max-width: 760px; }
-.support h2 { font-size: 2rem; margin: 0 0 8px; }
-.support > p { color: var(--muted); margin: 0; }
+.support { padding-block: 48px 24px; }
+.support > p { color: var(--muted); margin: 12px 0 0; max-width: 40em; }
 .gives { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 24px 0; }
 .give {
   display: grid; gap: 4px; align-content: start; padding: 18px 20px; border-radius: 12px;
@@ -117,7 +149,7 @@ a.give:hover { border-color: var(--violet); }
 .small { font-size: 0.95rem; margin-top: 24px !important; }
 
 /* Documents */
-.doc { max-width: 720px; padding-block: 24px 48px; }
+.doc { max-width: 720px; margin-inline: auto; padding-block: 24px 48px; }
 .doc h1 { font-size: clamp(2rem, 5vw, 2.8rem); margin: 0 0 24px; }
 .doc h2 { font-size: 1.5rem; margin: 40px 0 12px; }
 .doc h3 { font-size: 1.2rem; margin: 28px 0 8px; }
@@ -139,10 +171,10 @@ a.give:hover { border-color: var(--violet); }
 @media (max-width: 720px) {
   .hero { grid-template-columns: 1fr; gap: 24px; padding-block: 16px 40px; }
   .hero-logo { order: -1; max-width: 240px; }
-  .facts > div, .facts > div:nth-child(even) { transform: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .screens { scroll-behavior: auto; }
+  .feature, .feature:nth-of-type(even) { grid-template-columns: 1fr; gap: 24px; padding-block: 24px; }
+  .feature:nth-of-type(even) .shot { order: 0; }
+  .shot { max-width: 220px; margin-inline: auto; }
+  .tags li, .tags li:nth-child(even) { transform: none; }
 }
 
 /* Pix: the QR stays dark on white in both themes so every bank app reads it. */
