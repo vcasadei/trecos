@@ -1,0 +1,26 @@
+# covers: app-shell: Scanning offline
+# screens: search
+# The emulators never have Play services' scanner module, so offline the app
+# must explain the one-time download (fixed in PR #29).
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- setAirplaneMode: enabled
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: scan_qr
+- assertVisible: Scanning needs a one-time download over the internet.*
+# Typing a code into search still works.
+- tapOn:
+    id: search_field
+- inputText: laptop
+- assertVisible:
+    id: result_count
+    text: 1 item
+- setAirplaneMode: disabled
