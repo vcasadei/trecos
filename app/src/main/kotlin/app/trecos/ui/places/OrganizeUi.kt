@@ -38,6 +38,7 @@ import app.trecos.places.Selection
 import app.trecos.ui.appContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import app.trecos.ui.exposeTestTags
 
 /**
  * An open destination picker.
@@ -306,7 +307,7 @@ private fun QrClashDialog(request: ClashRequest, controller: OrganizeController)
     var code by remember(first.id) { mutableStateOf(first.code) }
     Dialog(onDismissRequest = { controller.clash = null }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(
-            Modifier
+            Modifier.exposeTestTags()
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .statusBarsPadding()

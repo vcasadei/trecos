@@ -52,6 +52,7 @@ import app.trecos.categories.CategoryIcons
 import app.trecos.ui.language.AppLanguage
 import app.trecos.ui.text.SafeText
 import kotlinx.coroutines.launch
+import app.trecos.ui.exposeTestTags
 
 /**
  * Returns the test tag of a category row in the picker.
@@ -149,7 +150,7 @@ private fun CategoryPicker(vm: ItemFormViewModel, onDone: () -> Unit) {
 
     Dialog(onDismissRequest = onDone, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(
-            Modifier
+            Modifier.exposeTestTags()
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .statusBarsPadding()

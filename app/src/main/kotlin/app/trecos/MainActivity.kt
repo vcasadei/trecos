@@ -10,11 +10,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import app.trecos.help.RatingPolicy
+import app.trecos.ui.exposeTestTags
 import app.trecos.ui.lock.LockGate
 import app.trecos.ui.shell.TrecosApp
 import app.trecos.ui.theme.TrecosTheme
@@ -50,8 +49,7 @@ class MainActivity : AppCompatActivity() {
             val theme by themes.collectAsState(initial = initial)
             val navController = rememberNavController()
             TrecosTheme(mode = theme) {
-                // Exposes test tags as resource ids so the Maestro device flows can find them.
-                Box(Modifier.semantics { testTagsAsResourceId = true }) {
+                Box(Modifier.exposeTestTags()) {
                     LockGate { TrecosApp(navController) }
                 }
             }

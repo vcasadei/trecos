@@ -1,0 +1,96 @@
+# covers: categories-and-tags: New subcategory
+# covers: categories-and-tags: Trying to delete a built-in
+# covers: categories-and-tags: Other houses don't see it
+# covers: categories-and-tags: Deleting a used custom category
+# screens: place, item_form, item
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: two-houses
+# In Apartment: a custom "Keyboards (mechanical)" under Computers, used by two items that also have USB-C.
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: field_name
+- inputText: Keychron K2
+- tapOn:
+    id: add_category
+- tapOn:
+    id: new_category
+- tapOn:
+    id: new_category_name
+- inputText: Keyboards (mechanical)
+- tapOn:
+    id: new_category_parent
+# The parent list is a popup menu, which has no ids.
+- tapOn: Computers
+- tapOn: Save
+- assertVisible: ★ Computers > Keyboards \(mechanical\)
+- tapOn:
+    id: category_search
+- inputText: USB-C
+- tapOn:
+    id: pick_cables.usb_c
+# Built-in categories have no menu; custom ones do.
+- assertNotVisible:
+    id: category_menu_.*
+- tapOn:
+    id: picker_done
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save_new
+# "Save + new" keeps both categories for the next item.
+- tapOn:
+    id: field_name
+- inputText: Keychron Q1
+- assertVisible: .*Keyboards \(mechanical\).*
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+# Parents' house doesn't list Apartment's custom category.
+- tapOn:
+    id: tab_Home
+- tapOn: Parents' house
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: add_category
+- tapOn:
+    id: category_search
+- inputText: Keyboards
+- assertNotVisible: .*Keyboards \(mechanical\).*
+- tapOn:
+    id: picker_done
+- back
+# Deleting it in Apartment asks first, then removes only that category from both items.
+- tapOn:
+    id: tab_Home
+- tapOn: Apartment
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: add_category
+- tapOn:
+    id: category_search
+- inputText: Keyboards
+- tapOn:
+    id: category_menu_.*
+- tapOn: Delete
+- assertVisible: .*2 items.*
+- tapOn: Delete
+- assertNotVisible: .*Keyboards \(mechanical\).*
+- tapOn:
+    id: picker_done
+- back
+- tapOn: Keychron K2
+- assertVisible: .*Cables > USB-C.*
+- assertNotVisible: .*Keyboards.*

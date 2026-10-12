@@ -1,0 +1,23 @@
+# Adds an item named NAME with the category whose id is CATEGORY (found by
+# typing SEARCH in the picker) to the current place.
+appId: app.trecos
+---
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: field_name
+- inputText: ${NAME}
+- tapOn:
+    id: add_category
+- tapOn:
+    id: category_search
+- inputText: ${SEARCH}
+- tapOn:
+    id: pick_${CATEGORY}
+- tapOn:
+    id: picker_done
+- runFlow:
+    file: tap.yaml
+    env:
+      ID: save

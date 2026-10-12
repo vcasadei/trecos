@@ -1,0 +1,80 @@
+# covers: categories-and-tags: Reusing a tag
+# covers: categories-and-tags: Same tag, different case
+# screens: place, item_form, settings, tags, search
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- runFlow:
+    file: ../../common/open-tag-field.yaml
+    env:
+      NAME: Drill
+- inputText: borrowed
+- tapOn:
+    id: add_tag
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+# Typing the start of an existing tag offers it.
+- runFlow:
+    file: ../../common/open-tag-field.yaml
+    env:
+      NAME: Ladder
+- inputText: Borr
+- tapOn:
+    id: complete_borrowed
+- assertVisible:
+    id: tag_borrowed
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+# A different case reuses the tag instead of making a second one.
+- runFlow:
+    file: ../../common/open-tag-field.yaml
+    env:
+      NAME: Saw
+- inputText: Borrowed
+- tapOn:
+    id: add_tag
+- assertVisible:
+    id: tag_borrowed
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn:
+    id: tab_Settings
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_tags
+- assertVisible:
+    id: tag_row_borrowed
+# Maestro matches ids and text ignoring case, so the count proves there is one tag: all three items carry it.
+- tapOn:
+    id: tab_Search
+- runFlow: ../../common/open-filters.yaml
+# The list holds every built-in category before the tags.
+- repeat:
+    while:
+      notVisible:
+        id: filter_tag_borrowed
+    times: 40
+    commands:
+      - swipe:
+          from:
+            id: filters_list
+          direction: UP
+- tapOn:
+    id: filter_tag_borrowed
+- tapOn:
+    id: filters_done
+- assertVisible:
+    id: result_count
+    text: 3 items
