@@ -63,7 +63,7 @@ Each task writes the area's flows with `# covers:` and `# screens:` headers, tag
 - [ ] 6.4 Test scenario "An emulator fails to boot": a cell with an impossible image (temporary matrix override) is reported "infrastructure failure" while the other cell still passes
 - [ ] 6.5 **(user)** Mark the `pr` device check as required in the branch rules for `master`; verify the merge button waits for it on the next pull request
 - [ ] 6.6 Add the nightly and weekly schedules and run the weekly tier once by `workflow_dispatch`; verify 36 cells report results (scenario "A weekly full run"), and fix or tag as flaky any flow that fails only on some cells
-- [ ] 6.7 Update `docs/dev/device-tests.md` and `docs/dev/testing.md` with the CI tiers, where to find results, and the required check
+- [x] 6.7 Update `docs/dev/device-tests.md` and `docs/dev/testing.md` with the CI tiers, where to find results, and the required check
 
 ## 7. Drive flows with the Google test account
 
@@ -81,17 +81,17 @@ Each task writes the area's flows with `# covers:` and `# screens:` headers, tag
 ## 8. Reference emulator and release gate
 
 - [ ] 8.1 Add the `benchmark` job to `release.yml` on the reference emulator (API 28, 2048 MB, 2 cores, `google_apis` x86_64), running `StartupBenchmark` and `scripts/check-benchmark.py`, and make `publish` need it and the `release` device tier; verify with a `workflow_dispatch` dry run (publishing skipped) that the job runs and the summary shows the numbers, runner and image revision
-- [ ] 8.2 Test scenarios "A release within budget" and "A slow build blocks the release" with `check-benchmark.py` unit tests on sample Macrobenchmark JSON (1.2 s / 2% passes, 1.7 s fails with measured and allowed values)
+- [x] 8.2 Test scenarios "A release within budget" and "A slow build blocks the release" with `check-benchmark.py` unit tests on sample Macrobenchmark JSON (1.2 s / 2% passes, 1.7 s fails with measured and allowed values)
 - [ ] 8.3 Update `trecos-v1`: the `app-shell` requirement "Performance on low-end phones" names the reference emulator instead of the reference phone, D19's `FEATURE_ENCRYPTION` criterion names the round-trip flows on the reference emulator and Android 16, and tasks 14.7 and 14.8 refer to them; verify `openspec validate trecos-v1` passes
 - [ ] 8.4 Update `docs/dev/release.md` (the benchmark gate and the device tier in the release) and `docs/decisions/` with an ADR for the reference emulator replacing the physical phone
 
 ## 9. Quality Gates
 
-- [ ] 9.1 Build compiles cleanly: `./gradlew assembleDebug assembleRelease`
-- [ ] 9.2 Lint passes with no new warnings: `./gradlew lintDebug`
-- [ ] 9.3 Unit and screenshot tests pass: `./gradlew testDebugUnitTest verifyRoborazziDebug`
-- [ ] 9.4 Coverage threshold holds: `./gradlew jacocoCoverageVerification`
-- [ ] 9.5 Script tests pass: `python3 -m unittest discover -s scripts -p 'test_*.py'`
+- [x] 9.1 Build compiles cleanly: `./gradlew assembleDebug assembleRelease`
+- [x] 9.2 Lint passes with no new warnings: `./gradlew lintDebug`
+- [x] 9.3 Unit and screenshot tests pass: `./gradlew testDebugUnitTest verifyRoborazziDebug`
+- [x] 9.4 Coverage threshold holds: `./gradlew jacocoCoverageVerification`
+- [x] 9.5 Script tests pass: `python3 -m unittest discover -s scripts -p 'test_*.py'`
 - [ ] 9.6 Scenario coverage passes: `python3 scripts/check-scenario-coverage.py`
-- [ ] 9.7 The OpenSpec change validates: `openspec validate device-test-suite --strict`
-- [ ] 9.8 Secret scan passes over the branch: `pre-commit run gitleaks --all-files`
+- [x] 9.7 The OpenSpec change validates: `openspec validate device-test-suite --strict`
+- [x] 9.8 Secret scan passes over the branch: `pre-commit run gitleaks --all-files`
