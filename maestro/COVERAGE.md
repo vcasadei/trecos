@@ -32,3 +32,15 @@ place.
 | qr-codes: One match | Robolectric only | Needs the barcode scanner; `QrScenariosTest.oneMatch` |
 | qr-codes: Several houses | Robolectric only | Needs the barcode scanner; `QrScenariosTest.severalHouses` |
 | qr-codes: Unknown code | Robolectric only | Needs the barcode scanner; `QrScenariosTest.unknownCode` |
+| app-shell: Following the system | Robolectric only | Maestro can't switch the phone's night mode; `ThemeModeTest.followSystemTracksNightMode` and the Dark screenshots |
+| app-shell: Forcing a theme | Robolectric only | Same; `ThemeModeTest.forcedThemesIgnoreNightMode` |
+| app-shell: First launch on a Portuguese phone | Robolectric only | Maestro can't change the phone's language; `LanguageTest.firstLaunchOnAPortuguesePhone` |
+| app-shell: Portuguese (Portugal) phone | Robolectric only | Same; `LanguageTest.firstLaunchOnAPortugalPortuguesePhone` |
+| app-shell: Unsupported device language | Robolectric only | Same; `LanguageTest.unsupportedDeviceLanguage` |
+| app-shell: Reduced motion | Robolectric only | Animation timing; `TrecosBottomBarTest.reducedMotion`. The device flows run with system animations off |
+| app-shell: Leaving a container | Robolectric only | Scroll position after back; `PathScenariosTest.leavingAContainer`. Back itself is exercised by most flows |
+| app-shell: Very long name | Robolectric only | Ellipsis inside a measured line; `TextSafetyTest.veryLongName` |
+| app-shell: Long unbroken serial number | Robolectric only | Wrapping inside a measured column; `TextSafetyTest.longUnbrokenSerialNumber` |
+| app-shell: Opening a photo | Robolectric only | The 250 ms zoom; `PhotoScenariosTest.openingAPhotoAndZoomingIntoASerialLabel`. The photos flow opens the viewer |
+| app-shell: Cold start benchmark | device test | `StartupBenchmark` (Macrobenchmark) on the reference emulator, task 8.1 |
+| app-shell: Regression blocks a release | device test | The benchmark job gates `release.yml` through `scripts/check-benchmark.py`, task 8.1 |
