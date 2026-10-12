@@ -6,6 +6,10 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- The Trecos app icon: a cardboard box with a lid and a handwritten "t" on its label, on violet. Android 13+ can tint it to match the wallpaper.
+
 ### Changed
 
 - Google Drive sync is switched on in every build.
