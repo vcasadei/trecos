@@ -55,6 +55,13 @@ android {
         }
     }
 
+    // Device tests in CI sign debug builds with a fixed keystore (the CI_DEBUG_KEYSTORE
+    // secret), so Google sign-in recognises the app on any runner. Local builds keep
+    // the machine's own debug keystore.
+    System.getenv("TRECOS_CI_DEBUG_KEYSTORE")?.let { ciDebugKeystore ->
+        signingConfigs.getByName("debug") { storeFile = file(ciDebugKeystore) }
+    }
+
     splits {
         abi {
             isEnable = true

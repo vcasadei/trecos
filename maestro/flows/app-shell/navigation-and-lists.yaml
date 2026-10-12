@@ -47,6 +47,11 @@ tags:
       ID: setting_extras
 - back
 # The app's own language switch, kept after a restart (on Android 9 too).
+- scrollUntilVisible:
+    element:
+      id: setting_language
+    direction: UP
+    centerElement: true
 - tapOn:
     id: setting_language
 - tapOn: Português (Brasil)
