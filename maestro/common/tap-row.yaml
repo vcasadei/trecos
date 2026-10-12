@@ -1,0 +1,14 @@
+# Scrolls the list until the row with test tag ID sits in the middle of the
+# screen, then taps it. Centring keeps the row clear of the floating bottom bar,
+# which otherwise catches taps on rows at the bottom edge. Use tap.yaml for
+# buttons fixed to the bottom of a form, which can't be centred.
+appId: app.trecos
+---
+- scrollUntilVisible:
+    element:
+      id: ${ID}
+    direction: DOWN
+    timeout: 10000
+    centerElement: true
+- tapOn:
+    id: ${ID}

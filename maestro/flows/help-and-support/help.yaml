@@ -16,7 +16,7 @@ tags:
     id: tab_Settings
 # One FAQ answer opens; the others stay closed.
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: setting_faq
 - scrollUntilVisible:
@@ -32,7 +32,7 @@ tags:
 - back
 # Contact: "License quote" hands over to the e-mail app.
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: setting_contact
 - tapOn: License quote
@@ -51,7 +51,7 @@ tags:
     env:
       ACTION: mail-apps-off
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: setting_contact
 - tapOn: Question
@@ -65,7 +65,7 @@ tags:
       ACTION: mail-apps-on
 # Tips need Google Play, which these emulator images don't have.
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: setting_tips
 - assertVisible:
@@ -73,11 +73,11 @@ tags:
 - back
 # Licenses: every library is listed, and one opens its text.
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: setting_about
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: about_licenses
 - assertVisible:

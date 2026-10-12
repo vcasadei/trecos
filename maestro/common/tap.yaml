@@ -1,6 +1,6 @@
-# Scrolls until the control with test tag ID is on screen, centred, then taps it.
-# Forms are taller than small screens, so their buttons can start below the fold;
-# centring keeps the control clear of the floating bottom bar.
+# Scrolls until the control with test tag ID is on screen, then taps it.
+# Forms are taller than small screens, so their buttons can start below the fold.
+# For rows of a list under the floating bottom bar, use tap-row.yaml instead.
 appId: app.trecos
 ---
 - scrollUntilVisible:
@@ -8,6 +8,5 @@ appId: app.trecos
       id: ${ID}
     direction: DOWN
     timeout: 10000
-    centerElement: true
 - tapOn:
     id: ${ID}

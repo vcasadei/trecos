@@ -51,7 +51,7 @@ tags:
 - tapOn:
     id: tab_Settings
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: setting_tags
 - assertVisible:

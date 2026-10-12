@@ -14,12 +14,12 @@ tags:
 - tapOn:
     id: tab_Settings
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: setting_add_flow
 - tapOn: Photo
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: setting_image_source
 - tapOn: Gallery

@@ -30,7 +30,7 @@ tags:
 - tapOn:
     id: tab_Settings
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: setting_profile
 - tapOn:
@@ -42,7 +42,7 @@ tags:
 - tapOn:
     id: save_profile
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: setting_profile
 - assertVisible:
@@ -58,7 +58,7 @@ tags:
     text: ""
 - back
 - runFlow:
-    file: ../../common/tap.yaml
+    file: ../../common/tap-row.yaml
     env:
       ID: setting_profile
 - assertVisible:
