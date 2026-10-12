@@ -8,6 +8,8 @@ import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { marked } from "marked";
+import QRCode from "qrcode";
+import { pixPayload } from "./pix.mjs";
 
 const SITE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(SITE, "..");
@@ -23,7 +25,8 @@ const STRINGS = {
     other: { lang: "pt-BR", label: "Português" },
     footer: "Free for noncommercial use under the PolyForm Noncommercial License 1.0.0.",
     contact: "Contact",
-    copy: "Copy", copied: "Copied",
+    copied: "Copied", copyKey: "Copy key", copyCode: "Copy Pix code",
+    pixKey: "Key", pixQr: "Pix QR code: scan it with your bank app",
   },
   "pt-BR": {
     home: "/pt/", privacy: "/pt/privacidade/", commercial: "/pt/licenca-comercial/",
@@ -31,7 +34,8 @@ const STRINGS = {
     other: { lang: "en", label: "English" },
     footer: "Gratuito para uso não comercial sob a PolyForm Noncommercial License 1.0.0.",
     contact: "Contato",
-    copy: "Copiar", copied: "Copiado",
+    copied: "Copiado", copyKey: "Copiar chave", copyCode: "Copiar Pix copia e cola",
+    pixKey: "Chave", pixQr: "QR code do Pix: escaneie com o app do seu banco",
   },
 };
 
@@ -58,15 +62,15 @@ function doc(markdown) {
   return { title, html: `<article class="doc">${marked.parse(markdown)}</article>` };
 }
 
-function home(lang) {
-  const html = read(join(SITE, `content/home.${lang}.html`)).replace("{{support}}", support(lang));
+async function home(lang) {
+  const html = read(join(SITE, `content/home.${lang}.html`)).replace("{{support}}", await support(lang));
   return { title: null, html };
 }
 
 // The donation links, each shown only once config.json names it.
-function support(lang) {
+async function support(lang) {
   const t = STRINGS[lang];
-  const { githubSponsors, buyMeACoffee, pixKey } = config.donate;
+  const { githubSponsors, buyMeACoffee, pix } = config.donate;
   const cards = [];
   if (githubSponsors) {
     cards.push(`<a class="give" href="https://github.com/sponsors/${escape(githubSponsors)}"><strong>GitHub Sponsors</strong><span>github.com/sponsors/${escape(githubSponsors)}</span></a>`);
@@ -74,9 +78,15 @@ function support(lang) {
   if (buyMeACoffee) {
     cards.push(`<a class="give" href="https://buymeacoffee.com/${escape(buyMeACoffee)}"><strong>Buy Me a Coffee</strong><span>buymeacoffee.com/${escape(buyMeACoffee)}</span></a>`);
   }
-  if (pixKey) {
-    cards.push(`<div class="give"><strong>Pix</strong><span><code id="pix-key">${escape(pixKey)}</code></span>` +
-      `<button type="button" class="copy" data-copy="pix-key" data-done="${t.copied}">${t.copy}</button></div>`);
+  if (pix?.key) {
+    const code = pixPayload(pix);
+    const qr = await QRCode.toString(code, { type: "svg", errorCorrectionLevel: "M", margin: 2, color: { dark: "#1C1828", light: "#FFFFFF" } });
+    cards.push(`<div class="give pix"><strong>Pix</strong>` +
+      `<div class="qr" role="img" aria-label="${t.pixQr}">${qr}</div>` +
+      `<span>${t.pixKey}: <code id="pix-key">${escape(pix.key)}</code></span>` +
+      `<button type="button" class="copy" data-copy="pix-key" data-done="${t.copied}">${t.copyKey}</button>` +
+      `<code id="pix-code" hidden>${escape(code)}</code>` +
+      `<button type="button" class="copy" data-copy="pix-code" data-done="${t.copied}">${t.copyCode}</button></div>`);
   }
   return cards.length ? `<div class="gives">${cards.join("")}</div>` : "";
 }
@@ -137,7 +147,7 @@ rmSync(OUT, { recursive: true, force: true });
 for (const page of PAGES) {
   const target = join(OUT, page.out);
   mkdirSync(dirname(target), { recursive: true });
-  writeFileSync(target, layout(page, page.body()));
+  writeFileSync(target, layout(page, await page.body()));
 }
 cpSync(join(SITE, "assets"), join(OUT, "assets"), { recursive: true });
 for (const file of ["trecos-icon.svg", "trecos-logo.svg"]) {
