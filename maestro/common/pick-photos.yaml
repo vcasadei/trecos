@@ -1,0 +1,20 @@
+# Picks gallery photos at positions FIRST and, when set, SECOND in the system
+# photo picker, then confirms when the picker asks for it: with one slot left
+# it returns on the first tap; otherwise it needs "Done" (on Android 9 the
+# Files app uses "Select"). The app keeps each image once, so pick different
+# positions each time.
+appId: app.trecos
+---
+- tapOn:
+    text: Photo taken on.*|.*\.png
+    index: ${FIRST}
+- runFlow:
+    when:
+      true: ${typeof SECOND !== 'undefined' && SECOND !== ''}
+    commands:
+      - tapOn:
+          text: Photo taken on.*|.*\.png
+          index: ${SECOND}
+- tapOn:
+    text: (?i)done|select|add
+    optional: true

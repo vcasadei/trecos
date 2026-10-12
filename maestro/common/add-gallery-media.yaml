@@ -1,0 +1,8 @@
+# Puts the four test photos in the phone's gallery.
+appId: app.trecos
+---
+- addMedia:
+    - ../media/photo-1.png
+    - ../media/photo-2.png
+    - ../media/photo-3.png
+    - ../media/photo-4.png

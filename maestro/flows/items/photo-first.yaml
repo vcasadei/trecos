@@ -1,0 +1,50 @@
+# covers: items: Photo first
+# covers: items: Photo cancelled
+# screens: settings, place, item_form
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow: ../../common/add-gallery-media.yaml
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# "New item starts with" a photo, from the gallery.
+- tapOn:
+    id: tab_Settings
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_add_flow
+- tapOn: Photo
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_image_source
+- tapOn: Gallery
+- tapOn:
+    id: tab_Home
+# "+" then Item opens the gallery at once; the chosen photo is attached and the name focused.
+- tapOn:
+    id: add_button
+- tapOn: Item
+- runFlow:
+    file: ../../common/pick-photos.yaml
+    env:
+      FIRST: "0"
+- assertVisible:
+    id: photo_[0-9a-f]{64}
+- assertVisible:
+    id: field_name
+    focused: true
+- back
+# Cancelling the photo still opens the form, with no photo.
+- tapOn:
+    id: add_button
+- tapOn: Item
+- back
+- assertVisible:
+    id: field_name
+- assertNotVisible:
+    id: photo_[0-9a-f]{64}

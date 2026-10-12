@@ -52,3 +52,7 @@ place.
 | help-and-support: Tipping | manual | Needs a Google Play account and a real purchase; `HelpScenariosTest.tipping` fakes billing. Checked on the closed testing track |
 | help-and-support: Purchase cancelled | manual | Same; `HelpScenariosTest.purchaseCancelled` |
 | help-and-support: Offline user | Robolectric only | `NoTrackingTest.offlineUser`, plus the CI check that keeps tracking SDKs out of the app |
+| photos: Photo from a 12-megapixel camera | device test | `PhotoDeviceTest.aCameraPhotoIsStoredSmallAndWithoutLocation` stores a large photo with GPS data on each emulator cell and reads the stored file |
+| photos: Unreadable file | Robolectric only | The photo picker only offers readable images; `PhotoStoreTest.unreadableFile` feeds an undecodable file |
+| photos: Thumbnail regenerated | Robolectric only | Needs a thumbnail deleted from app-private storage; `PhotoStoreTest.thumbnailRegenerated` and `PhotoScenariosTest.thumbnailRegenerated` |
+| photos: Zooming into a serial label | Robolectric only | Maestro has no pinch gesture; `PhotoScenariosTest.openingAPhotoAndZoomingIntoASerialLabel` |
