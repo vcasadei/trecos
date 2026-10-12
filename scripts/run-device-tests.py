@@ -44,6 +44,8 @@ SECRET_ENV = ("TEST_GOOGLE_PASSWORD", "TEST_GOOGLE_DRIVE_TOKEN", "TEST_GOOGLE_OA
 FLOW_ENV = ("TEST_GOOGLE_ACCOUNT",) + SECRET_ENV
 # The PIN scripts/device-helper.py sets; the runner clears it around every flow.
 HELPER_PIN = "1111"
+# Pauses-and-retries allowed per flow when Maestro's on-device driver dies.
+DRIVER_RESTARTS = 2
 TIER_TAGS = {
     "pr": {"smoke"},
     "nightly": {"full"},
@@ -217,6 +219,36 @@ def run_flow(device, flow, out_dir, env):
     return passed
 
 
+def run_flow_surviving_driver(device, flow, out_dir, env, restarts):
+    """Runs a flow, retrying without counting an attempt when Maestro's driver died.
+
+    Maestro's on-device server sometimes dies on the 2 GB Android 9 emulator
+    before a flow starts ("DeviceServerDiedException"). That is the test
+    tool failing, not the app, so the flow runs again after a pause, at most
+    DRIVER_RESTARTS times.
+
+    Args:
+        device (str): the device serial.
+        flow (pathlib.Path): the flow file.
+        out_dir (pathlib.Path): where this attempt's files go.
+        env (dict[str, str]): values passed to the flow.
+        restarts (int): driver restarts already used for this flow.
+
+    Returns:
+        tuple[bool, int]: whether the flow passed, and the restarts used so far.
+    """
+    while True:
+        passed = run_flow(device, flow, out_dir, env)
+        log = out_dir / "maestro.log"
+        died = not passed and log.exists() and "DeviceServerDied" in log.read_text(encoding="utf-8")
+        junit = out_dir / "junit.xml"
+        died = died or (not passed and junit.exists() and "DeviceServerDied" in junit.read_text(encoding="utf-8"))
+        if not died or restarts >= DRIVER_RESTARTS:
+            return passed, restarts
+        restarts += 1
+        time.sleep(15)
+
+
 def redact(out_dir, secrets):
     """Replaces every secret value in the text files under a folder with ***.
 
@@ -306,15 +338,17 @@ def main(argv):
     for flow in flows:
         name = str(flow.relative_to(pathlib.Path(args.flows))).removesuffix(".yaml")
         start = time.monotonic()
+        restarts = 0
         attempts = 1
-        passed = run_flow(args.device, flow, out / name / "attempt-1", env)
+        passed, restarts = run_flow_surviving_driver(args.device, flow, out / name / "attempt-1", env, restarts)
         if not passed:
             attempts = 2
-            retried = run_flow(args.device, flow, out / name / "attempt-2", env)
+            retried, restarts = run_flow_surviving_driver(args.device, flow, out / name / "attempt-2", env, restarts)
             status = "flaky" if retried else "failed"
         else:
             status = "passed"
-        result["flows"].append({"flow": name, "status": status, "attempts": attempts, "seconds": round(time.monotonic() - start, 1)})
+        result["flows"].append({"flow": name, "status": status, "attempts": attempts, "driver_restarts": restarts,
+                                "seconds": round(time.monotonic() - start, 1)})
         print(f"  {status:7} {name}")
 
     helper.terminate()
