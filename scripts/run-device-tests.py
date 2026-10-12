@@ -182,6 +182,7 @@ def reset_phone(device):
         device (str): the device serial.
     """
     adb(device, "shell", "locksettings", "clear", "--old", HELPER_PIN)
+    adb(device, "shell", "locksettings", "set-disabled", "false")
     adb(device, "shell", "pm", "enable", "com.google.android.gm")
 
 
