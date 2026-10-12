@@ -1,0 +1,80 @@
+# covers: qr-codes: Code follows the name at creation
+# covers: qr-codes: Printing one label
+# covers: qr-codes: Name already used as a code
+# covers: qr-codes: Entering a taken code
+# covers: qr-codes: Nothing to print
+# screens: place, container_form, item_form
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# A new container's code is its name; its label prints through the system dialog.
+- tapOn:
+    id: add_button
+- tapOn: Container
+- tapOn:
+    id: field_name
+- inputText: Armario#1
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn: Armario#1
+- tapOn:
+    id: show_qr
+- assertVisible:
+    id: qr_label
+- assertVisible: Armario#1
+- tapOn:
+    id: print_label
+- extendedWaitUntil:
+    visible: Select a printer|Save as PDF|All printers.*
+    timeout: 15000
+- back
+- tapOn: Close
+- back
+# A second container with the same name can't take the code.
+- tapOn:
+    id: add_button
+- tapOn: Container
+- tapOn:
+    id: field_name
+- inputText: Armario#1
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible: The code "Armario#1" is already used in this house, so this one has no QR code\.
+# Typing a taken code names who holds it.
+- tapOn:
+    id: row_office
+- tapOn:
+    id: row_box-b
+- tapOn: Edit
+- tapOn:
+    id: field_qr
+- eraseText
+- inputText: Armario#1
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible: Already used by "Armario#1"
+- assertVisible: Open it
+- back
+# Several selected, two without a code: those are skipped with a note.
+- tapOn:
+    id: tab_Home
+- longPressOn:
+    id: row_office
+- tapOn: Select all
+- tapOn: Print QR
+- extendedWaitUntil:
+    visible: Select a printer|Save as PDF|All printers.*
+    timeout: 15000
+- back
+- assertVisible: 2 had no QR code and were skipped\.

@@ -26,3 +26,9 @@ place.
 | search: Cancelling a scan | Robolectric only | The emulator's Play services can't download the barcode scanner module; `QrScenariosTest.cancellingAScan` fakes the scanner. Checked by hand on a phone before release |
 | trash: Automatic purge | Robolectric only | Needs 30 days to pass; `OrganizeStoreTest.automaticPurge` and `aPurgeRemovesPhotoRowsAndThenTheFiles` move the clock |
 | trash: Scanning a trashed box | Robolectric only | Needs the barcode scanner (see "Cancelling a scan"); `QrScenariosTest.scanningATrashedBox` |
+| qr-codes: Printing several labels | Robolectric only | The number of labels inside a print job isn't visible to Maestro; `QrScenariosTest.printingSeveralLabels` counts them. The device flow checks that printing opens the system dialog |
+| qr-codes: Rename keeps the label valid | Robolectric only | Needs the barcode scanner; `QrScenariosTest.renameKeepsTheLabelValid` |
+| qr-codes: Label from another program | Robolectric only | Needs the barcode scanner; `QrScenariosTest.labelFromAnotherProgram` |
+| qr-codes: One match | Robolectric only | Needs the barcode scanner; `QrScenariosTest.oneMatch` |
+| qr-codes: Several houses | Robolectric only | Needs the barcode scanner; `QrScenariosTest.severalHouses` |
+| qr-codes: Unknown code | Robolectric only | Needs the barcode scanner; `QrScenariosTest.unknownCode` |
