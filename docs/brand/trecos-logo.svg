@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 280">
+<path d="M239.6,98.6 L304,61.8 L304,218.2 L239.6,255 Z" fill="#A86A33" stroke="#4A2E17" stroke-width="4" stroke-linejoin="round"/>
+<path d="M37.2,98.6 L239.6,98.6 L239.6,255 L37.2,255 Z" fill="#C98A4B" stroke="#4A2E17" stroke-width="4" stroke-linejoin="round"/>
+<path d="M37.2,103.2 L239.6,103.2 L239.6,117 L37.2,117 Z" fill="#4A2E17" opacity="0.25"/>
+<path d="M262.6,137.7 L285.6,124.36 L285.6,138.16 L262.6,151.5 Z" fill="#4A2E17" stroke="#4A2E17" stroke-width="4" stroke-linejoin="round"/>
+<path d="M248.8,61.8 L313.2,25 L313.2,66.4 L248.8,103.2 Z" fill="#B47639" stroke="#4A2E17" stroke-width="4" stroke-linejoin="round"/>
+<path d="M28,61.8 L92.4,25 L313.2,25 L248.8,61.8 Z" fill="#E8B677" stroke="#4A2E17" stroke-width="4" stroke-linejoin="round"/>
+<path d="M28,61.8 L248.8,61.8 L248.8,103.2 L28,103.2 Z" fill="#D59A58" stroke="#4A2E17" stroke-width="4" stroke-linejoin="round"/>
+<g transform="rotate(-3 138.4 186)">
+<path d="M56.16,143.6 H225.44 A7.36,7.36 0 0 1 232.8,150.96 V228.24 A7.36,7.36 0 0 1 225.44,235.6 H56.16 A7.36,7.36 0 0 1 48.8,228.24 V150.96 A7.36,7.36 0 0 1 56.16,143.6 Z" fill="#4A2E17" opacity="0.35"/>
+<path d="M53.76,140 H223.04 A7.36,7.36 0 0 1 230.4,147.36 V224.64 A7.36,7.36 0 0 1 223.04,232 H53.76 A7.36,7.36 0 0 1 46.4,224.64 V147.36 A7.36,7.36 0 0 1 53.76,140 Z" fill="#FFFFFF" stroke="#4A2E17" stroke-width="4"/>
+<g transform="translate(58.61 151.8) scale(0.8142)" fill="none" stroke="#23201C" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+<path d="M10,10 C10,30 8,55 12,68 C14,74 20,74 26,70"/>
+<path d="M0,30 L24,28"/>
+<path d="M34,36 C35,50 35,60 34,70"/>
+<path d="M35,48 C40,38 48,34 56,38"/>
+<path d="M64,56 L90,52 C92,40 80,34 72,38 C62,44 62,64 72,70 C80,74 88,72 94,66"/>
+<path d="M124,42 C116,34 102,38 100,52 C98,66 108,74 118,72 C122,71 125,69 127,66"/>
+<path d="M152,38 C140,38 134,50 136,60 C138,70 146,74 154,72 C164,69 168,58 165,48 C163,40 158,37 152,38 Z"/>
+<path d="M196,40 C190,35 178,36 178,44 C178,52 196,52 196,62 C196,72 182,74 174,68"/>
+</g>
+</g>
+</svg>
