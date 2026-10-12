@@ -75,8 +75,8 @@ const val SOURCE_URL = "https://github.com/vcasadei/trecos"
 /** The website. */
 const val WEBSITE_URL = "https://trecos.app"
 
-/** The privacy policy; on GitHub until the website hosts it (task 14.9). */
-const val PRIVACY_URL = "https://github.com/vcasadei/trecos/blob/master/PRIVACY.md"
+/** The privacy policy on the website (rendered from PRIVACY.md). */
+const val PRIVACY_URL = "https://trecos.app/privacy/"
 
 /**
  * @param context a context.

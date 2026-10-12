@@ -13,6 +13,7 @@ All notable changes to Trecos are recorded here. The format follows
 ### Changed
 
 - Google Drive sync is switched on in every build.
+- Settings > About opens the privacy policy on trecos.app.
 - Database encryption is available in every build. It stays off until you turn it on in Settings, is labelled "Experimental", and warns you to export a backup before turning it on.
 
 ## [1.0.0] - Unreleased
