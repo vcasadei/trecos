@@ -58,9 +58,27 @@ machine anyway:
   -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR
 ```
 
-The release gate (median of 1.5 s or less) is measured on the 2 GB Android 9
-reference phone, without that flag. For reference, 0.1 on the API 36 emulator:
-894 ms with the Baseline Profile, 939 ms without.
+`ScrollJankTest` flings the Home list of 1,000 items and reads the share of
+janky frames from `dumpsys gfxinfo` while the app is open. It writes
+`scroll-jank-benchmarkData.json` next to the startup results, in the same
+shape, so `scripts/check-benchmark.py` reads both. Macrobenchmark's own frame
+metrics fail on Android 9: the traced one misses an app that started before
+tracing, and the gfxinfo one reads after the app is stopped.
+
+On Android 9, Macrobenchmark also needs a frame after `reportFullyDrawn()`,
+which Android 9 doesn't draw by itself; `MainActivity` requests one.
+
+The release gate (median of 1.5 s or less, janky frames under 5%) was written
+for a 2 GB Android 9 phone. Reference numbers:
+
+| Device | Cold start, with profile | Cold start, without | Janky frames scrolling 1,000 items |
+|---|---|---|---|
+| API 36 emulator, release 0.1 | 894 ms | 939 ms | not measured |
+| API 28 emulator, 2 GB, 2 cores, software GPU (2026-10-12) | 1,792 ms | 1,813 ms | 97.7% |
+
+An emulator without a GPU draws every frame in software, so its jank share
+says nothing about a phone; the gate for the emulator is an open decision of
+the device-test-suite change.
 
 ## Coverage
 

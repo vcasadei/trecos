@@ -4,8 +4,9 @@
 Reads the Macrobenchmark JSON results and fails when, on the reference phone,
 the median cold start to the interactive Home screen (with the Baseline
 Profile) is over 1.5 s, or 5% or more of the frames while scrolling 1,000
-items are janky (frames that missed their deadline: frameOverrunMs > 0, so the
-95th percentile must be on time).
+items are janky. On Android 12+ that is the traced frameOverrunMs (the 95th
+percentile must be on time); on Android 9-11 it is the system's jank share from
+dumpsys gfxinfo (gfxFrameJankPercent).
 
 Usage: scripts/check-benchmark.py <benchmarkData.json>...
        scripts/check-benchmark.py --self-test
@@ -43,9 +44,14 @@ def check(results):
     if not scroll:
         failures.append("no scrollingOneThousandItems result")
     for b in scroll:
+        # Android 9-11 report the system's jank share (dumpsys gfxinfo); 12+ the traced overrun.
+        jank = metric(b, "gfxFrameJankPercent")
         m = metric(b, "frameOverrunMs")
         p95 = m and m.get("P95")
-        if p95 is None:
+        if jank is not None:
+            if jank.get("median", 0) >= 5:
+                failures.append(f"5% or more of the frames are janky ({jank['median']:.1f}% median)")
+        elif p95 is None:
             failures.append("scrolling has no frame overrun data")
         elif p95 > 0:
             failures.append(f"5% or more of the frames are janky (95th percentile overrun {p95:.1f} ms)")
@@ -65,6 +71,11 @@ def self_test():
     janky[0]["benchmarks"][1]["metrics"]["frameOverrunMs"]["P95"] = 3.5
     assert any("janky" in f for f in check(janky))
     assert check([{"benchmarks": []}]), "missing results block a release"
+    gfx = json.loads(json.dumps(ok))
+    gfx[0]["benchmarks"][1]["metrics"] = {"gfxFrameJankPercent": {"median": 2.0}}
+    assert check(gfx) == [], check(gfx)
+    gfx[0]["benchmarks"][1]["metrics"]["gfxFrameJankPercent"]["median"] = 7.5
+    assert any("janky" in f for f in check(gfx)), "the gfxinfo jank share gates too"
     print("check-benchmark self-test OK")
 
 

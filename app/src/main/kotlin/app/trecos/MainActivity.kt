@@ -55,6 +55,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
         lifecycleScope.launch { container.preferences.appLock.collect(::hideFromRecents) }
+        // Android 9 draws no frame after reportFullyDrawn() on its own, and the startup
+        // benchmark needs one to close its measurement (task 14.8); newer versions draw it.
+        fullyDrawnReporter.addOnReportDrawnListener { window.decorView.postInvalidate() }
     }
 
     /**

@@ -2,7 +2,6 @@ package app.trecos.baselineprofile
 
 import androidx.benchmark.macro.BaselineProfileMode
 import androidx.benchmark.macro.CompilationMode
-import androidx.benchmark.macro.FrameTimingMetric
 import androidx.benchmark.macro.StartupMode
 import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
@@ -17,7 +16,8 @@ import org.junit.runner.RunWith
 /**
  * The performance pass (spec "Performance on low-end phones", task 14.8):
  * cold start to the interactive Home screen over 10 runs with 1,000 items
- * stored, with and without the Baseline Profile, and scrolling those items.
+ * stored, with and without the Baseline Profile. Scrolling is measured by
+ * [ScrollJankTest].
  * `scripts/check-benchmark.py` gates a release on the results: a median of
  * 1.5 s or less, and janky frames under 5%.
  */
@@ -40,21 +40,6 @@ class StartupBenchmark {
 
     @Test
     fun coldStartWithBaselineProfile() = coldStart(CompilationMode.Partial(BaselineProfileMode.Require))
-
-    @Test
-    fun scrollingOneThousandItems() = rule.measureRepeated(
-        packageName = TARGET_PACKAGE,
-        metrics = listOf(FrameTimingMetric()),
-        compilationMode = CompilationMode.Partial(BaselineProfileMode.Require),
-        startupMode = StartupMode.COLD,
-        iterations = 5,
-        setupBlock = {
-            pressHome()
-            startActivityAndWait()
-        },
-    ) {
-        scrollTheList()
-    }
 
     /**
      * Cold-starts the app 10 times with the given compilation.
