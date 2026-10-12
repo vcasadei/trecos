@@ -41,11 +41,11 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Benchmark builds only: stores 1,000 items for the performance pass. Disabled everywhere else. -->
+        <!-- Test builds only (debug, benchmarkRelease): stores fixture data for device flows and the benchmark. Disabled in release. -->
         <receiver
-            android:name=".BenchmarkSeedReceiver"
-            android:enabled="${benchmarkSeed}"
-            android:exported="${benchmarkSeed}" />
+            android:name=".TestSeedReceiver"
+            android:enabled="${testSeed}"
+            android:exported="${testSeed}" />
 
         <!-- Stores the in-app language on Android 9-12, where the system has no per-app setting. -->
         <service

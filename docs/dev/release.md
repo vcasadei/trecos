@@ -118,8 +118,8 @@ Every release is measured on the **reference phone**: Android 9, 2 GB of RAM
 1. Connect the phone with USB debugging on. The benchmark build is profileable,
    not debuggable, so no root is needed on a real phone.
 2. Run `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest`. The
-   benchmarks store 1,000 items through the benchmark-only
-   `BenchmarkSeedReceiver`, which is disabled in every other build.
+   benchmarks store 1,000 items through `TestSeedReceiver` (fixture
+   `1000-items`), which only test builds enable; release builds ignore it.
 3. Gate the release:
    `scripts/check-benchmark.py baselineprofile/build/outputs/connected_android_test_additional_output/benchmarkRelease/connected/*/app.trecos.baselineprofile-benchmarkData.json`.
    The script fails, and the release is not published, when the median cold

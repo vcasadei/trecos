@@ -27,11 +27,11 @@ class StartupBenchmark {
     @get:Rule
     val rule = MacrobenchmarkRule()
 
-    /** Stores 1,000 items through the benchmark-only receiver. */
+    /** Stores 1,000 items through the test-only seed receiver. */
     @Before
     fun seed() {
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        device.executeShellCommand("am broadcast -n $TARGET_PACKAGE/.BenchmarkSeedReceiver --ei count 1000")
+        device.executeShellCommand("am broadcast -n $TARGET_PACKAGE/.TestSeedReceiver --es fixture 1000-items")
         Thread.sleep(SEED_WAIT_MS)
     }
 

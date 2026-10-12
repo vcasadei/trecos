@@ -20,7 +20,7 @@ class BaselineProfileGenerator {
 
     @Test
     fun generate() = rule.collect(packageName = TARGET_PACKAGE) {
-        device.executeShellCommand("am broadcast -n $TARGET_PACKAGE/.BenchmarkSeedReceiver --ei count 1000")
+        device.executeShellCommand("am broadcast -n $TARGET_PACKAGE/.TestSeedReceiver --es fixture 1000-items")
         Thread.sleep(8_000)
         pressHome()
         startActivityAndWait()

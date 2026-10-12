@@ -14,8 +14,8 @@ Android 16 / 6 GB.
 ## 2. App hooks for the flows
 
 - [x] 2.1 Set `testTagsAsResourceId = true` on the activity's Compose root (lock gate and `TrecosApp`); verify with a Robolectric test that a tagged node exposes its tag as a resource id, and that `maestro hierarchy` on a local cell lists `id: tab_home`
-- [ ] 2.2 Rename `BenchmarkSeedReceiver` to `TestSeedReceiver` with a `fixture` extra (`empty`, `one-house`, `two-houses`, `photos`, `1000-items`), enabled in `debug` and `benchmarkRelease` only; verify each fixture with a Robolectric test of the stored houses, containers, items and photos
-- [ ] 2.3 Test scenario "The seeding hook in a release build": a Robolectric test with `BENCHMARK_SEED` off stores nothing, and the merged release manifest has the receiver disabled (`./gradlew :app:processReleaseMainManifest` plus a check of the output)
+- [x] 2.2 Rename `BenchmarkSeedReceiver` to `TestSeedReceiver` with a `fixture` extra (`one-house`, `two-houses`, `photos`, `1000-items`; a fresh install is already empty), enabled in `debug` and `benchmarkRelease` only; verify each fixture with a Robolectric test of the stored houses, containers, items and photos
+- [x] 2.3 Test scenario "The seeding hook in a release build": a Robolectric test with the seed switch off stores nothing, and the merged release manifest has the receiver disabled (`./gradlew :app:processReleaseMainManifest` plus a check of the output)
 - [ ] 2.4 Point `StartupBenchmark` at `fixture=1000-items`; verify it still runs on the local API 28 cell with `-Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR`
 - [ ] 2.5 Add any missing test tags that flows need (listed while writing group 5), each covered by an existing or new Robolectric assertion; update `docs/architecture/overview.md` with the test-tag and seed-hook conventions
 

@@ -11,7 +11,7 @@ See proposal.md for the motivation. What exists today:
 - The `baselineprofile` module holds `StartupBenchmark` (cold start over 10
   runs, scrolling 1,000 items) and `BaselineProfileGenerator`.
   `scripts/check-benchmark.py` applies the 1.5 s / 5% budget. The data comes
-  from `BenchmarkSeedReceiver`, which is on only in `benchmarkRelease`
+  from `BenchmarkSeedReceiver`, which was on only in `benchmarkRelease`
   (manifest placeholder plus `BuildConfig.BENCHMARK_SEED`).
 - The Compose UI already uses `testTag` widely (for example `rowTag(id)`,
   `tabTag(tab)`, `about_privacy`), because the Robolectric tests depend on it.
@@ -71,16 +71,19 @@ ids in the accessibility tree, which expose nothing private.
   something different from what ships.
 
 ### 3. Fixtures through the existing seed receiver
-`BenchmarkSeedReceiver` becomes `TestSeedReceiver`. It gets a `fixture` extra
-naming a set:
-- `empty`, `one-house`, `two-houses`, `photos` and `1000-items`;
-- `1000-items` is today's benchmark data.
+`BenchmarkSeedReceiver` becomes `TestSeedReceiver`, with a `fixture` extra naming a set:
+- `one-house`: an apartment with an office, two boxes and four items (one without a price);
+- `two-houses`: the same plus a second house, for the house list and moves between houses;
+- `photos`: `one-house` with three photos on the laptop, generated as plain
+  bitmaps and stored through the real photo pipeline;
+- `1000-items`: today's benchmark data.
 
-It is enabled in the `debug` and `benchmarkRelease` builds and stays disabled in
-`release`: the manifest placeholder is off and the `BuildConfig` check returns
-early. The benchmark keeps calling it with `fixture=1000-items`. Photo fixtures
-are bundled test images that the receiver copies into the photo store. Flows
-that test creation, import or restore build their data through the UI instead.
+A fresh install already has no data (the first-run prompt), so there is no
+`empty` fixture: flows that need it clear the app's data. The receiver is
+enabled in the `debug` and `benchmarkRelease` builds (`BuildConfig.TEST_SEED`
+and the `testSeed` manifest placeholder) and stays disabled in `release`, where
+the check also returns early. The benchmark calls it with `fixture=1000-items`.
+Flows that test creation, import or restore build their data through the UI.
 - **Why reuse:** the benchmark is the concrete second user of this receiver, so
   there is one seeding path, not two.
 - **Alternative:** importing a fixture backup through the document picker at
