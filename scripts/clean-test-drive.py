@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Empties the Google test account's Drive of Trecos data before Drive flows run.
 
-Deletes the visible "Trecos" folder and every file in the app's hidden app
-folder (where the encryption key lives), so a run never sees the previous
-run's data (spec device-testing, "Google test account"). It uses only the
+Deletes the visible "Trecos" folder and, when the token reaches it, every
+file in the app's hidden app folder (where the encryption key lives), so a
+run never sees the previous run's data (spec device-testing, "Google test account"). It uses only the
 Python standard library and reads, from the environment:
 
 - TEST_GOOGLE_OAUTH_CLIENT: JSON with "client_id" and "client_secret" of the
@@ -80,8 +80,15 @@ def trecos_files(token):
     for f in call(token, f"{FILES_URL}?{query}").get("files", []):
         found.append((f["id"], f"folder {f['name']}"))
     query = urllib.parse.urlencode({"spaces": "appDataFolder", "fields": "files(id,name)", "pageSize": 1000})
-    for f in call(token, f"{FILES_URL}?{query}").get("files", []):
-        found.append((f["id"], f"app file {f['name']}"))
+    try:
+        for f in call(token, f"{FILES_URL}?{query}").get("files", []):
+            found.append((f["id"], f"app file {f['name']}"))
+    except urllib.error.HTTPError as error:
+        # Google's device flow can't grant drive.appdata, so the hidden app folder
+        # (the encryption key) may be out of reach; the encryption flows overwrite it.
+        if error.code != 403:
+            raise
+        print("The hidden app folder is out of this token's reach; leaving it.")
     return found
 
 

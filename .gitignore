@@ -32,3 +32,6 @@ build/
 local.properties
 keystore.properties
 scripts/__pycache__/
+
+# Local secrets for the Maestro Drive flows (see maestro/.env.example).
+maestro/.env
