@@ -17,7 +17,7 @@ Android 16 / 6 GB.
 - [x] 2.2 Rename `BenchmarkSeedReceiver` to `TestSeedReceiver` with a `fixture` extra (`one-house`, `two-houses`, `photos`, `1000-items`; a fresh install is already empty), enabled in `debug` and `benchmarkRelease` only; verify each fixture with a Robolectric test of the stored houses, containers, items and photos
 - [x] 2.3 Test scenario "The seeding hook in a release build": a Robolectric test with the seed switch off stores nothing, and the merged release manifest has the receiver disabled (`./gradlew :app:processReleaseMainManifest` plus a check of the output)
 - [ ] 2.4 Point `StartupBenchmark` at `fixture=1000-items`; verify it still runs on the local API 28 cell with `-Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR`
-- [ ] 2.5 Add any missing test tags that flows need (listed while writing group 5), each covered by an existing or new Robolectric assertion; update `docs/architecture/overview.md` with the test-tag and seed-hook conventions
+- [x] 2.5 Add any missing test tags that flows need (listed while writing group 5), each covered by an existing or new Robolectric assertion; update `docs/architecture/overview.md` with the test-tag and seed-hook conventions
 
 ## 3. Matrix and cell runner
 
@@ -27,7 +27,7 @@ Android 16 / 6 GB.
 - [x] 3.4 Test scenario "A flaky flow": a fixture flow that fails on its first attempt only is reported `flaky` and the run passes (check `result.json`)
 - [ ] 3.5 Test scenario "Flows run in any order": two full runs on a local cell with different shuffle seeds give the same per-flow results
 - [x] 3.6 Write `scripts/summarize-device-results.py` merging `result.json` files into a Markdown table (cell, Android version, memory, passed, failed, flaky, infrastructure), with redaction of known secret values; verify with unit tests including scenario "Secrets in a failing sign-in flow" (a planted password value never survives in any output)
-- [ ] 3.7 Update `docs/dev/device-tests.md` with the tiers, the matrix, `result.json` and how to reproduce a CI run locally from its shuffle seed
+- [x] 3.7 Update `docs/dev/device-tests.md` with the tiers, the matrix, `result.json` and how to reproduce a CI run locally from its shuffle seed
 
 ## 4. Scenario coverage check
 
@@ -40,19 +40,19 @@ Android 16 / 6 GB.
 
 Each task writes the area's flows with `# covers:` and `# screens:` headers, tags the smoke subset, and is verified by the flows passing on both local cells and the coverage check counting the area's scenarios.
 
-- [ ] 5.1 `maestro/common/`: fresh start (clear app data, launch), seed a fixture, open a tab, add a house, add a container, add an item, and system-UI branches for API 28–29, 30–32 and 33+ (photo picker, document picker, permission dialogs); verify each subflow on both local cells
-- [ ] 5.2 `app-shell`: tabs and the raised circle, tab taps returning to the root, back behaviour, first launch, language switch (en/pt-BR), themes (Follow system, White, Dark), start screen, reduced motion
-- [ ] 5.3 `places`: houses (create, edit, colours, icons, the house list with two or more houses, deleting the last house), nested containers, breadcrumbs, values and the "no price" count
-- [ ] 5.4 `items`: create, edit and validation, quantity and price with the currency symbol, brand, model, serial, description, empty fields hidden, item screen
-- [ ] 5.5 `photos`: add from the system photo picker (pushed fixture images), main photo, carousel, viewer, delete, location data removed (EXIF check of the stored file through `adb`)
-- [ ] 5.6 `categories-and-tags` and `custom-fields`: two-level categories, offline suggestions, custom categories per house, tags, custom fields per house and their values
-- [ ] 5.7 `search`: query with accents ignored, scopes (items, containers, both), match in, filters by house, category and tag, "Clear all", sort, "search in this container", typed QR code lookup, filters kept across restarts
-- [ ] 5.8 `qr-codes`: generate, duplicates refused, print through the system print dialog (save as PDF), share, label sheet; camera scanning listed as manual in `COVERAGE.md`
-- [ ] 5.9 `organize` and `trash`: move, copy and duplicate within and between houses, the 30-day trash, restore, restore when the original place is gone, permanent delete, deleted houses
+- [x] 5.1 `maestro/common/`: fresh start (clear app data, launch), seed a fixture, open a tab, add a house, add a container, add an item, and system-UI branches for API 28–29, 30–32 and 33+ (photo picker, document picker, permission dialogs); verify each subflow on both local cells
+- [x] 5.2 `app-shell`: tabs and the raised circle, tab taps returning to the root, back behaviour, first launch, language switch (en/pt-BR), themes (Follow system, White, Dark), start screen, reduced motion
+- [x] 5.3 `places`: houses (create, edit, colours, icons, the house list with two or more houses, deleting the last house), nested containers, breadcrumbs, values and the "no price" count
+- [x] 5.4 `items`: create, edit and validation, quantity and price with the currency symbol, brand, model, serial, description, empty fields hidden, item screen
+- [x] 5.5 `photos`: add from the system photo picker (pushed fixture images), main photo, carousel, viewer, delete, location data removed (EXIF check of the stored file through `adb`)
+- [x] 5.6 `categories-and-tags` and `custom-fields`: two-level categories, offline suggestions, custom categories per house, tags, custom fields per house and their values
+- [x] 5.7 `search`: query with accents ignored, scopes (items, containers, both), match in, filters by house, category and tag, "Clear all", sort, "search in this container", typed QR code lookup, filters kept across restarts
+- [x] 5.8 `qr-codes`: generate, duplicates refused, print through the system print dialog (save as PDF), share, label sheet; camera scanning listed as manual in `COVERAGE.md`
+- [x] 5.9 `organize` and `trash`: move, copy and duplicate within and between houses, the 30-day trash, restore, restore when the original place is gone, permanent delete, deleted houses
 - [ ] 5.10 `backup`: export to a `.zip` through the document picker, import preview, add houses, replace everything, the unencrypted-backup warning with encryption on
-- [ ] 5.11 `settings` and `app-lock`: every setting persists across restarts, app lock with an emulator fingerprint (`adb emu finger touch`) and PIN, lock timeout, "lock turned off" when the screen lock is removed
+- [x] 5.11 `settings` and `app-lock`: every setting persists across restarts, app lock with an emulator fingerprint (`adb emu finger touch`) and PIN, lock timeout, "lock turned off" when the screen lock is removed
 - [ ] 5.12 `encryption`: turn on with the experimental warning, restart, turn off, export while encrypted; plus the `roundtrip`-tagged scenario "Encryption round trip keeps the data" on the `photos` fixture
-- [ ] 5.13 `help-and-support`: FAQ accordion, "Contact us" opening an e-mail intent (and the copy fallback without an e-mail app), About links (website, privacy, source, licences), the tips screen when Play Billing is unavailable
+- [x] 5.13 `help-and-support`: FAQ accordion, "Contact us" opening an e-mail intent (and the copy fallback without an e-mail app), About links (website, privacy, source, licences), the tips screen when Play Billing is unavailable
 - [ ] 5.14 Verify the whole suite: all flows pass on both local cells in two shuffled orders, and `scripts/check-scenario-coverage.py` passes on the branch
 
 ## 6. CI workflow

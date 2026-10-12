@@ -1,8 +1,9 @@
 # Testing
 
-Every test except the benchmarks runs on the JVM, so the headless machine and
-CI need no emulator for them. The emulator is used only for Baseline Profiles
-and Macrobenchmark; set it up with [setup-headless-linux.md](setup-headless-linux.md).
+Most tests run on the JVM, so the main CI job needs no emulator. The device
+suite (instrumented tests and Maestro flows), Baseline Profiles and
+Macrobenchmark run on emulators; see [device-tests.md](device-tests.md) and
+[setup-headless-linux.md](setup-headless-linux.md).
 
 ## Test types
 
@@ -14,6 +15,9 @@ and Macrobenchmark; set it up with [setup-headless-linux.md](setup-headless-linu
 | Screenshot tests (Roborazzi) | `app/src/test`, baselines in `app/src/test/screenshots/` | JVM | `./gradlew verifyRoborazziDebug` |
 | Baseline Profile generation | `baselineprofile/` (`BaselineProfileGenerator`) | Emulator or rooted device | `./gradlew :app:generateBaselineProfile` |
 | Startup benchmark | `baselineprofile/` (`StartupBenchmark`) | Device (emulator with a flag, below) | `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest` |
+| Instrumented tests | `app/src/androidTest` (SQLCipher, encryption, backup, photos) | Emulator cells of the device suite | `./gradlew connectedDebugAndroidTest` |
+| Device flows (Maestro) | `maestro/flows/`, coverage in `maestro/COVERAGE.md` | Emulator cells, Android 9 to 16 × 2 to 6 GB | `scripts/run-device-tests.py`, see [device-tests.md](device-tests.md) |
+| Script tests | `scripts/test_*.py` | Python 3 | `python3 -m unittest discover -s scripts -p 'test_*.py'` |
 
 ## Screenshot tests
 

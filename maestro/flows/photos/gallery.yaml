@@ -62,3 +62,10 @@ tags:
 - tapOn: Camera bag
 - assertVisible:
     id: carousel
+# Tapping the carousel opens the full-screen viewer, main photo first.
+- tapOn:
+    id: carousel_.*
+    index: 0
+- assertVisible:
+    id: photo_viewer
+- back
