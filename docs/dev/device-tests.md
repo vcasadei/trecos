@@ -148,6 +148,7 @@ actions over HTTP on `127.0.0.1`, and flows call it through
 | `recents-hidden` | Whether the app hides its recent-apps preview (`null` on Android 13+, where `dumpsys` doesn't show it) |
 | `top-package` | The app in front |
 | `mail-apps-off` / `mail-apps-on` | Turns Gmail off or on |
+| `add-photos` | Copies the photos in `maestro/media` to the gallery (Maestro's `addMedia` fails on a fresh Android 9 emulator) |
 | `push-bad-backups` / `clear-downloads` | Puts a corrupt and a too-new backup in Downloads, or removes Trecos backups |
 
 The runner starts the helper and passes its port as `DEVICE_HELPER_PORT`. When

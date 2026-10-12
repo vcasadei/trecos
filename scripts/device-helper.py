@@ -16,9 +16,11 @@ import argparse
 import http.server
 import json
 import os
+import pathlib
 import subprocess
 import sys
 import tempfile
+import time
 import zipfile
 
 PIN = "1111"
@@ -167,7 +169,31 @@ def clear_downloads(device):
     return {}
 
 
+def add_photos(device):
+    """Copies the test photos in maestro/media to the phone's Pictures folder and indexes them.
+
+    Maestro's own addMedia fails on a freshly booted Android 9 emulator, so the
+    photo flows use this instead.
+
+    Args:
+        device (str): the device serial.
+
+    Returns:
+        dict: how many photos were added.
+    """
+    media = pathlib.Path(__file__).resolve().parent.parent / "maestro" / "media"
+    photos = sorted(media.glob("*.png"))
+    adb(device, "shell", "mkdir", "-p", "/sdcard/Pictures")
+    for photo in photos:
+        adb(device, "push", str(photo), "/sdcard/Pictures/")
+        adb(device, "shell", "am", "broadcast", "-a", "android.intent.action.MEDIA_SCANNER_SCAN_FILE",
+            "-d", "file:///sdcard/Pictures/" + photo.name)
+    time.sleep(2)
+    return {"added": len(photos)}
+
+
 ACTIONS = {
+    "add-photos": add_photos,
     "push-bad-backups": push_bad_backups,
     "clear-downloads": clear_downloads,
     "top-package": top_package,
