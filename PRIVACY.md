@@ -57,7 +57,7 @@ remove the data from Drive, delete the Trecos folder in Drive.
 All data is under your control on your device: edit or delete it in the app,
 export it, or uninstall the app to remove it. Data in your Google Drive is
 deleted from Drive itself. Questions: open an issue at
-<https://github.com/vcasadei/trecos/issues>.
+<https://github.com/vcasadei/trecos/issues> or write to <hello@trecos.app>.
 
 ## Changes
 

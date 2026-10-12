@@ -1,0 +1,13 @@
+{
+  "donate": {
+    "githubSponsors": "",
+    "buyMeACoffee": "",
+    "pixKey": ""
+  },
+  "screens": {
+    "house-list.png": "HouseList_White.png",
+    "container.png": "ContainerScreen_White.png",
+    "item.png": "ItemScreen_White.png",
+    "container-dark.png": "ContainerScreen_Dark.png"
+  }
+}

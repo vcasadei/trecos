@@ -1,7 +1,7 @@
 # Commercial licensing
 
 Trecos is free for any **noncommercial** purpose under the
-[PolyForm Noncommercial License 1.0.0](LICENSE): personal use, research,
+[PolyForm Noncommercial License 1.0.0](https://github.com/vcasadei/trecos/blob/master/LICENSE): personal use, research,
 education, hobby projects, and use by charities, public bodies and schools.
 
 ## When you need a commercial license
@@ -24,6 +24,6 @@ name and a sentence on the intended use; the maintainer will reply and move
 the conversation off GitHub. Keep confidential details out of the issue.
 
 Commercial licenses are offered by Vitor Casadei, who holds the rights to
-Trecos and to contributions under the [Contributor License Agreement](CLA.md).
+Trecos and to contributions under the [Contributor License Agreement](https://github.com/vcasadei/trecos/blob/master/CLA.md).
 Third-party components included in Trecos keep their own licenses, which
 commercial terms don't change.

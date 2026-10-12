@@ -1,0 +1,12 @@
+{
+  "name": "trecos-site",
+  "private": true,
+  "type": "module",
+  "description": "Builds trecos.app into site/_site.",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "marked": "12.0.2"
+  }
+}
