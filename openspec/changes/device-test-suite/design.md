@@ -60,8 +60,11 @@ Layout:
   (`# screens: house_list, container`).
 
 ### 2. Test tags as resource ids
-`TrecosApp`'s root sets `Modifier.semantics { testTagsAsResourceId = true }`,
-so Maestro's `id:` selectors match the existing Compose test tags. It is set in
+The activity's Compose root (around the lock gate and `TrecosApp`) sets
+`Modifier.semantics { testTagsAsResourceId = true }`,
+so Maestro's `id:` selectors match the existing Compose test tags, the lock
+screen's included. Dialogs are separate windows that do not inherit the flag,
+so flows find dialog controls by their visible text. It is set in
 every build, so CI tests the same UI tree users get. The cost is extra resource
 ids in the accessibility tree, which expose nothing private.
 - **Alternative:** debug-only. Rejected: two UI trees would mean flows test

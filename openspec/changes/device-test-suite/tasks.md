@@ -7,13 +7,13 @@ Android 16 / 6 GB.
 
 ## 1. Tooling and local emulators
 
-- [ ] 1.1 Install Maestro `cli-2.11.0` locally from its GitHub release zip with the SHA-256 checked; verify `maestro --version` prints 2.11.0
-- [ ] 1.2 Install the `google_apis` x86_64 images for API 28 and 36 and create the local AVDs `trecos-api28-2g` (2048 MB, 2 cores) and `trecos-api36-6g` (6144 MB, 2 cores); verify both boot headless and `adb shell getprop ro.build.version.sdk` prints 28 and 36
+- [x] 1.1 Install Maestro `cli-2.11.0` locally from its GitHub release zip with the SHA-256 checked; verify `maestro --version` prints 2.11.0
+- [x] 1.2 Install the `google_apis` x86_64 images for API 28 and 36 and create the local AVDs `trecos-api28-2g` (2048 MB, 2 cores) and `trecos-api36-6g` (6144 MB, 2 cores); verify both boot headless and `adb shell getprop ro.build.version.sdk` prints 28 and 36
 - [ ] 1.3 Write `docs/dev/device-tests.md` (what the suite is, local setup, running one flow, one area or one tier on a local cell); verify by following it in a fresh shell to run one flow
 
 ## 2. App hooks for the flows
 
-- [ ] 2.1 Set `testTagsAsResourceId = true` on `TrecosApp`'s root; verify with a Robolectric test that a tagged node exposes its tag as a resource id, and that `maestro hierarchy` on a local cell lists `id: tab_home`
+- [x] 2.1 Set `testTagsAsResourceId = true` on the activity's Compose root (lock gate and `TrecosApp`); verify with a Robolectric test that a tagged node exposes its tag as a resource id, and that `maestro hierarchy` on a local cell lists `id: tab_home`
 - [ ] 2.2 Rename `BenchmarkSeedReceiver` to `TestSeedReceiver` with a `fixture` extra (`empty`, `one-house`, `two-houses`, `photos`, `1000-items`), enabled in `debug` and `benchmarkRelease` only; verify each fixture with a Robolectric test of the stored houses, containers, items and photos
 - [ ] 2.3 Test scenario "The seeding hook in a release build": a Robolectric test with `BENCHMARK_SEED` off stores nothing, and the merged release manifest has the receiver disabled (`./gradlew :app:processReleaseMainManifest` plus a check of the output)
 - [ ] 2.4 Point `StartupBenchmark` at `fixture=1000-items`; verify it still runs on the local API 28 cell with `-Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR`
