@@ -24,3 +24,5 @@ place.
 | items: Scanning into an empty form | Robolectric only | Scanning needs the Play services scanner and a camera pointed at a label; `QrScenariosTest.scanningIntoAnEmptyForm` fakes the scanner |
 | items: Scanning when a name exists | Robolectric only | As above; `QrScenariosTest.scanningWhenANameExists` |
 | search: Cancelling a scan | Robolectric only | The emulator's Play services can't download the barcode scanner module; `QrScenariosTest.cancellingAScan` fakes the scanner. Checked by hand on a phone before release |
+| trash: Automatic purge | Robolectric only | Needs 30 days to pass; `OrganizeStoreTest.automaticPurge` and `aPurgeRemovesPhotoRowsAndThenTheFiles` move the clock |
+| trash: Scanning a trashed box | Robolectric only | Needs the barcode scanner (see "Cancelling a scan"); `QrScenariosTest.scanningATrashedBox` |

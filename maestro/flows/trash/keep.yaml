@@ -1,0 +1,73 @@
+# covers: trash: Keeping some things
+# covers: trash: Leaving the keep screen early
+# screens: place, keep, trash
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# Box A holds the cable; add a Pi and a broken mouse.
+- tapOn:
+    id: row_office
+- tapOn:
+    id: row_box-a
+- runFlow:
+    file: ../../common/add-item.yaml
+    env:
+      NAME: Pi
+- runFlow:
+    file: ../../common/add-item.yaml
+    env:
+      NAME: Broken mouse
+# Keep the Pi (moved to Box B), leave early: Box A stays, the Pi stays moved.
+- tapOn: More options
+- tapOn: Delete
+- tapOn: Choose what to keep
+- tapOn:
+    id: keep_check_Pi
+- tapOn:
+    id: move_selected
+- tapOn: Choose a container…
+- tapOn:
+    id: dest_office
+- tapOn:
+    id: dest_box-b
+- tapOn:
+    id: dest_confirm
+- back
+- assertVisible: Box A
+- assertVisible: Broken mouse
+- assertNotVisible: Pi
+# Keep the cable too (moved to Office), then Finish: Box A and the mouse go to the trash.
+- tapOn: More options
+- tapOn: Delete
+- tapOn: Choose what to keep
+- tapOn:
+    id: keep_check_USB-C cable 1m
+- tapOn:
+    id: move_selected
+- tapOn: Parent level
+- tapOn:
+    id: keep_finish
+- assertVisible: Move "Box A" and everything still listed to the trash\?
+- tapOn: Finish
+- tapOn:
+    id: tab_Home
+- tapOn:
+    id: row_office
+- assertNotVisible:
+    id: row_box-a
+- assertVisible:
+    id: row_usb-cable
+- tapOn:
+    id: row_box-b
+- assertVisible: Pi
+- tapOn:
+    id: tab_Home
+- tapOn: More options
+- tapOn: Trash
+- assertVisible:
+    id: trash_Box A

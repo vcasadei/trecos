@@ -1,0 +1,88 @@
+# covers: trash: Deleting an item
+# covers: trash: Cancelling
+# covers: trash: Undoing a delete
+# covers: trash: Trashed items hidden
+# covers: trash: Normal restore
+# covers: trash: Original location gone
+# screens: place, item, trash, search
+appId: app.trecos
+tags:
+  - smoke
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- tapOn:
+    id: row_office
+# The confirmation names the item; Cancel deletes nothing.
+- tapOn: USB hub 7 ports
+- tapOn: More options
+- tapOn: Delete
+- assertVisible: Delete "USB hub 7 ports"\?
+- tapOn: Cancel
+- assertVisible: USB hub 7 ports
+- tapOn: More options
+- tapOn: Delete
+- tapOn: Delete
+# Undo puts it back where it was.
+- assertNotVisible:
+    id: row_usb-hub
+- tapOn: Undo
+- assertVisible:
+    id: row_usb-hub
+# A trashed item is hidden from search.
+- tapOn: Laptop
+- tapOn: More options
+- tapOn: Delete
+- tapOn: Delete
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- inputText: laptop
+- assertVisible:
+    id: result_count
+    text: 0 items
+# Box B goes to the trash with its item, and comes back with it.
+- tapOn:
+    id: tab_Home
+- tapOn:
+    id: row_office
+- tapOn:
+    id: row_box-b
+- tapOn: More options
+- tapOn: Delete
+- tapOn: Move everything to trash
+- tapOn:
+    id: tab_Home
+- tapOn: More options
+- tapOn: Trash
+- tapOn:
+    id: restore_Box B
+- tapOn:
+    id: tab_Home
+- tapOn:
+    id: row_office
+- tapOn:
+    id: row_box-b
+- assertVisible: Unlabelled cable
+# The laptop's place still exists, but delete Office too: restoring the laptop asks where.
+- tapOn: Office
+- tapOn: More options
+- tapOn: Delete
+- tapOn: Move everything to trash
+- tapOn: More options
+- tapOn: Trash
+- tapOn:
+    id: restore_Laptop
+- assertVisible:
+    id: destination_picker
+- assertVisible: Restore
+- tapOn:
+    id: dest_confirm
+- tapOn:
+    id: tab_Home
+- assertVisible:
+    id: row_laptop
