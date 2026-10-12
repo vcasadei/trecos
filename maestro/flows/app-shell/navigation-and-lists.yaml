@@ -21,7 +21,8 @@ tags:
     id: tab_Home
 - assertVisible:
     id: row_office
-- assertNotVisible: Back
+- assertVisible:
+    id: screen_home
 # Detailed view applies everywhere and survives a restart; an unpriced item shows no price.
 - tapOn:
     id: view_toggle

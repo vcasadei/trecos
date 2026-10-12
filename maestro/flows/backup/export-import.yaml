@@ -1,0 +1,86 @@
+# covers: backup: Exporting to Downloads
+# covers: backup: Adding houses from another phone
+# covers: backup: Corrupt file
+# covers: backup: Backup from a newer app version
+# screens: settings, backup, home
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: clear-downloads
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# Export Apartment to Downloads through the system file picker.
+- tapOn:
+    id: tab_Settings
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_backup
+- tapOn:
+    id: export
+- tapOn: (?i)save
+- assertVisible: Backup saved\.
+# On a "new phone" with other houses, import it as new houses alongside them.
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: none
+- tapOn:
+    id: field_name
+- eraseText
+- inputText: Studio
+- tapOn:
+    id: continue
+- tapOn:
+    id: tab_Settings
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_backup
+- tapOn:
+    id: import
+- tapOn: trecos-backup-.*\.zip
+- assertVisible: This backup holds
+- assertVisible: .*Apartment.*
+- tapOn: Add as new houses
+- tapOn:
+    id: tab_Home
+- assertVisible:
+    id: house_list
+- assertVisible: Apartment
+- assertVisible: Studio
+# A corrupt file and a too-new backup are refused; nothing changes.
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: push-bad-backups
+- tapOn:
+    id: tab_Settings
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_backup
+- tapOn:
+    id: import
+- tapOn: trecos-corrupt.zip
+- assertVisible: This file isn't a Trecos backup, or it is damaged\. Nothing was changed\.
+- tapOn:
+    text: (?i)ok|close
+    optional: true
+- tapOn:
+    id: import
+- tapOn: trecos-newer.zip
+- assertVisible: This backup was made by a newer version of Trecos\..*
+- tapOn:
+    text: (?i)ok|close
+    optional: true
+- tapOn:
+    id: tab_Home
+- assertVisible: Apartment
+- assertVisible: Studio

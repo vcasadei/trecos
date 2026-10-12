@@ -1,0 +1,89 @@
+# covers: help-and-support: Reading an answer
+# covers: help-and-support: Asking for a quote
+# covers: help-and-support: No e-mail app
+# covers: help-and-support: Google Play unavailable
+# covers: help-and-support: Viewing licenses
+# screens: settings, faq, tips, about, licenses
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- tapOn:
+    id: tab_Settings
+# One FAQ answer opens; the others stay closed.
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_faq
+- scrollUntilVisible:
+    element:
+      id: faq_9
+- tapOn: Do I need an account\?
+- assertVisible:
+    id: faq_answer_9
+- assertNotVisible:
+    id: faq_answer_8
+- assertNotVisible:
+    id: faq_answer_10
+- back
+# Contact: "License quote" hands over to the e-mail app.
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_contact
+- tapOn: License quote
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: top-package
+- assertTrue: ${output.device.package == 'com.google.android.gm'}
+- launchApp:
+    stopApp: false
+- tapOn:
+    id: tab_Settings
+# Without an e-mail app, the address is shown with a copy button.
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: mail-apps-off
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_contact
+- tapOn: Question
+- assertVisible: No e-mail app was found.*
+- assertVisible: hello@trecos.app
+- assertVisible: Copy
+- tapOn: Close
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: mail-apps-on
+# Tips need Google Play, which these emulator images don't have.
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_tips
+- assertVisible:
+    id: tips_unavailable
+- back
+# Licenses: every library is listed, and one opens its text.
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_about
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: about_licenses
+- assertVisible:
+    id: licenses
+- tapOn:
+    id: library_.*
+    index: 0
+- assertVisible: (?s).*(License|LICENSE).*
+- tapOn: Close

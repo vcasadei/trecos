@@ -15,11 +15,15 @@ and passes the port).
 import argparse
 import http.server
 import json
+import os
 import subprocess
 import sys
+import tempfile
+import zipfile
 
 PIN = "1111"
 PACKAGE = "app.trecos"
+MAIL_APPS = ("com.google.android.gm",)
 
 
 def adb(device, *args):
@@ -93,7 +97,82 @@ def recents_hidden(device):
     return {"hidden": secure_window(device)}
 
 
+def top_package(device):
+    """Names the app whose screen is in front.
+
+    Args:
+        device (str): the device serial.
+
+    Returns:
+        dict: ``package``, such as ``com.google.android.gm``.
+    """
+    for line in adb(device, "shell", "dumpsys", "activity", "activities").splitlines():
+        if "ResumedActivity" in line and "/" in line:
+            return {"package": line.split("/")[0].split()[-1]}
+    return {"package": ""}
+
+
+def mail_apps(device, enabled):
+    """Turns the phone's e-mail apps (Gmail) on or off.
+
+    Args:
+        device (str): the device serial.
+        enabled (bool): whether they should be on.
+
+    Returns:
+        dict: an empty result.
+    """
+    for package in MAIL_APPS:
+        adb(device, "shell", "pm", "enable" if enabled else "disable-user", package)
+    return {}
+
+
+def push_bad_backups(device):
+    """Puts two unusable backups in the phone's Downloads folder.
+
+    ``trecos-corrupt.zip`` is not a zip at all; ``trecos-newer.zip`` is a valid
+    zip whose manifest has a format version far newer than any app knows.
+
+    Args:
+        device (str): the device serial.
+
+    Returns:
+        dict: the file names.
+    """
+    with tempfile.TemporaryDirectory() as folder:
+        corrupt = os.path.join(folder, "trecos-corrupt.zip")
+        with open(corrupt, "wb") as out:
+            out.write(b"this is not a zip file")
+        newer = os.path.join(folder, "trecos-newer.zip")
+        with zipfile.ZipFile(newer, "w") as archive:
+            archive.writestr("manifest.json", json.dumps(
+                {"formatVersion": 999, "createdAt": 0, "appVersion": "99.0.0", "houses": []}))
+        for path in (corrupt, newer):
+            adb(device, "push", path, "/sdcard/Download/")
+            adb(device, "shell", "am", "broadcast", "-a", "android.intent.action.MEDIA_SCANNER_SCAN_FILE",
+                "-d", "file:///sdcard/Download/" + os.path.basename(path))
+    return {"files": ["trecos-corrupt.zip", "trecos-newer.zip"]}
+
+
+def clear_downloads(device):
+    """Deletes Trecos backups from the phone's Downloads folder.
+
+    Args:
+        device (str): the device serial.
+
+    Returns:
+        dict: an empty result.
+    """
+    adb(device, "shell", "rm", "-f", "/sdcard/Download/trecos-*.zip")
+    return {}
+
+
 ACTIONS = {
+    "push-bad-backups": push_bad_backups,
+    "clear-downloads": clear_downloads,
+    "top-package": top_package,
+    "mail-apps-off": lambda device: mail_apps(device, False),
+    "mail-apps-on": lambda device: mail_apps(device, True),
     "screen-lock-on": screen_lock_on,
     "screen-lock-off": screen_lock_off,
     "recents-hidden": recents_hidden,

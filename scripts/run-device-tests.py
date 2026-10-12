@@ -165,6 +165,16 @@ def prepare(device):
     adb(device, "shell", "wm", "dismiss-keyguard")
 
 
+def reset_phone(device):
+    """Undoes what the device helper can change: the PIN and disabled e-mail apps.
+
+    Args:
+        device (str): the device serial.
+    """
+    adb(device, "shell", "locksettings", "clear", "--old", HELPER_PIN)
+    adb(device, "shell", "pm", "enable", "com.google.android.gm")
+
+
 def run_flow(device, flow, out_dir, env):
     """Runs one flow once with Maestro, keeping its outputs.
 
@@ -179,8 +189,8 @@ def run_flow(device, flow, out_dir, env):
     """
     out_dir.mkdir(parents=True, exist_ok=True)
     adb(device, "logcat", "-c")
-    # A flow that set the phone's PIN and then failed must not leave it for the next flow.
-    adb(device, "shell", "locksettings", "clear", "--old", HELPER_PIN)
+    # A flow that changed the phone and then failed must not leave it changed for the next flow.
+    reset_phone(device)
     command = ["maestro", "--device", device, "test", str(flow), "--format", "junit",
                "--output", str(out_dir / "junit.xml"), "--test-output-dir", str(out_dir)]
     for key, value in env.items():
@@ -191,7 +201,7 @@ def run_flow(device, flow, out_dir, env):
     except subprocess.TimeoutExpired as timeout:
         passed, log = False, f"Timed out after {FLOW_TIMEOUT_S} s\n{timeout.stdout or ''}"
     (out_dir / "maestro.log").write_text(log, encoding="utf-8")
-    adb(device, "shell", "locksettings", "clear", "--old", HELPER_PIN)
+    reset_phone(device)
     if not passed:
         (out_dir / "logcat.txt").write_text(adb(device, "logcat", "-d", timeout=120).stdout, encoding="utf-8")
     else:

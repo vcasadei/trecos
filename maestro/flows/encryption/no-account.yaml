@@ -1,0 +1,24 @@
+# covers: encryption: No Google account
+# screens: settings
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- tapOn:
+    id: tab_Settings
+- scrollUntilVisible:
+    element:
+      id: setting_encryption
+    centerElement: true
+- assertVisible: .*Experimental.*
+- tapOn:
+    id: setting_encryption
+- assertVisible: Encryption keeps its key in your Google account.*Connect Google Drive first\.
+- assertVisible: Connect Google Drive
+- tapOn: Cancel
+- assertVisible:
+    id: setting_encryption

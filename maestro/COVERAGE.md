@@ -46,3 +46,9 @@ place.
 | app-shell: Regression blocks a release | device test | The benchmark job gates `release.yml` through `scripts/check-benchmark.py`, task 8.1 |
 | settings: Fresh install | Robolectric only | The defaults it checks follow a Portuguese phone, and Maestro can't change the phone's language; `SettingsScenariosTest.freshInstall` |
 | settings: Immediate effect | Robolectric only | The change is a colour scheme; `SettingsScenariosTest.immediateEffect` |
+| backup: Not enough space | Robolectric only | An emulator can't run out of space on demand; `BackupScenariosTest.notEnoughSpace` |
+| help-and-support: The single prompt | Robolectric only | Needs 14 days, 20 items and 5 sessions, and Google Play's review dialog; `HelpScenariosTest.theSinglePrompt` |
+| help-and-support: Too early | Robolectric only | Same; `HelpScenariosTest.tooEarly` |
+| help-and-support: Tipping | manual | Needs a Google Play account and a real purchase; `HelpScenariosTest.tipping` fakes billing. Checked on the closed testing track |
+| help-and-support: Purchase cancelled | manual | Same; `HelpScenariosTest.purchaseCancelled` |
+| help-and-support: Offline user | Robolectric only | `NoTrackingTest.offlineUser`, plus the CI check that keeps tracking SDKs out of the app |
