@@ -35,6 +35,9 @@ FLOW_TIMEOUT_S = 600
 # Apps that provide input methods on the emulator images: Gboard, the AOSP keyboard, and
 # the Google app, whose voice input Android 9 switches to when no keyboard is left.
 KEYBOARDS = ("com.google.android.inputmethod.latin", "com.android.inputmethod.latin", "com.google.android.googlequicksearchbox")
+CAMERA_APP_PERMISSIONS = ("android.permission.CAMERA", "android.permission.RECORD_AUDIO",
+                          "android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION",
+                          "android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE")
 MAESTRO_IME_PACKAGE = "dev.mobile.maestro/"
 SECRET_ENV = ("TEST_GOOGLE_PASSWORD", "TEST_GOOGLE_DRIVE_TOKEN", "TEST_GOOGLE_OAUTH_CLIENT")
 # The environment variables passed into flows; secret ones are redacted from outputs.
@@ -146,7 +149,8 @@ def prepare(device):
 
     Disables the on-screen keyboards and other input methods, which
     autocorrect or cover what flows type (Gboard turned "dos meus" into "do
-    mess" on Android 9), turns off system animations, and wakes the screen.
+    mess" on Android 9), turns off system animations, grants the emulator
+    Camera app its permissions, and wakes the screen.
 
     Args:
         device (str): the device serial.
@@ -161,6 +165,10 @@ def prepare(device):
             adb(device, "shell", "ime", "disable", ime)
     for scale in ("window_animation_scale", "transition_animation_scale", "animator_duration_scale"):
         adb(device, "shell", "settings", "put", "global", scale, "0")
+    # The emulator's Camera app asks for its own permissions on first use (Android 9),
+    # on a screen Back can't leave; Trecos itself asks for none.
+    for permission in CAMERA_APP_PERMISSIONS:
+        adb(device, "shell", "pm", "grant", "com.android.camera2", permission)
     adb(device, "shell", "input", "keyevent", "KEYCODE_WAKEUP")
     adb(device, "shell", "wm", "dismiss-keyguard")
 
