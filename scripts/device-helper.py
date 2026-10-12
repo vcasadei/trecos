@@ -170,7 +170,7 @@ def clear_downloads(device):
 
 
 def add_photos(device):
-    """Copies the test photos in maestro/media to the phone's Pictures folder and indexes them.
+    """Copies the test photos in maestro/media to the phone's Pictures and Download folders.
 
     Maestro's own addMedia fails on a freshly booted Android 9 emulator, so the
     photo flows use this instead.
@@ -183,11 +183,14 @@ def add_photos(device):
     """
     media = pathlib.Path(__file__).resolve().parent.parent / "maestro" / "media"
     photos = sorted(media.glob("*.png"))
-    adb(device, "shell", "mkdir", "-p", "/sdcard/Pictures")
-    for photo in photos:
-        adb(device, "push", str(photo), "/sdcard/Pictures/")
-        adb(device, "shell", "am", "broadcast", "-a", "android.intent.action.MEDIA_SCANNER_SCAN_FILE",
-            "-d", "file:///sdcard/Pictures/" + photo.name)
+    # Pictures feeds the photo picker; Downloads feeds Android 9's Files app,
+    # which offers only Recent and Downloads on these emulator images.
+    for folder in ("/sdcard/Pictures", "/sdcard/Download"):
+        adb(device, "shell", "mkdir", "-p", folder)
+        for photo in photos:
+            adb(device, "push", str(photo), folder + "/")
+            adb(device, "shell", "am", "broadcast", "-a", "android.intent.action.MEDIA_SCANNER_SCAN_FILE",
+                "-d", "file://" + folder + "/" + photo.name)
     time.sleep(2)
     return {"added": len(photos)}
 

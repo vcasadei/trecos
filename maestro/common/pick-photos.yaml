@@ -1,20 +1,57 @@
-# Picks gallery photos at positions FIRST and, when set, SECOND in the system
-# photo picker, then confirms when the picker asks for it: with one slot left
-# it returns on the first tap; otherwise it needs "Done" (on Android 9 the
-# Files app uses "Select"). The app keeps each image once, so pick different
-# positions each time.
+# Picks gallery photos at positions FIRST and, when set, SECOND, then confirms
+# when the picker asks for it. Android 11+ shows the system photo picker: with
+# one slot left it returns on the first tap, otherwise it needs "Done".
+# Android 9 and 10 show the Files app, in Downloads, where photos are picked by
+# name (photo-N.png, N = position + 1): one tap returns a single photo, and
+# several need a long press, another tap and "Select". The app keeps
+# each image once, so pick different positions each time.
 appId: app.trecos
 ---
-- tapOn:
-    text: Photo taken on.*|.*\.png
-    index: ${FIRST}
 - runFlow:
     when:
-      true: ${typeof SECOND !== 'undefined' && SECOND !== ''}
+      visible: Show roots
     commands:
+      # It reopens where it was last; go back to Downloads first.
+      - tapOn: Show roots
       - tapOn:
-          text: Photo taken on.*|.*\.png
-          index: ${SECOND}
-- tapOn:
-    text: (?i)done|select|add
-    optional: true
+          text: Downloads
+          index: 1
+      - scrollUntilVisible:
+          element:
+            text: photo-${Number(FIRST) + 1}.png
+      - runFlow:
+          when:
+            true: ${typeof SECOND === 'undefined' || SECOND === ''}
+          commands:
+            - tapOn: photo-${Number(FIRST) + 1}.png
+      - runFlow:
+          when:
+            true: ${typeof SECOND !== 'undefined' && SECOND !== ''}
+          commands:
+            - longPressOn: photo-${Number(FIRST) + 1}.png
+            - scrollUntilVisible:
+                element:
+                  text: photo-${Number(SECOND) + 1}.png
+            - tapOn: photo-${Number(SECOND) + 1}.png
+            - tapOn: (?i)select|open
+- runFlow:
+    when:
+      notVisible: Show roots
+    commands:
+      - runFlow:
+          when:
+            visible: Photo taken on.*
+          commands:
+            - tapOn:
+                text: Photo taken on.*
+                index: ${FIRST}
+            - runFlow:
+                when:
+                  true: ${typeof SECOND !== 'undefined' && SECOND !== ''}
+                commands:
+                  - tapOn:
+                      text: Photo taken on.*
+                      index: ${SECOND}
+            - tapOn:
+                text: (?i)done|add
+                optional: true
