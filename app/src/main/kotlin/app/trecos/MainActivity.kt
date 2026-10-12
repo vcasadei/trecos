@@ -41,6 +41,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Test builds only: device flows seed a cleared app through this launch argument.
+        intent?.getStringExtra("fixture")?.let { runBlocking { TestSeedReceiver.seed(this@MainActivity, container, it) } }
         val themes = container.preferences.theme
         // Read once before the first frame so a Dark choice never flashes White.
         val initial = runBlocking { themes.first() }

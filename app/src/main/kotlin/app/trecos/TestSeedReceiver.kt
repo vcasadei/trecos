@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
+import androidx.annotation.VisibleForTesting
 import app.trecos.data.Container
 import app.trecos.data.House
 import app.trecos.data.Item
@@ -27,7 +28,7 @@ import java.io.File
 class TestSeedReceiver : BroadcastReceiver() {
 
     /**
-     * Stores the fixture named by the `fixture` extra, then makes its first house the current one.
+     * Stores the fixture named by the `fixture` extra.
      *
      * @param context the receiving context.
      * @param intent the broadcast; its `fixture` extra defaults to `1000-items`.
@@ -35,7 +36,6 @@ class TestSeedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (!enabled) return
         val fixture = intent.getStringExtra("fixture") ?: THOUSAND_ITEMS
-        if (fixture !in FIXTURES) return
         val count = intent.getIntExtra("count", 1000)
         val pending = goAsync()
         val app = (context.applicationContext as TrecosApplication).container
@@ -48,79 +48,9 @@ class TestSeedReceiver : BroadcastReceiver() {
         }
     }
 
-    /**
-     * Writes one fixture, skipping it when its first house already exists.
-     *
-     * @param context reads the cache directory for generated photos.
-     * @param app the app's container.
-     * @param fixture one of [FIXTURES].
-     * @param count the item count for `1000-items`.
-     */
-    private suspend fun seed(context: Context, app: AppContainer, fixture: String, count: Int) {
-        val db = app.database
-        val first = if (fixture == THOUSAND_ITEMS) BENCHMARK_HOUSE else APARTMENT
-        if (db.houses().get(first) != null) return
-        when (fixture) {
-            THOUSAND_ITEMS -> {
-                db.houses().insert(House(BENCHMARK_HOUSE, "Benchmark house", icon = "house", createdAt = 1, updatedAt = 1))
-                repeat(20) { db.containers().insert(Container("box$it", BENCHMARK_HOUSE, null, "Box $it", icon = "box", createdAt = 1, updatedAt = 1)) }
-                repeat(count) {
-                    db.items().insert(Item("item$it", BENCHMARK_HOUSE, null, "Item $it", quantity = 1 + it % 5, unitPrice = (it % 7) * 1_000L, createdAt = 1, updatedAt = 1))
-                }
-            }
-            else -> {
-                apartment().forEach { insert(app, it) }
-                if (fixture == TWO_HOUSES) parents().forEach { insert(app, it) }
-                if (fixture == PHOTOS) addPhotos(context, app)
-            }
-        }
-        app.preferences.setLastHouse(first)
-    }
-
-    private suspend fun insert(app: AppContainer, record: Any) {
-        val db = app.database
-        when (record) {
-            is House -> db.houses().insert(record)
-            is Container -> db.containers().insert(record)
-            is Item -> db.items().insert(record)
-        }
-    }
-
-    /** One house with an office, two boxes inside it and four items, one without a price. */
-    private fun apartment(): List<Any> = listOf(
-        House(APARTMENT, "Apartment", icon = "apartment", colorKey = "sky", createdAt = 1, updatedAt = 1),
-        Container("office", APARTMENT, null, "Office", icon = "box", colorKey = "sky", createdAt = 1, updatedAt = 1),
-        Container("box-a", APARTMENT, "office", "Box A", icon = "box", createdAt = 1, updatedAt = 1),
-        Container("box-b", APARTMENT, "office", "Box B", icon = "drawer", colorKey = "coral", createdAt = 1, updatedAt = 1),
-        Item("laptop", APARTMENT, "office", "Laptop", unitPrice = 350_000, brand = "Lenovo", model = "T14", serial = "PF-12345", createdAt = 1, updatedAt = 1),
-        Item("usb-cable", APARTMENT, "box-a", "USB-C cable 1m", quantity = 3, unitPrice = 2_990, createdAt = 1, updatedAt = 1),
-        Item("usb-hub", APARTMENT, "office", "USB hub 7 ports", unitPrice = 15_900, createdAt = 1, updatedAt = 1),
-        Item("mystery", APARTMENT, "box-b", "Unlabelled cable", createdAt = 1, updatedAt = 1),
-    )
-
-    /** A second house with one box and two items, for the house list and moves between houses. */
-    private fun parents(): List<Any> = listOf(
-        House(PARENTS, "Parents' house", icon = "house", colorKey = "coral", createdAt = 2, updatedAt = 2),
-        Container("attic", PARENTS, null, "Attic", icon = "box", createdAt = 2, updatedAt = 2),
-        Item("lamp", PARENTS, "attic", "Desk lamp", unitPrice = 12_000, createdAt = 2, updatedAt = 2),
-        Item("usb-cable-2", PARENTS, "attic", "USB-C cable 2m", createdAt = 2, updatedAt = 2),
-    )
-
-    /** Gives the laptop three generated photos, stored through the real photo pipeline. */
-    private suspend fun addPhotos(context: Context, app: AppContainer) {
-        listOf(Color.RED, Color.GREEN, Color.BLUE).forEachIndexed { index, color ->
-            val file = File(context.cacheDir, "fixture-$index.png")
-            val bitmap = Bitmap.createBitmap(640, 480, Bitmap.Config.ARGB_8888).apply { eraseColor(color) }
-            file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-            val sha = app.photoStore.import(Uri.fromFile(file)) ?: return@forEachIndexed
-            file.delete()
-            app.database.photos().insert(listOf(Photo("photo-$index", APARTMENT, Photo.OWNER_ITEM, "laptop", sha, index, createdAt = 1)))
-        }
-    }
-
     companion object {
         /** Whether seeding works: true only in test builds; tests turn it off to check a release build. */
-        @androidx.annotation.VisibleForTesting
+        @VisibleForTesting
         var enabled = BuildConfig.TEST_SEED
 
         /** The fixture sets, by the name the `fixture` extra takes. */
@@ -132,5 +62,70 @@ class TestSeedReceiver : BroadcastReceiver() {
         private const val BENCHMARK_HOUSE = "benchmark-house"
         private const val APARTMENT = "apartment"
         private const val PARENTS = "parents"
+
+        /**
+         * Writes one fixture and makes its first house the current one. Does
+         * nothing when seeding is off, the name is unknown, or the fixture's
+         * first house already exists. Also used by [MainActivity] for a
+         * `fixture` launch argument, which is how device flows seed a freshly
+         * cleared app.
+         *
+         * @param context reads the cache directory for generated photos.
+         * @param app the app's container.
+         * @param fixture one of [FIXTURES].
+         * @param count the item count for `1000-items`.
+         */
+        suspend fun seed(context: Context, app: AppContainer, fixture: String, count: Int = 1000) {
+            if (!enabled || fixture !in FIXTURES) return
+            val db = app.database
+            val first = if (fixture == THOUSAND_ITEMS) BENCHMARK_HOUSE else APARTMENT
+            if (db.houses().get(first) != null) return
+            if (fixture == THOUSAND_ITEMS) {
+                db.houses().insert(House(BENCHMARK_HOUSE, "Benchmark house", icon = "house", createdAt = 1, updatedAt = 1))
+                repeat(20) { db.containers().insert(Container("box$it", BENCHMARK_HOUSE, null, "Box $it", icon = "box", createdAt = 1, updatedAt = 1)) }
+                repeat(count) {
+                    db.items().insert(Item("item$it", BENCHMARK_HOUSE, null, "Item $it", quantity = 1 + it % 5, unitPrice = (it % 7) * 1_000L, createdAt = 1, updatedAt = 1))
+                }
+            } else {
+                insertApartment(app)
+                if (fixture == TWO_HOUSES) insertParents(app)
+                if (fixture == PHOTOS) addPhotos(context, app)
+            }
+            app.preferences.setLastHouse(first)
+        }
+
+        /** One house with an office, two boxes inside it and four items, one without a price. */
+        private suspend fun insertApartment(app: AppContainer) {
+            val db = app.database
+            db.houses().insert(House(APARTMENT, "Apartment", icon = "apartment", colorKey = "sky", createdAt = 1, updatedAt = 1))
+            db.containers().insert(Container("office", APARTMENT, null, "Office", icon = "box", colorKey = "sky", createdAt = 1, updatedAt = 1))
+            db.containers().insert(Container("box-a", APARTMENT, "office", "Box A", icon = "box", createdAt = 1, updatedAt = 1))
+            db.containers().insert(Container("box-b", APARTMENT, "office", "Box B", icon = "drawer", colorKey = "coral", createdAt = 1, updatedAt = 1))
+            db.items().insert(Item("laptop", APARTMENT, "office", "Laptop", unitPrice = 350_000, brand = "Lenovo", model = "T14", serial = "PF-12345", createdAt = 1, updatedAt = 1))
+            db.items().insert(Item("usb-cable", APARTMENT, "box-a", "USB-C cable 1m", quantity = 3, unitPrice = 2_990, createdAt = 1, updatedAt = 1))
+            db.items().insert(Item("usb-hub", APARTMENT, "office", "USB hub 7 ports", unitPrice = 15_900, createdAt = 1, updatedAt = 1))
+            db.items().insert(Item("mystery", APARTMENT, "box-b", "Unlabelled cable", createdAt = 1, updatedAt = 1))
+        }
+
+        /** A second house with one box and two items, for the house list and moves between houses. */
+        private suspend fun insertParents(app: AppContainer) {
+            val db = app.database
+            db.houses().insert(House(PARENTS, "Parents' house", icon = "house", colorKey = "coral", createdAt = 2, updatedAt = 2))
+            db.containers().insert(Container("attic", PARENTS, null, "Attic", icon = "box", createdAt = 2, updatedAt = 2))
+            db.items().insert(Item("lamp", PARENTS, "attic", "Desk lamp", unitPrice = 12_000, createdAt = 2, updatedAt = 2))
+            db.items().insert(Item("usb-cable-2", PARENTS, "attic", "USB-C cable 2m", createdAt = 2, updatedAt = 2))
+        }
+
+        /** Gives the laptop three generated photos, stored through the real photo pipeline. */
+        private suspend fun addPhotos(context: Context, app: AppContainer) {
+            listOf(Color.RED, Color.GREEN, Color.BLUE).forEachIndexed { index, color ->
+                val file = File(context.cacheDir, "fixture-$index.png")
+                val bitmap = Bitmap.createBitmap(640, 480, Bitmap.Config.ARGB_8888).apply { eraseColor(color) }
+                file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                val sha = app.photoStore.import(Uri.fromFile(file))
+                file.delete()
+                if (sha != null) app.database.photos().insert(listOf(Photo("photo-$index", APARTMENT, Photo.OWNER_ITEM, "laptop", sha, index, createdAt = 1)))
+            }
+        }
     }
 }

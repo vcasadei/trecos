@@ -117,7 +117,10 @@ the matrix. Then one job runs per cell, with `fail-fast: false` and
 documentation gives. The user approved this action on 2026-10-12.
 
 ### 6. Running a cell
-`scripts/run-device-tests.sh <tier>` runs on a cell, locally or in CI:
+`scripts/run-device-tests.py --device <serial> --tier <tier>` runs on a cell,
+locally or in CI. It is Python rather than shell because it drives each flow
+separately (one Maestro run per flow), which is what makes the shuffled order
+and the single rerun possible:
 1. Installs the debug APK, or the `benchmarkRelease` APK for the benchmark.
 2. Runs `connectedDebugAndroidTest` for the four existing instrumented tests.
 3. Runs Maestro over the tier's tags with JUnit output. The order is shuffled
@@ -191,7 +194,7 @@ image revision.
   - Locally, a developer who wants to run Drive flows exports them from a
     gitignored `maestro/.env`. The committed `maestro/.env.example` holds only
     placeholders.
-- **Redaction:** after every run, `run-device-tests.sh` replaces the password
+- **Redaction:** after every run, `run-device-tests.py` replaces the password
   and token values in every file under `build/device-results/` with `***`
   before upload. This is a second guard, on top of Maestro's own masking of
   values read from the environment.

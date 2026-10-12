@@ -9,7 +9,7 @@ Android 16 / 6 GB.
 
 - [x] 1.1 Install Maestro `cli-2.11.0` locally from its GitHub release zip with the SHA-256 checked; verify `maestro --version` prints 2.11.0
 - [x] 1.2 Install the `google_apis` x86_64 images for API 28 and 36 and create the local AVDs `trecos-api28-2g` (2048 MB, 2 cores) and `trecos-api36-6g` (6144 MB, 2 cores); verify both boot headless and `adb shell getprop ro.build.version.sdk` prints 28 and 36
-- [ ] 1.3 Write `docs/dev/device-tests.md` (what the suite is, local setup, running one flow, one area or one tier on a local cell); verify by following it in a fresh shell to run one flow
+- [x] 1.3 Write `docs/dev/device-tests.md` (what the suite is, local setup, running one flow, one area or one tier on a local cell); verify by following it in a fresh shell to run one flow
 
 ## 2. App hooks for the flows
 
@@ -21,19 +21,19 @@ Android 16 / 6 GB.
 
 ## 3. Matrix and cell runner
 
-- [ ] 3.1 Write `scripts/device-matrix.py <tier>` printing the GitHub matrix JSON (`pr` 2 cells, `nightly` 9 cells with rotating memory, `weekly`/`release` 36 cells); verify with `scripts/test_device_matrix.py` (standard-library `unittest`)
-- [ ] 3.2 Test scenario "The nightly run rotates memory": seven consecutive days give every API level all four memory sizes (in `test_device_matrix.py`)
-- [ ] 3.3 Write `scripts/run-device-tests.sh <tier>`: installs the APK, runs `connectedDebugAndroidTest`, runs Maestro with JUnit output and a printed shuffle seed, reruns failures once, collects screenshots, step logs and `logcat --pid`, writes `result.json`; verify on both local cells with the `smoke` tag
-- [ ] 3.4 Test scenario "A flaky flow": a fixture flow that fails on its first attempt only is reported `flaky` and the run passes (check `result.json`)
+- [x] 3.1 Write `scripts/device-matrix.py <tier>` printing the GitHub matrix JSON (`pr` 2 cells, `nightly` 9 cells with rotating memory, `weekly`/`release` 36 cells); verify with `scripts/test_device_matrix.py` (standard-library `unittest`)
+- [x] 3.2 Test scenario "The nightly run rotates memory": seven consecutive days give every API level all four memory sizes (in `test_device_matrix.py`)
+- [x] 3.3 Write `scripts/run-device-tests.py --device <serial> --tier <tier>`: installs the APK, runs `connectedDebugAndroidTest`, runs Maestro with JUnit output and a printed shuffle seed, reruns failures once, collects screenshots, step logs and `logcat --pid`, writes `result.json`; verify on both local cells with the `smoke` tag
+- [x] 3.4 Test scenario "A flaky flow": a fixture flow that fails on its first attempt only is reported `flaky` and the run passes (check `result.json`)
 - [ ] 3.5 Test scenario "Flows run in any order": two full runs on a local cell with different shuffle seeds give the same per-flow results
-- [ ] 3.6 Write `scripts/summarize-device-results.py` merging `result.json` files into a Markdown table (cell, Android version, memory, passed, failed, flaky, infrastructure), with redaction of known secret values; verify with unit tests including scenario "Secrets in a failing sign-in flow" (a planted password value never survives in any output)
+- [x] 3.6 Write `scripts/summarize-device-results.py` merging `result.json` files into a Markdown table (cell, Android version, memory, passed, failed, flaky, infrastructure), with redaction of known secret values; verify with unit tests including scenario "Secrets in a failing sign-in flow" (a planted password value never survives in any output)
 - [ ] 3.7 Update `docs/dev/device-tests.md` with the tiers, the matrix, `result.json` and how to reproduce a CI run locally from its shuffle seed
 
 ## 4. Scenario coverage check
 
-- [ ] 4.1 Write `scripts/check-scenario-coverage.py` reading the `trecos-v1` (and later `openspec/specs/`) scenarios, the flows' `# covers:` and `# screens:` headers, `maestro/COVERAGE.md` and the app's `NavHost` routes; verify with `scripts/test_check_scenario_coverage.py`
-- [ ] 4.2 Test scenario "A new scenario with no flow": a planted scenario missing from every group fails the check and is named
-- [ ] 4.3 Test scenario "A screen with no flow": a planted route missing from every `# screens:` header fails the check and is named
+- [x] 4.1 Write `scripts/check-scenario-coverage.py` reading the `trecos-v1` (and later `openspec/specs/`) scenarios, the flows' `# covers:` and `# screens:` headers, `maestro/COVERAGE.md` and the app's `NavHost` routes; verify with `scripts/test_check_scenario_coverage.py`
+- [x] 4.2 Test scenario "A new scenario with no flow": a planted scenario missing from every group fails the check and is named
+- [x] 4.3 Test scenario "A screen with no flow": a planted route missing from every `# screens:` header fails the check and is named
 - [ ] 4.4 Create `maestro/COVERAGE.md` with the "Robolectric only" and "manual" scenarios and reasons (Play Billing tips, camera scanning, the Play services scanner download), and run the check in `ci.yml`; verify it fails on `master` until group 5 lands, then passes
 
 ## 5. Flows for every screen and feature
@@ -57,7 +57,7 @@ Each task writes the area's flows with `# covers:` and `# screens:` headers, tag
 
 ## 6. CI workflow
 
-- [ ] 6.1 Write `.github/workflows/device-tests.yml`: matrix job from `device-matrix.py`, one job per cell with `reactivecircus/android-emulator-runner@v2.38.0`, the KVM step, cached boot snapshots, `fail-fast: false`, `max-parallel: 20`, a 10-minute boot timeout, Maestro installed with its checksum, and `run-device-tests.sh`; verify a green `pr` tier on the pull request
+- [ ] 6.1 Write `.github/workflows/device-tests.yml`: matrix job from `device-matrix.py`, one job per cell with `reactivecircus/android-emulator-runner@v2.38.0`, the KVM step, cached boot snapshots, `fail-fast: false`, `max-parallel: 20`, a 10-minute boot timeout, Maestro installed with its checksum, and `run-device-tests.py`; verify a green `pr` tier on the pull request
 - [ ] 6.2 Add the summary job (merged table on the run page) and artifact upload with 14 days' retention; verify on the pull request run that the table and artifacts appear
 - [ ] 6.3 Test scenario "A pull request breaks adding an item": on a throwaway branch, a deliberate break in the add-item flow fails the device check, which names the flow and the cell; close the branch without merging
 - [ ] 6.4 Test scenario "An emulator fails to boot": a cell with an impossible image (temporary matrix override) is reported "infrastructure failure" while the other cell still passes
