@@ -59,7 +59,7 @@ Each task writes the area's flows with `# covers:` and `# screens:` headers, tag
 
 - [ ] 6.1 Write `.github/workflows/device-tests.yml`: matrix job from `device-matrix.py`, one job per cell with `reactivecircus/android-emulator-runner@v2.38.0`, the KVM step, cached boot snapshots, `fail-fast: false`, `max-parallel: 20`, a 10-minute boot timeout, Maestro installed with its checksum, and `run-device-tests.py`; verify a green `pr` tier on the pull request
 - [ ] 6.2 Add the summary job (merged table on the run page) and artifact upload with 14 days' retention; verify on the pull request run that the table and artifacts appear
-- [ ] 6.3 Test scenario "A pull request breaks adding an item": on a throwaway branch, a deliberate break in the add-item flow fails the device check, which names the flow and the cell; close the branch without merging
+- [x] 6.3 Test scenario "A pull request breaks adding an item": on a throwaway branch, a deliberate break in the add-item flow fails the device check, which names the flow and the cell; close the branch without merging
 - [ ] 6.4 Test scenario "An emulator fails to boot": a cell with an impossible image (temporary matrix override) is reported "infrastructure failure" while the other cell still passes
 - [ ] 6.5 **(user)** Mark the `pr` device check as required in the branch rules for `master`; verify the merge button waits for it on the next pull request
 - [ ] 6.6 Add the nightly and weekly schedules and run the weekly tier once by `workflow_dispatch`; verify 36 cells report results (scenario "A weekly full run"), and fix or tag as flaky any flow that fails only on some cells
