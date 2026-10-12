@@ -1,0 +1,69 @@
+# covers: settings: Cancelling
+# covers: settings: Relabelling
+# covers: settings: Picking extras
+# covers: settings: Too many
+# screens: settings, currency, extras, place
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# Cancelling the currency change keeps USD.
+- tapOn:
+    id: tab_Settings
+- tapOn:
+    id: setting_currency
+- tapOn:
+    id: currency_search
+- inputText: BRL
+- tapOn:
+    id: currency_BRL
+- tapOn: Cancel
+- back
+- assertVisible:
+    id: value_currency
+    text: USD · US Dollar
+# Accepting relabels prices: same number, new symbol.
+- tapOn:
+    id: setting_currency
+- tapOn:
+    id: currency_search
+- inputText: BRL
+- tapOn:
+    id: currency_BRL
+- tapOn: Change
+- tapOn:
+    id: tab_Home
+- tapOn:
+    id: row_office
+- tapOn: Laptop
+- assertVisible:
+    text: R\$3,500\.00
+    below: Unit price
+# Extras: tags and brand next to categories; a fourth can't be picked.
+- tapOn:
+    id: tab_Settings
+- tapOn:
+    id: setting_extras
+- tapOn:
+    id: extra_tags
+- tapOn:
+    id: extra_brand
+- tapOn:
+    id: extra_model
+- assertVisible:
+    id: extra_model
+    checked: false
+- assertVisible:
+    id: extras_limit
+- back
+- tapOn:
+    id: tab_Home
+- tapOn:
+    id: view_toggle
+- tapOn:
+    id: row_office
+- assertVisible: .*Lenovo.*

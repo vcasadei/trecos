@@ -23,6 +23,7 @@ import platform
 import random
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -38,6 +39,8 @@ MAESTRO_IME_PACKAGE = "dev.mobile.maestro/"
 SECRET_ENV = ("TEST_GOOGLE_PASSWORD", "TEST_GOOGLE_DRIVE_TOKEN", "TEST_GOOGLE_OAUTH_CLIENT")
 # The environment variables passed into flows; secret ones are redacted from outputs.
 FLOW_ENV = ("TEST_GOOGLE_ACCOUNT",) + SECRET_ENV
+# The PIN scripts/device-helper.py sets; the runner clears it around every flow.
+HELPER_PIN = "1111"
 TIER_TAGS = {
     "pr": {"smoke"},
     "nightly": {"full"},
@@ -127,6 +130,17 @@ def prop(device, name):
     return adb(device, "shell", "getprop", name).stdout.strip()
 
 
+def free_port():
+    """Finds a free TCP port on localhost for the device helper.
+
+    Returns:
+        int: the port number.
+    """
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        return probe.getsockname()[1]
+
+
 def prepare(device):
     """Makes the emulator predictable for flows.
 
@@ -165,6 +179,8 @@ def run_flow(device, flow, out_dir, env):
     """
     out_dir.mkdir(parents=True, exist_ok=True)
     adb(device, "logcat", "-c")
+    # A flow that set the phone's PIN and then failed must not leave it for the next flow.
+    adb(device, "shell", "locksettings", "clear", "--old", HELPER_PIN)
     command = ["maestro", "--device", device, "test", str(flow), "--format", "junit",
                "--output", str(out_dir / "junit.xml"), "--test-output-dir", str(out_dir)]
     for key, value in env.items():
@@ -175,6 +191,7 @@ def run_flow(device, flow, out_dir, env):
     except subprocess.TimeoutExpired as timeout:
         passed, log = False, f"Timed out after {FLOW_TIMEOUT_S} s\n{timeout.stdout or ''}"
     (out_dir / "maestro.log").write_text(log, encoding="utf-8")
+    adb(device, "shell", "locksettings", "clear", "--old", HELPER_PIN)
     if not passed:
         (out_dir / "logcat.txt").write_text(adb(device, "logcat", "-d", timeout=120).stdout, encoding="utf-8")
     else:
@@ -265,6 +282,9 @@ def main(argv):
     random.Random(args.seed).shuffle(flows)
     print(f"Running {len(flows)} flows on {args.device} with shuffle seed {args.seed}")
     env = {k: os.environ[k] for k in FLOW_ENV if os.environ.get(k)}
+    helper_port = free_port()
+    helper = subprocess.Popen([sys.executable, str(REPO / "scripts" / "device-helper.py"), "--device", args.device, "--port", str(helper_port)])
+    env["DEVICE_HELPER_PORT"] = str(helper_port)
     for flow in flows:
         name = str(flow.relative_to(pathlib.Path(args.flows))).removesuffix(".yaml")
         start = time.monotonic()
@@ -279,6 +299,7 @@ def main(argv):
         result["flows"].append({"flow": name, "status": status, "attempts": attempts, "seconds": round(time.monotonic() - start, 1)})
         print(f"  {status:7} {name}")
 
+    helper.terminate()
     (out / "result.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     redact(out, [os.environ.get(k, "") for k in SECRET_ENV])
     failed = [f for f in result["flows"] if f["status"] == "failed"] or result.get("instrumented") == "failed"

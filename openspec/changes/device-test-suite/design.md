@@ -135,6 +135,24 @@ and the single rerun possible:
 A final job in the workflow merges every cell's `result.json` into the run
 summary table. It uploads the artifacts with 14 days' retention.
 
+### 6b. A device helper for what flows can't do
+Maestro flows can't run `adb`, but their `runScript` steps can make HTTP calls
+from the machine running Maestro. `scripts/device-helper.py` listens on
+`127.0.0.1` and runs a fixed list of `adb` actions against one device:
+- set or clear the phone's PIN;
+- report whether the app hides its recent-apps preview (FLAG_SECURE on
+  Android 9 to 12; Android 13+ doesn't expose it, so the answer is "unknown"
+  there).
+
+Anything else returns 404. `run-device-tests.py` starts the helper per cell,
+passes its port to the flows as `DEVICE_HELPER_PORT`, and clears the PIN
+around every flow so a failure can't leak into the next one.
+- **Why:** the app lock scenarios need a phone PIN that appears and disappears
+  mid-flow.
+- **Alternative:** driving the Settings app with Maestro. Rejected: its
+  screens differ on every Android version, and removing a PIN asks for it
+  again inside secure windows Maestro can't read.
+
 ### 7. Coverage check without an emulator
 `scripts/check-scenario-coverage.py` runs in `ci.yml`. It reads:
 - every `#### Scenario:` in `openspec/changes/trecos-v1/specs/*/spec.md` (and

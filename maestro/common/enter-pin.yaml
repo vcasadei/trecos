@@ -1,0 +1,11 @@
+# Types the device helper's PIN (1111) into the system's screen-lock prompt.
+# The prompt is a secure window: it has no readable hierarchy, so the flow
+# waits briefly, types and presses Enter.
+appId: app.trecos
+---
+- waitForAnimationToEnd:
+    timeout: 3000
+- inputText: "1111"
+- pressKey: Enter
+- waitForAnimationToEnd:
+    timeout: 3000

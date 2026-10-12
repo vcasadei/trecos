@@ -1,0 +1,9 @@
+# Runs a whitelisted adb action on the phone through the device helper:
+# ACTION is screen-lock-on, screen-lock-off or recents-hidden. The answer is
+# in output.device.
+appId: app.trecos
+---
+- runScript:
+    file: device.js
+    env:
+      ACTION: ${ACTION}

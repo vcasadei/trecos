@@ -1,0 +1,69 @@
+# covers: app-lock: No profile
+# covers: app-lock: Deleting the profile
+# screens: settings, profile, place, item_form, search
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: none
+# From the first run through adding and searching, nothing asks for a name, e-mail or account.
+- tapOn:
+    id: continue
+- runFlow:
+    file: ../../common/add-item.yaml
+    env:
+      NAME: Kettle
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- inputText: kettle
+- assertVisible:
+    id: result_count
+    text: 1 item
+- assertNotVisible: .*[Ss]ign in.*
+- assertNotVisible: .*E-mail.*
+# A saved profile can be deleted, leaving both fields empty.
+- tapOn:
+    id: tab_Settings
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_profile
+- tapOn:
+    id: profile_name
+- inputText: Ana
+- tapOn:
+    id: profile_email
+- inputText: ana@example.com
+- tapOn:
+    id: save_profile
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_profile
+- assertVisible:
+    id: profile_name
+    text: Ana
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: delete_profile
+- tapOn: Delete
+- assertVisible:
+    id: profile_name
+    text: ""
+- back
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: setting_profile
+- assertVisible:
+    id: profile_name
+    text: ""
+- assertVisible:
+    id: profile_email
+    text: ""
