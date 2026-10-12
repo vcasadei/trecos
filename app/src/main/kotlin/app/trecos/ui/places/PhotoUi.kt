@@ -70,6 +70,7 @@ import app.trecos.ui.theme.LocalMotion
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import app.trecos.ui.exposeTestTags
 
 /** The zoom level of the full-screen viewer, for tests. */
 val ZoomLevel = SemanticsPropertyKey<Float>("ZoomLevel")
@@ -287,7 +288,7 @@ fun PhotoViewer(photos: List<String>, start: Int, onDismiss: () -> Unit) {
             visibleState = visible,
             enter = scaleIn(motion.spec(motion.longMs), initialScale = 0.3f) + fadeIn(motion.spec(motion.longMs)),
         ) {
-            Box(Modifier.fillMaxSize().background(Color.Black).testTag("photo_viewer")) {
+            Box(Modifier.exposeTestTags().fillMaxSize().background(Color.Black).testTag("photo_viewer")) {
                 HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { page ->
                     var scale by remember { mutableFloatStateOf(1f) }
                     val max = remember(page) { maxZoom(store.photoFile(photos[page])) }
