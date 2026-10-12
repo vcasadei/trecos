@@ -29,8 +29,11 @@ import app.trecos.data.QrMatch
 import app.trecos.places.Destination
 import app.trecos.ui.appContainer
 import app.trecos.ui.text.SafeText
+import com.google.android.gms.common.moduleinstall.ModuleInstall
+import com.google.android.gms.common.moduleinstall.ModuleInstallRequest
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanner
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import kotlin.coroutines.resume
@@ -66,11 +69,47 @@ interface QrScanner {
     suspend fun scan(context: Context): ScanResult
 }
 
-/** The Google code scanner (design D9): QR codes only, no camera permission. */
+/**
+ * The Google code scanner (design D9): QR codes only, no camera permission.
+ *
+ * Play services installs the scanner as a separate module. Until it is on the
+ * phone, startScan() waits for the download without ever finishing, so the
+ * user would see nothing, offline forever. The scanner therefore checks for the
+ * module first: when it is missing it asks Play services to download it in the
+ * background and reports [ScanResult.Unavailable] at once (spec "Scanning offline").
+ */
 object GoogleQrScanner : QrScanner {
-    override suspend fun scan(context: Context): ScanResult = suspendCancellableCoroutine { continuation ->
+    override suspend fun scan(context: Context): ScanResult {
         val options = GmsBarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE).build()
-        GmsBarcodeScanning.getClient(context, options).startScan()
+        val scanner = GmsBarcodeScanning.getClient(context, options)
+        return if (moduleInstalled(context, scanner)) startScan(scanner) else ScanResult.Unavailable
+    }
+
+    /**
+     * Tells whether the scanner module is on the phone, and requests its download when it isn't.
+     *
+     * @param context an activity context.
+     * @param scanner the scanner whose module to check.
+     * @return true when scanning can start now.
+     */
+    private suspend fun moduleInstalled(context: Context, scanner: GmsBarcodeScanner): Boolean = suspendCancellableCoroutine { continuation ->
+        val installer = ModuleInstall.getClient(context)
+        installer.areModulesAvailable(scanner)
+            .addOnSuccessListener { response ->
+                if (!response.areModulesAvailable()) installer.installModules(ModuleInstallRequest.newBuilder().addApi(scanner).build())
+                continuation.resume(response.areModulesAvailable())
+            }
+            .addOnFailureListener { continuation.resume(false) }
+    }
+
+    /**
+     * Opens the scanner and waits for a code, a cancel or a failure.
+     *
+     * @param scanner the scanner to start.
+     * @return what happened.
+     */
+    private suspend fun startScan(scanner: GmsBarcodeScanner): ScanResult = suspendCancellableCoroutine { continuation ->
+        scanner.startScan()
             .addOnSuccessListener { barcode ->
                 val text = barcode.rawValue?.trim()
                 continuation.resume(if (text.isNullOrEmpty()) ScanResult.Cancelled else ScanResult.Code(text))

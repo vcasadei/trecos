@@ -6,6 +6,10 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Scanning a QR code on a phone that never downloaded Google's scanner, while offline, now says it needs a one-time download instead of doing nothing.
+
 ### Added
 
 - The Trecos app icon: a cardboard box with a lid and a handwritten "t" on its label, on violet. Android 13+ can tint it to match the wallpaper.
