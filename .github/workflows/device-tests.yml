@@ -79,7 +79,7 @@ jobs:
     name: ${{ matrix.name }}
     needs: [matrix, apk]
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       max-parallel: 20

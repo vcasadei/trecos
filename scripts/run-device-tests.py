@@ -104,7 +104,8 @@ def adb(device, *args, timeout=60):
     Returns:
         subprocess.CompletedProcess: the finished command, output as text.
     """
-    return subprocess.run(["adb", "-s", device, *args], capture_output=True, text=True, timeout=timeout)
+    # Device logs can hold bytes that aren't UTF-8; they must not crash the run.
+    return subprocess.run(["adb", "-s", device, *args], capture_output=True, text=True, errors="replace", timeout=timeout)
 
 
 def device_ready(device):
@@ -207,7 +208,7 @@ def run_flow(device, flow, out_dir, env):
     for key, value in env.items():
         command += ["-e", f"{key}={value}"]
     try:
-        done = subprocess.run(command, capture_output=True, text=True, timeout=FLOW_TIMEOUT_S, cwd=REPO)
+        done = subprocess.run(command, capture_output=True, text=True, errors="replace", timeout=FLOW_TIMEOUT_S, cwd=REPO)
         passed, log = done.returncode == 0, done.stdout + done.stderr
     except subprocess.TimeoutExpired as timeout:
         passed, log = False, f"Timed out after {FLOW_TIMEOUT_S} s\n{timeout.stdout or ''}"

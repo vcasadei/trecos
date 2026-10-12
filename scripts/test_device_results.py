@@ -152,6 +152,18 @@ class RunnerEndToEndTest(unittest.TestCase):
         self.assertEqual(done.returncode, 0)
         self.assertEqual(result["seed"], 3)
 
+    def test_device_logs_that_are_not_utf8_do_not_crash_the_run(self):
+        import stat
+        (self.tmp / "bin" / "adb").write_text(
+            '#!/bin/sh\ncase "$*" in *boot_completed*) echo 1;; *version.sdk*) echo 28;; '
+            "*logcat\\ -d*) printf 'ok \\377\\376 bytes';; esac\nexit 0\n")
+        adb = self.tmp / "bin" / "adb"
+        adb.chmod(adb.stat().st_mode | stat.S_IEXEC)
+        done, result = self.run_runner()
+        self.assertEqual(done.returncode, 1)
+        log = self.tmp / "out" / "android9-2g" / "area" / "always-fails" / "attempt-1" / "logcat.txt"
+        self.assertIn("ok", log.read_text())
+
     def test_a_dead_maestro_driver_is_retried_without_counting(self):
         import os
         import stat
