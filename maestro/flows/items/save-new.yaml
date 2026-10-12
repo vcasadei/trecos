@@ -1,0 +1,67 @@
+# covers: items: Cataloguing a box of cables
+# covers: items: Editing updates the date
+# screens: place, item_form, item
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- tapOn:
+    id: row_office
+- tapOn:
+    id: row_box-a
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: add_category
+- tapOn: Search categories
+- inputText: USB-C
+- tapOn: Cables > USB-C
+- tapOn: Done
+- tapOn:
+    id: field_name
+- inputText: USB-C cable 2m
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save_new
+# A new empty form, still in Box A and with the same category.
+- assertVisible:
+    id: field_name
+    text: ""
+- assertVisible:
+    id: chosen_cables.usb_c
+- tapOn:
+    id: field_name
+- inputText: USB-C cable 3m
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible: USB-C cable 2m
+- assertVisible: USB-C cable 3m
+- assertVisible: Items (3)
+# The fixture's cable was added on 1 January 1970; editing it changes only "Last changed".
+- tapOn: USB-C cable 1m
+- assertVisible:
+    text: Jan 1, 1970
+    below: Added
+- tapOn: Edit
+- tapOn:
+    id: field_quantity
+- eraseText
+- inputText: "4"
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible:
+    text: Jan 1, 1970
+    below: Added
+- assertVisible:
+    text: "${new Date().toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}"
+    below: Last changed

@@ -59,6 +59,13 @@ class CoverageTest(unittest.TestCase):
         covers, _ = coverage.flow_headers(self.repo / "maestro" / "flows")
         self.assertEqual(covers, {"items: Adding an item"})
 
+    def test_device_test_listing_counts(self):
+        spec = self.repo / "openspec" / "changes" / "trecos-v1" / "specs" / "items" / "spec.md"
+        spec.write_text(spec.read_text() + "#### Scenario: Stored without location\n")
+        md = self.repo / "maestro" / "COVERAGE.md"
+        md.write_text(md.read_text() + "| items: Stored without location | device test | `PhotoDeviceTest` reads the stored file |\n")
+        self.assertEqual(coverage.check(self.repo), ([], []))
+
     def test_main_specs_count_too(self):
         main = self.repo / "openspec" / "specs" / "search"
         main.mkdir(parents=True)

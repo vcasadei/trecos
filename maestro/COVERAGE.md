@@ -1,0 +1,25 @@
+# Scenarios outside the device flows
+
+Every `trecos-v1` scenario is checked by a Maestro flow (named in the flow's
+`# covers:` header) or listed here with the reason it is not.
+`scripts/check-scenario-coverage.py` fails when a scenario is in neither
+place.
+
+- **device test**: an instrumented test in `app/src/androidTest` checks it.
+  Those tests run on the same emulator cells as the flows.
+- **Robolectric only**: the behaviour is visual or timing-based, and Maestro
+  can't assert it (colours, measured widths, animation), or an emulator can't
+  reach the state. The named unit test or screenshot checks it on every
+  pull request.
+- **manual**: it needs hardware, an account or a store purchase that an
+  emulator doesn't have. It is checked by hand before a release.
+
+| Scenario | Covered by | Reason |
+|---|---|---|
+| places: Deep path on a small screen | Robolectric only | The collapse to "…" depends on the measured width; `PathScenariosTest.deepPathOnASmallScreen` fixes a small width |
+| places: Inherited colour | Robolectric only | Colour tints can't be asserted by Maestro; `PlaceLookScenariosTest.inheritedColour` and the Roborazzi screenshots check them |
+| places: Own colour wins | Robolectric only | Colour stripes; `PlaceLookScenariosTest.ownColourWins` |
+| places: Two houses | Robolectric only | The band and pill colours; `PlaceLookScenariosTest.twoHouses` |
+| places: Container without photos | Robolectric only | The placeholder icon is a drawable with no text; `PlaceLookScenariosTest.containerWithoutPhotos` |
+| items: Scanning into an empty form | Robolectric only | Scanning needs the Play services scanner and a camera pointed at a label; `QrScenariosTest.scanningIntoAnEmptyForm` fakes the scanner |
+| items: Scanning when a name exists | Robolectric only | As above; `QrScenariosTest.scanningWhenANameExists` |

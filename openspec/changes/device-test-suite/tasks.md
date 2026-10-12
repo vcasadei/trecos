@@ -34,7 +34,7 @@ Android 16 / 6 GB.
 - [x] 4.1 Write `scripts/check-scenario-coverage.py` reading the `trecos-v1` (and later `openspec/specs/`) scenarios, the flows' `# covers:` and `# screens:` headers, `maestro/COVERAGE.md` and the app's `NavHost` routes; verify with `scripts/test_check_scenario_coverage.py`
 - [x] 4.2 Test scenario "A new scenario with no flow": a planted scenario missing from every group fails the check and is named
 - [x] 4.3 Test scenario "A screen with no flow": a planted route missing from every `# screens:` header fails the check and is named
-- [ ] 4.4 Create `maestro/COVERAGE.md` with the "Robolectric only" and "manual" scenarios and reasons (Play Billing tips, camera scanning, the Play services scanner download), and run the check in `ci.yml`; verify it fails on `master` until group 5 lands, then passes
+- [ ] 4.4 Create `maestro/COVERAGE.md` with the "device test", "Robolectric only" and "manual" scenarios and reasons (Play Billing tips, camera scanning, the Play services scanner download), and run the check in `ci.yml`; verify it fails on `master` until group 5 lands, then passes
 
 ## 5. Flows for every screen and feature
 

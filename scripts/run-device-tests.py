@@ -31,6 +31,9 @@ REPO = pathlib.Path(__file__).resolve().parent.parent
 FLOWS = REPO / "maestro" / "flows"
 PACKAGE = "app.trecos"
 FLOW_TIMEOUT_S = 600
+# Apps that provide input methods on the emulator images: Gboard, the AOSP keyboard, and
+# the Google app, whose voice input Android 9 switches to when no keyboard is left.
+KEYBOARDS = ("com.google.android.inputmethod.latin", "com.android.inputmethod.latin", "com.google.android.googlequicksearchbox")
 SECRET_ENV = ("TEST_GOOGLE_PASSWORD", "TEST_GOOGLE_DRIVE_TOKEN", "TEST_GOOGLE_OAUTH_CLIENT")
 # The environment variables passed into flows; secret ones are redacted from outputs.
 FLOW_ENV = ("TEST_GOOGLE_ACCOUNT",) + SECRET_ENV
@@ -121,6 +124,28 @@ def prop(device, name):
         str: the value, empty when unknown.
     """
     return adb(device, "shell", "getprop", name).stdout.strip()
+
+
+def prepare(device):
+    """Makes the emulator predictable for flows.
+
+    Disables the on-screen keyboards and other input methods, which
+    autocorrect or cover what flows type (Gboard turned "dos meus" into "do
+    mess" on Android 9), turns off system animations, and wakes the screen.
+
+    Args:
+        device (str): the device serial.
+    """
+    for package in KEYBOARDS:
+        adb(device, "shell", "pm", "disable-user", "--user", "0", package)
+    # Whatever input method is left (Android 9 falls back to Google's voice input, whose
+    # panel covers the screen) is switched off too, so typed text goes straight to the field.
+    for ime in adb(device, "shell", "ime", "list", "-s").stdout.split():
+        adb(device, "shell", "ime", "disable", ime)
+    for scale in ("window_animation_scale", "transition_animation_scale", "animator_duration_scale"):
+        adb(device, "shell", "settings", "put", "global", scale, "0")
+    adb(device, "shell", "input", "keyevent", "KEYCODE_WAKEUP")
+    adb(device, "shell", "wm", "dismiss-keyguard")
 
 
 def run_flow(device, flow, out_dir, env):
@@ -226,6 +251,7 @@ def main(argv):
         return 2
     result.update(api=int(prop(args.device, "ro.build.version.sdk") or 0), android=prop(args.device, "ro.build.version.release"),
                   image=prop(args.device, "ro.build.fingerprint"))
+    prepare(args.device)
     # The instrumented tests uninstall the app when they finish, so they run before the install.
     if args.instrumented:
         result["instrumented"] = instrumented(args.device)

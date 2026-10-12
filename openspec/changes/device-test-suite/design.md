@@ -140,7 +140,7 @@ summary table. It uploads the artifacts with 14 days' retention.
 - every `#### Scenario:` in `openspec/changes/trecos-v1/specs/*/spec.md` (and
   in `openspec/specs/` once `trecos-v1` is archived);
 - the `# covers:` and `# screens:` headers of every flow;
-- `maestro/COVERAGE.md`, which lists the scenarios marked "Robolectric only" or
+- `maestro/COVERAGE.md`, which lists the scenarios marked "device test", "Robolectric only" or
   "manual" with a reason;
 - the navigation routes declared in the app's `NavHost`.
 

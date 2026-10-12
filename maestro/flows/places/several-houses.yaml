@@ -1,0 +1,28 @@
+# covers: places: Several houses
+# covers: places: Opening a house from the list
+# screens: home, place
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: two-houses
+# App start opens the last-used house above the list.
+- assertVisible: Apartment
+- assertVisible:
+    id: row_office
+- back
+- assertVisible:
+    id: house_list
+- assertVisible: Apartment
+- assertVisible: Parents' house
+- tapOn: Parents' house
+- assertVisible:
+    id: row_attic
+# It is now the last-used house, so the next app start opens it.
+- stopApp
+- launchApp
+- assertVisible:
+    id: row_attic

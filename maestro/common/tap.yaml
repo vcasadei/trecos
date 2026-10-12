@@ -1,0 +1,11 @@
+# Scrolls until the control with test tag ID is on screen, then taps it.
+# Forms are taller than small screens, so their buttons can start below the fold.
+appId: app.trecos
+---
+- scrollUntilVisible:
+    element:
+      id: ${ID}
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    id: ${ID}

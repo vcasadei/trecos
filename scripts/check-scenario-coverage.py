@@ -3,7 +3,8 @@
 
 A scenario counts as covered when a Maestro flow names it in a header line
 ``# covers: <capability>: <scenario>``, or when maestro/COVERAGE.md lists it as
-"Robolectric only" or "manual" with a reason. A screen (a navigation route of
+"device test" (an instrumented test in app/src/androidTest, which runs on the
+same emulators), "Robolectric only" or "manual", with a reason. A screen (a navigation route of
 the app) counts as covered when a flow names it in ``# screens: a, b``.
 Anything else fails the check, which names what is missing (spec
 device-testing, "Scenario coverage").
@@ -22,7 +23,7 @@ import re
 import sys
 
 SPEC_CHANGES = ("trecos-v1",)
-OUTSIDE_FLOWS = ("Robolectric only", "manual")
+OUTSIDE_FLOWS = ("device test", "Robolectric only", "manual")
 
 
 def spec_scenarios(repo):
@@ -71,8 +72,8 @@ def flow_headers(flows_dir):
 def listed_outside_flows(coverage_md):
     """Reads the scenarios that COVERAGE.md marks as covered outside flows.
 
-    A table row counts when its second column is "Robolectric only" or
-    "manual" and its third column (the reason) is not empty.
+    A table row counts when its second column is one of OUTSIDE_FLOWS and its
+    third column (the reason) is not empty.
 
     Args:
         coverage_md (pathlib.Path): maestro/COVERAGE.md.

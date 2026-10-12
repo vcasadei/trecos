@@ -1,0 +1,82 @@
+# covers: places: Container with contents
+# covers: places: Dismissing the options
+# covers: places: Container without a name
+# covers: places: Box inside a box
+# covers: places: Empty container
+# covers: places: Adding from a container
+# covers: places: Jumping up the hierarchy
+# screens: place, container_form, item_form
+appId: app.trecos
+tags:
+  - smoke
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- tapOn:
+    id: row_office
+- assertVisible: Containers (2)
+- assertVisible:
+    text: Items \(2\)
+    below: Containers \(2\)
+- tapOn:
+    id: row_box-a
+# The + options close with back and with a tap outside, creating nothing.
+- tapOn:
+    id: add_button
+- assertVisible: Container
+- back
+- assertNotVisible:
+    id: add_scrim
+- tapOn:
+    id: add_button
+- tapOn:
+    id: add_scrim
+- assertNotVisible:
+    id: add_scrim
+- assertVisible: Items (1)
+- assertNotVisible: Containers \(.*\)
+# A container needs a name.
+- tapOn:
+    id: add_button
+- tapOn: Container
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible:
+    id: error_name
+- tapOn:
+    id: field_name
+- inputText: Cables bag
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible: Containers (1)
+- assertVisible: Cables bag
+# An empty container hides both sections and explains how to add.
+- tapOn: Cables bag
+- assertVisible:
+    id: empty_hint
+- assertNotVisible: Items \(.*\)
+# + Item inside "Cables bag" creates the item there.
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: field_name
+- inputText: HDMI cable
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible: Items (1)
+- assertVisible: HDMI cable
+# Path levels open that level.
+- tapOn: Office
+- assertVisible: Containers (2)
+- assertVisible:
+    id: row_box-b

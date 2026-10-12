@@ -49,7 +49,8 @@ full suite MUST run on all 36 cells.
 The Maestro flows SHALL cover every screen of the app and every user-facing
 `trecos-v1` scenario that can run on an emulator. A coverage report in the
 repository MUST map each `trecos-v1` scenario to the flows that check it, or
-mark it "Robolectric only" or "manual" with a reason. The suite MUST fail when
+mark it "device test" (an instrumented test run on the same cells),
+"Robolectric only" or "manual", with a reason. The suite MUST fail when
 a scenario is in none of those groups.
 
 #### Scenario: A new scenario with no flow

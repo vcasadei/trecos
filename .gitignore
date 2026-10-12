@@ -31,3 +31,4 @@ build/
 *.iml
 local.properties
 keystore.properties
+scripts/__pycache__/

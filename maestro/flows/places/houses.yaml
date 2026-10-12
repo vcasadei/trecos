@@ -1,0 +1,62 @@
+# covers: places: First run
+# covers: places: Single house
+# covers: places: Deleting the last house
+# covers: places: House without a name
+# covers: places: Creating a second house
+# screens: home, place, house_form
+appId: app.trecos
+tags:
+  - smoke
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: none
+- assertVisible: Name your first place
+- assertVisible:
+    id: field_name
+    text: My home
+- tapOn:
+    id: continue
+# Inside the only house: its own screen, not a house list.
+- assertVisible: My home
+- assertVisible:
+    id: add_button
+- assertNotVisible:
+    id: house_list
+# One house and the default setting: no colour band.
+- assertNotVisible:
+    id: house_band
+- tapOn: More options
+- tapOn: Delete
+- assertVisible: At least one house is required, so this one can't be deleted.
+- tapOn: Close
+- tapOn: Switch house
+- tapOn: Add house
+- assertVisible:
+    id: icon_house
+    checked: true
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible:
+    id: error_name
+    text: A name is required
+- tapOn:
+    id: field_name
+- inputText: Casa dos meus pais
+- tapOn:
+    id: field_address
+- inputText: Rua das Flores, 10
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn:
+    id: tab_Home
+- assertVisible:
+    id: house_list
+- assertVisible: My home
+- assertVisible: Casa dos meus pais
