@@ -1,7 +1,7 @@
 <section class="hero">
   <div class="hero-text">
     <h1>Know what’s in every box.</h1>
-    <p class="lead">Trecos is a home inventory for Android. Record what you own, which box, drawer or shelf it lives in, and what it is worth, across every house you look after.</p>
+    <p class="lead">Trecos is a home inventory for Android. Record what you own, which box, drawer or shelf it lives in, and what it is worth. It stays on your phone, with no account and no ads.</p>
     <p class="cta">
       <a class="button" href="https://github.com/vcasadei/trecos/releases">Download the APK</a>
       <span class="note">Free. Android 9 and later. Google Play coming soon.</span>
@@ -10,33 +10,75 @@
   <img class="hero-logo" src="/assets/trecos-logo.svg" alt="A cardboard box with a lid and a label that says trecos" width="340" height="280">
 </section>
 
-<section class="facts">
-  <div>
-    <h2>Boxes inside boxes</h2>
-    <p>Houses hold rooms, rooms hold shelves, shelves hold boxes, as deep as you need. Every item shows its full path: <em>Apartment › Office › Box A</em>.</p>
+<section class="features" id="features">
+  <div class="section-head">
+    <h2>Features</h2>
+    <div class="theme-switch" role="group" aria-label="Screenshot theme">
+      <button type="button" data-shots="light">White</button>
+      <button type="button" data-shots="dark">Dark</button>
+    </div>
   </div>
-  <div>
-    <h2>Values for insurance</h2>
-    <p>Quantity, unit price, brand, model, serial number and photos. Totals add up per box and per house, in your own currency.</p>
+
+  <div class="feature">
+    {{shot house-list|The house list: Apartment, Beach house and Parents' house, with item counts and values}}
+    <div class="feature-text">
+      <h3>Every house, every box</h3>
+      <p>Keep an apartment, a beach house and your parents’ attic apart. Inside each house, put boxes in shelves in rooms, as many levels deep as you need.</p>
+      <ul>
+        <li>Each item shows its full path: <em>Apartment › Office › Box A</em></li>
+        <li>Move, copy or duplicate items and boxes, also between houses</li>
+        <li>Deleted things wait 30 days in the trash</li>
+      </ul>
+    </div>
   </div>
-  <div>
-    <h2>QR labels</h2>
-    <p>Print a label, stick it on the box, scan it later to see what is inside without opening it.</p>
+
+  <div class="feature">
+    {{shot item|An item with quantity, unit price, total value, brand, model and serial number}}
+    <div class="feature-text">
+      <h3>The details insurance asks for</h3>
+      <p>Quantity, unit price, brand, model, serial number, photos and your own fields. Values add up per box and per house, in your currency.</p>
+      <ul>
+        <li>Two-level categories, with suggestions that work offline, and free-form tags</li>
+        <li>Photos are stored without their location data</li>
+      </ul>
+    </div>
   </div>
-  <div>
-    <h2>Your data stays yours</h2>
-    <p>Works offline, with no account and no server. Optional sync goes to your own Google Drive. No ads, no analytics, no tracking.</p>
+
+  <div class="feature">
+    {{shot search|Search results for “usb” across two houses, with the path to each item}}
+    <div class="feature-text">
+      <h3>Find anything in seconds</h3>
+      <p>Type part of a name and Trecos searches every house, ignoring accents. Filter by house, category or tag, or search only inside one box.</p>
+      <ul>
+        <li>Print QR labels, stick them on boxes and scan one to see what is inside</li>
+        <li>It also reads QR codes made by other programs</li>
+      </ul>
+    </div>
   </div>
+
+  <ul class="more">
+    <li><strong>Backups</strong> Export everything to a file and restore it on any phone.</li>
+    <li><strong>Google Drive sync</strong> Optional, to your own Drive, across your phones.</li>
+    <li><strong>White and Dark</strong> A soft white theme and a pure black one.</li>
+    <li><strong>English and Portuguese</strong> Brazilian Portuguese throughout.</li>
+  </ul>
 </section>
 
-<section class="screens" aria-label="Screenshots">
-  <img src="/assets/screens/house-list.png" alt="The house list with two houses" width="360" height="800" loading="lazy">
-  <img src="/assets/screens/container.png" alt="An office container with two boxes and three items, worth R$3,520.00" width="360" height="800" loading="lazy">
-  <img src="/assets/screens/item.png" alt="An item with quantity, price, brand, model and serial number" width="360" height="800" loading="lazy">
-  <img src="/assets/screens/container-dark.png" alt="The same container in the pure black Dark theme" width="360" height="800" loading="lazy">
+<section class="privacy" id="privacy">
+  <h2>Private by design</h2>
+  <p class="privacy-lead">Your inventory says what you own and where it is. Trecos is built so that nobody else sees it, including us.</p>
+  <ul class="tags">
+    <li><strong>No account, no server</strong> There is no Trecos server. The developer never receives your data.</li>
+    <li><strong>Works offline</strong> Everything lives on your phone and works without a connection.</li>
+    <li><strong>No ads, no tracking</strong> No analytics, no crash reporting, no advertising code. A check in every build keeps them out.</li>
+    <li><strong>Your own Drive</strong> Sync is optional and goes to your Google Drive. Trecos can open only the files it created.</li>
+    <li><strong>App lock</strong> Unlock with your fingerprint, face, PIN, pattern or password.</li>
+    <li><strong>Few permissions</strong> No camera or storage permission: photos come from the system camera and photo picker.</li>
+  </ul>
+  <p class="privacy-more">Database encryption is available as an experimental option. The source code is public, so anyone can check all of this. <a href="/privacy/">Read the privacy policy</a></p>
 </section>
 
-<section class="support">
+<section class="support" id="support">
   <h2>Support Trecos</h2>
   <p>Trecos is free and has no ads. If it helps you keep track of your things, you can help keep it going.</p>
   {{support}}

@@ -10,8 +10,12 @@
   },
   "screens": {
     "house-list.png": "HouseList_White.png",
+    "house-list-dark.png": "HouseList_Dark.png",
     "container.png": "ContainerScreen_White.png",
+    "container-dark.png": "ContainerScreen_Dark.png",
     "item.png": "ItemScreen_White.png",
-    "container-dark.png": "ContainerScreen_Dark.png"
+    "item-dark.png": "ItemScreen_Dark.png",
+    "search.png": "Search_White.png",
+    "search-dark.png": "Search_Dark.png"
   }
 }

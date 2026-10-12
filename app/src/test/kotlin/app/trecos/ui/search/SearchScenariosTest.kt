@@ -218,7 +218,14 @@ class SearchScenariosTest : PlacesTestBase() {
     }
 
     @Test
-    fun searchScreenshot() {
+    fun searchScreenshot() = captureSearch("White")
+
+    @Test
+    @Config(qualifiers = "+night")
+    fun searchScreenshotDark() = captureSearch("Dark")
+
+    /** Seeds three USB items across two houses, searches "usb" and captures it in the qualifiers' theme. */
+    private fun captureSearch(theme: String) {
         seed(
             houses = listOf(house("h1", "Apartment").copy(colorKey = "mint"), house("h2", "Parents").copy(colorKey = "rose")),
             containers = listOf(container("office", name = "Office", houseId = "h1"), container("a1", parentId = "office", name = "Box A", houseId = "h1"), container("a2", name = "Box A", houseId = "h2")),
@@ -232,7 +239,7 @@ class SearchScenariosTest : PlacesTestBase() {
         openSearch()
         typeQuery("usb")
         count("3 items")
-        rule.onRoot().captureRoboImage("src/test/screenshots/Search_White.png")
+        rule.onRoot().captureRoboImage("src/test/screenshots/Search_$theme.png")
     }
 
     @Test
