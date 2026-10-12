@@ -1,0 +1,3 @@
+# The Pix key in the website config is a public random key meant to be shown on
+# trecos.app, not a secret.
+site/config.json:generic-api-key:6

@@ -1,8 +1,12 @@
 {
   "donate": {
-    "githubSponsors": "",
-    "buyMeACoffee": "",
-    "pixKey": ""
+    "githubSponsors": "vcasadei",
+    "buyMeACoffee": "vcasadei",
+    "pix": {
+      "key": "fe90e0b4-48b3-4fc7-a69a-f5dbc8e7e7f5",
+      "name": "Vitor Casadei",
+      "city": "Brasil"
+    }
   },
   "screens": {
     "house-list.png": "HouseList_White.png",
