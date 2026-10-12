@@ -1,0 +1,153 @@
+# Runs the Maestro device suite and the instrumented tests on Android
+# emulators (docs/dev/device-tests.md):
+# - pull requests: the smoke flows on Android 9 / 2 GB and Android 16 / 6 GB;
+# - nightly on master: the full suite once per Android version, memory rotating;
+# - weekly, and when release.yml calls it: the full suite on all 36 cells.
+# scripts/device-matrix.py defines the cells for each tier.
+name: Device tests
+
+on:
+  pull_request:
+  schedule:
+    - cron: "0 3 * * 1-6" # nightly
+    - cron: "0 3 * * 0" # weekly, Sunday
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: "pr, nightly, weekly or release"
+        required: true
+        default: nightly
+  workflow_call:
+    inputs:
+      tier:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: device-tests-${{ github.ref }}-${{ inputs.tier || github.event_name }}
+  cancel-in-progress: true
+
+env:
+  MAESTRO_VERSION: cli-2.11.0
+  MAESTRO_SHA256: 5384593cb4e7a106489e75a821d157dd43f4e438df6bc308b72e82c685e1283a
+
+jobs:
+  matrix:
+    name: Pick the cells
+    runs-on: ubuntu-24.04
+    outputs:
+      tier: ${{ steps.tier.outputs.tier }}
+      cells: ${{ steps.cells.outputs.cells }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - id: tier
+        run: |
+          if [ -n "${{ inputs.tier }}" ]; then tier="${{ inputs.tier }}"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then tier=pr
+          elif [ "${{ github.event.schedule }}" = "0 3 * * 0" ]; then tier=weekly
+          else tier=nightly; fi
+          echo "tier=$tier" >> "$GITHUB_OUTPUT"
+      - id: cells
+        run: echo "cells=$(python3 scripts/device-matrix.py '${{ steps.tier.outputs.tier }}')" >> "$GITHUB_OUTPUT"
+
+  apk:
+    name: Build the debug APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v6
+      - run: ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v7
+        with:
+          name: debug-apk
+          path: app/build/outputs/apk/debug/app-x86_64-debug.apk
+          retention-days: 3
+
+  cell:
+    name: ${{ matrix.name }}
+    needs: [matrix, apk]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.matrix.outputs.cells) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v6
+      - uses: actions/download-artifact@v8
+        with:
+          name: debug-apk
+          path: apk
+      - name: Install Maestro
+        run: |
+          curl -fsSL -o maestro.zip "https://github.com/mobile-dev-inc/maestro/releases/download/${MAESTRO_VERSION}/maestro.zip"
+          echo "${MAESTRO_SHA256}  maestro.zip" | sha256sum -c
+          unzip -q maestro.zip -d "$HOME/.maestro-cli"
+          echo "$HOME/.maestro-cli/maestro/bin" >> "$GITHUB_PATH"
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run the ${{ needs.matrix.outputs.tier }} tier
+        id: run
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_5
+          ram-size: ${{ matrix.memory }}M
+          cores: 2
+          disable-animations: true
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot-save -gpu swiftshader_indirect
+          script: python3 scripts/run-device-tests.py --device emulator-5554 --tier ${{ needs.matrix.outputs.tier }} --cell ${{ matrix.name }} --memory ${{ matrix.memory }} --apk apk/app-x86_64-debug.apk --instrumented
+      - name: Mark an emulator that never booted
+        if: always() && hashFiles(format('build/device-results/{0}/result.json', matrix.name)) == ''
+        run: |
+          mkdir -p "build/device-results/${{ matrix.name }}"
+          printf '{"cell": "%s", "api": %s, "memory": %s, "infrastructure": true, "flows": []}\n' \
+            "${{ matrix.name }}" "${{ matrix.api }}" "${{ matrix.memory }}" > "build/device-results/${{ matrix.name }}/result.json"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: device-results-${{ matrix.name }}
+          path: build/device-results/
+          retention-days: 14
+
+  summary:
+    name: Summary
+    needs: [matrix, cell]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: device-results-*
+          path: results
+          merge-multiple: true
+      - name: Merge the results
+        run: python3 scripts/summarize-device-results.py results --out summary.md; status=$?; cat summary.md >> "$GITHUB_STEP_SUMMARY"; exit $status

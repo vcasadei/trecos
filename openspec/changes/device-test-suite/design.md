@@ -96,8 +96,9 @@ Flows that test creation, import or restore build their data through the UI.
   Play services and account sign-in.
 - **Memory:** the AVD gets `hw.ramSize` and `-memory` set to the cell's size,
   2 CPU cores, `-no-snapshot-save`, `-no-audio` and `-no-boot-anim`.
-- **Snapshot cache:** a clean-boot snapshot is cached per API level and image
-  with `actions/cache`, keyed on the image's revision, so boots stay short.
+- **Snapshot cache:** not used at first. A cached AVD could carry one cell's
+  memory size into another, and a cold boot costs only 2 to 3 minutes per cell.
+  Revisit once the suite is green in CI.
 - **Reference emulator:** API 28 `google_apis` x86_64, 2048 MB, 2 cores, on
   `ubuntu-24.04`. The image revision is recorded in the results.
 
