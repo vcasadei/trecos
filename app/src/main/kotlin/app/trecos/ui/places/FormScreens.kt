@@ -338,7 +338,7 @@ fun ItemFormScreen(
                     Text(stringResource(R.string.action_save_new))
                 }
             }
-            Button(onClick = { vm.save(andNew = false, onDone) }, modifier = Modifier.testTag("save")) { Text(stringResource(R.string.action_save)) }
+            Button(onClick = { /* deliberately broken for the device-suite check */ }, modifier = Modifier.testTag("save")) { Text(stringResource(R.string.action_save)) }
         },
     ) {
         PhotoEditor(
