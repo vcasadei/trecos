@@ -1,0 +1,27 @@
+# Adds an item named NAME with the category CATEGORY (found by SEARCH) and the tag TAG.
+appId: app.trecos
+---
+- runFlow:
+    file: open-tag-field.yaml
+    env:
+      NAME: ${NAME}
+- inputText: ${TAG}
+- tapOn:
+    id: add_tag
+- scrollUntilVisible:
+    element:
+      id: add_category
+    direction: UP
+- tapOn:
+    id: add_category
+- tapOn:
+    id: category_search
+- inputText: ${SEARCH}
+- tapOn:
+    id: pick_${CATEGORY}
+- tapOn:
+    id: picker_done
+- runFlow:
+    file: tap.yaml
+    env:
+      ID: save

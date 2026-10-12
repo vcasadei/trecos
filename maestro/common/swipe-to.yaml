@@ -1,0 +1,13 @@
+# Swipes the list with test tag LIST upward until the control ID is on screen.
+appId: app.trecos
+---
+- repeat:
+    while:
+      notVisible:
+        id: ${ID}
+    times: 40
+    commands:
+      - swipe:
+          from:
+            id: ${LIST}
+          direction: UP

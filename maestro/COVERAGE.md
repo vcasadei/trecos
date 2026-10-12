@@ -23,3 +23,4 @@ place.
 | places: Container without photos | Robolectric only | The placeholder icon is a drawable with no text; `PlaceLookScenariosTest.containerWithoutPhotos` |
 | items: Scanning into an empty form | Robolectric only | Scanning needs the Play services scanner and a camera pointed at a label; `QrScenariosTest.scanningIntoAnEmptyForm` fakes the scanner |
 | items: Scanning when a name exists | Robolectric only | As above; `QrScenariosTest.scanningWhenANameExists` |
+| search: Cancelling a scan | Robolectric only | The emulator's Play services can't download the barcode scanner module; `QrScenariosTest.cancellingAScan` fakes the scanner. Checked by hand on a phone before release |

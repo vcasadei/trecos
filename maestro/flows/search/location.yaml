@@ -1,0 +1,66 @@
+# covers: search: Same box name in two houses
+# covers: search: Searching inside a box
+# screens: search, place, container_form, item_form
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: two-houses
+# Parents' house gets its own "Box A" with a USB-C cable.
+- assertVisible:
+    id: row_office
+- back
+- tapOn: Parents' house
+- tapOn:
+    id: add_button
+- tapOn: Container
+- tapOn:
+    id: field_name
+- inputText: Box A
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn: Box A
+- runFlow:
+    file: ../../common/add-item.yaml
+    env:
+      NAME: USB-C cable 50cm
+# Each result's path starts with its own house.
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- inputText: usb-c cable
+- assertVisible:
+    id: house_pill
+    text: Apartment
+- assertVisible:
+    id: house_pill
+    text: Parents' house
+# "Search in this container" limits results to that box, until its chip is removed.
+- tapOn:
+    id: tab_Home
+- tapOn: Parents' house
+- tapOn: Box A
+- tapOn: More options
+- tapOn: Search in this container
+- assertVisible:
+    id: within_chip
+- tapOn:
+    id: search_field
+- inputText: usb
+- assertVisible:
+    id: result_count
+    text: 1 item
+- assertVisible: USB-C cable 50cm
+- tapOn:
+    id: within_chip
+- assertNotVisible:
+    id: within_chip
+- assertVisible:
+    id: result_count
+    text: 4 items

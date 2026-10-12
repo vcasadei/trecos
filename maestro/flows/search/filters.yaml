@@ -1,0 +1,122 @@
+# covers: search: Any within, all across
+# covers: search: Top-level includes subcategories
+# covers: search: Most expensive first
+# screens: search, place, item_form
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# Three tagged items: an SBC, a USB-C cable and an HDMI cable; one untagged SBC.
+- runFlow:
+    file: ../../common/add-tagged-item.yaml
+    env:
+      NAME: Pi borrowed
+      SEARCH: SBCs
+      CATEGORY: computers.sbcs
+      TAG: borrowed
+- runFlow:
+    file: ../../common/add-tagged-item.yaml
+    env:
+      NAME: Cable borrowed
+      SEARCH: USB-C
+      CATEGORY: cables.usb_c
+      TAG: borrowed
+- runFlow:
+    file: ../../common/add-tagged-item.yaml
+    env:
+      NAME: HDMI borrowed
+      SEARCH: HDMI
+      CATEGORY: cables.hdmi
+      TAG: borrowed
+- runFlow:
+    file: ../../common/add-categorised-item.yaml
+    env:
+      NAME: Pi at home
+      SEARCH: SBCs
+      CATEGORY: computers.sbcs
+# Either category, and the tag: the two borrowed ones with SBC or USB-C.
+- tapOn:
+    id: tab_Search
+- runFlow: ../../common/open-filters.yaml
+- tapOn:
+    id: filter_category_computers.sbcs
+- runFlow:
+    file: ../../common/swipe-to.yaml
+    env:
+      ID: filter_category_cables.usb_c
+      LIST: filters_list
+- tapOn:
+    id: filter_category_cables.usb_c
+- runFlow:
+    file: ../../common/swipe-to.yaml
+    env:
+      ID: filter_tag_borrowed
+      LIST: filters_list
+- tapOn:
+    id: filter_tag_borrowed
+- tapOn:
+    id: filters_done
+- assertVisible:
+    id: result_count
+    text: 2 items
+- assertVisible: Pi borrowed
+- assertVisible: Cable borrowed
+# The top-level "Cables" includes HDMI and USB-C.
+- runFlow: ../../common/open-filters.yaml
+- tapOn:
+    id: clear_all
+- runFlow:
+    file: ../../common/swipe-to.yaml
+    env:
+      ID: filter_category_cables
+      LIST: filters_list
+- tapOn:
+    id: filter_category_cables
+- tapOn:
+    id: filters_done
+- assertVisible:
+    id: result_count
+    text: 2 items
+- assertVisible: Cable borrowed
+- assertVisible: HDMI borrowed
+# Nothing matches the filters and a query: 0, with a way to clear the filters.
+- tapOn:
+    id: search_field
+- inputText: zzzz
+- assertVisible:
+    id: result_count
+    text: 0 items
+- assertVisible:
+    id: clear_filters
+- tapOn:
+    id: clear_filters
+- eraseText
+# Price, high to low: laptop 3,500 first, unpriced items last.
+- swipe:
+    from:
+      id: match
+    direction: LEFT
+- tapOn:
+    id: sort
+- tapOn: Unit price
+- tapOn:
+    id: sort_direction
+- assertVisible:
+    id: row_usb-hub
+    below:
+      id: row_laptop
+- assertVisible:
+    id: row_usb-cable
+    below:
+      id: row_usb-hub
+- scrollUntilVisible:
+    element:
+      id: row_mystery
+- assertVisible:
+    id: row_mystery
+    below:
+      id: row_usb-cable
