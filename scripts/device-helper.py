@@ -208,7 +208,7 @@ def wipe_drive(device):
     """Empties the signed-in test account's Drive of Trecos data, through the app.
 
     The debug app's TestSeedReceiver deletes the Trecos folder and the hidden
-    app folder with the app's own Google authorization, which reaches the
+    app folder of TEST_GOOGLE_ACCOUNT with the app's own Google authorization, which reaches the
     hidden folder that scripts/clean-test-drive.py can't.
 
     Args:
@@ -217,7 +217,11 @@ def wipe_drive(device):
     Returns:
         dict: the app's answer, such as "wiped 3" or "no-account".
     """
-    done = adb(device, "shell", "am", "broadcast", "-n", f"{PACKAGE}/.TestSeedReceiver", "--es", "action", "wipe-drive")
+    account = os.environ.get("TEST_GOOGLE_ACCOUNT", "")
+    if not account:
+        return {"result": "no-account"}
+    done = adb(device, "shell", "am", "broadcast", "-n", f"{PACKAGE}/.TestSeedReceiver", "--es", "action", "wipe-drive",
+               "--es", "account", account)
     answer = done.split('data="', 1)[1].split('"', 1)[0] if 'data="' in done else "no answer"
     return {"result": answer}
 

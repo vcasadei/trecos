@@ -12,7 +12,11 @@ import app.trecos.data.House
 import app.trecos.data.Item
 import app.trecos.data.Photo
 import app.trecos.sync.DriveClient
-import app.trecos.sync.GoogleDriveAuth
+import com.google.android.gms.auth.api.identity.AuthorizationRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.common.api.Scope
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,8 +29,8 @@ import java.io.File
  * `adb shell am broadcast -n app.trecos/.TestSeedReceiver --es fixture two-houses`.
  * The fixtures are [FIXTURES]; `1000-items` is the performance pass's data
  * (task 14.8), and an `--ei count` extra changes its item count.
- * `--es action wipe-drive` instead deletes everything Trecos keeps in the
- * signed-in test account's Drive, the Trecos folder and the hidden app folder,
+ * `--es action wipe-drive --es account <address>` instead deletes everything
+ * Trecos keeps in that signed-in account's Drive, the Trecos folder and the hidden app folder,
  * so each Drive flow starts from an empty Drive; the broadcast's result data
  * says what happened. In release builds the receiver is disabled in the
  * manifest and ignores any intent.
@@ -45,7 +49,8 @@ class TestSeedReceiver : BroadcastReceiver() {
             val pending = goAsync()
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    pending.resultData = runCatching { wipeDrive(context) }.getOrElse { "failed ${it.javaClass.simpleName}" }
+                    val account = intent.getStringExtra("account").orEmpty()
+                    pending.resultData = runCatching { wipeDrive(context, account) }.getOrElse { "failed ${it.javaClass.simpleName}" }
                 } finally {
                     pending.finish()
                 }
@@ -113,15 +118,26 @@ class TestSeedReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Deletes the Trecos folder and every hidden app file in the Drive of
-         * the account this device last authorized, without asking.
+         * Deletes the Trecos folder and every hidden app file in an account's
+         * Drive, without asking. The account must be on the device and have
+         * allowed Trecos before; naming it lets this work on a cleared app.
          *
          * @param context asks Google for a token.
+         * @param account the account's address.
          * @return "wiped N" with the number of deleted entries, or
-         *   "no-account" when this device has no authorized account yet.
+         *   "no-account" when Google gives no token without asking.
          */
-        private suspend fun wipeDrive(context: Context): String {
-            val token = GoogleDriveAuth.token(context) ?: return "no-account"
+        private suspend fun wipeDrive(context: Context, account: String): String {
+            if (account.isEmpty()) return "no-account"
+            val request = AuthorizationRequest.builder()
+                .setRequestedScopes(listOf(Scope("https://www.googleapis.com/auth/drive.file"), Scope("https://www.googleapis.com/auth/drive.appdata")))
+                .setAccount(android.accounts.Account(account, "com.google"))
+                .build()
+            val token = suspendCancellableCoroutine<String?> { continuation ->
+                Identity.getAuthorizationClient(context).authorize(request)
+                    .addOnSuccessListener { continuation.resume(if (it.hasResolution()) null else it.accessToken) }
+                    .addOnFailureListener { continuation.resume(null) }
+            } ?: return "no-account"
             val drive = DriveClient(token = { token })
             val entries = drive.list("name = 'Trecos' and mimeType = '${DriveClient.FOLDER}' and trashed = false") +
                 drive.list("trashed = false", space = "appDataFolder")

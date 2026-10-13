@@ -13,6 +13,9 @@ appId: app.trecos
     file: device.yaml
     env:
       ACTION: wipe-drive
+- assertTrue:
+    condition: ${output.device.result.startsWith('wiped') || output.device.result === 'no-account'}
+    label: The test Drive was emptied
 - runFlow: open-sync.yaml
 - runFlow: google-sign-in.yaml
 - extendedWaitUntil:

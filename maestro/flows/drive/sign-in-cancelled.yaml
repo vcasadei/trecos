@@ -1,0 +1,32 @@
+# covers: sync: Sign-in cancelled
+# screens: sync
+appId: app.trecos
+tags:
+  - drive
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- runFlow: ../../common/open-sync.yaml
+- tapOn:
+    id: connect_drive
+# Whichever Google screen comes first, leaving it cancels the sign-in.
+- extendedWaitUntil:
+    visible: (?i)(sign in with ease|email or phone|choose an account.*|.*wants (additional )?access to your google account|.*hasn.t verified this app)
+    timeout: 60000
+- repeat:
+    times: 5
+    while:
+      notVisible:
+        id: connect_drive
+    commands:
+      - back
+- assertVisible:
+    id: connect_drive
+- assertNotVisible: Connected as.*
+- back
+- assertVisible:
+    text: "Off"
+    below:
+      text: Sync
