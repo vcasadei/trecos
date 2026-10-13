@@ -43,6 +43,14 @@ class DeviceMatrixTest(unittest.TestCase):
         cell = device_matrix.cell(28, 2048)
         self.assertEqual(cell, {"api": 28, "android": "9", "memory": 2048, "name": "android9-2g"})
 
+    def test_drive_job_never_runs_for_pull_requests(self):
+        self.assertEqual(device_matrix.drive_matrix("pr"), [])
+
+    def test_drive_job_runs_api_36_nightly_and_adds_the_reference_weekly(self):
+        self.assertEqual([c["name"] for c in device_matrix.drive_matrix("nightly")], ["drive-android16-4g"])
+        for tier in ("weekly", "release"):
+            self.assertEqual([c["name"] for c in device_matrix.drive_matrix(tier)], ["drive-android9-2g", "drive-android16-4g"])
+
     def test_unknown_tier_is_refused(self):
         with self.assertRaises(ValueError):
             device_matrix.matrix("hourly", day=1)

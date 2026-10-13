@@ -9,8 +9,13 @@ memory (spec device-testing, "Device matrix" and "Run tiers"):
   day of the year, so each version runs every size within four nights.
 - ``weekly`` and ``release``: all 36 cells.
 
-Usage: ``scripts/device-matrix.py <tier> [--day N]``. The output is a JSON
-object with an ``include`` list, ready for ``strategy.matrix``.
+With ``--drive`` it prints the cells of the Drive job instead, which signs in
+with the Google test account (spec "Google test account"): none for ``pr``,
+Android 16 / 4 GB nightly, and also the reference emulator (Android 9 / 2 GB)
+weekly and for a release.
+
+Usage: ``scripts/device-matrix.py <tier> [--day N] [--drive]``. The output is a
+JSON object with an ``include`` list, ready for ``strategy.matrix``.
 """
 import argparse
 import datetime
@@ -63,6 +68,28 @@ def matrix(tier, day):
     raise ValueError(f"unknown tier: {tier}")
 
 
+def drive_matrix(tier):
+    """Lists the cells the Drive job runs on for a tier.
+
+    Args:
+        tier (str): one of ``pr``, ``nightly``, ``weekly`` or ``release``.
+
+    Returns:
+        list[dict]: the cells; empty for pull requests, which never get the secrets.
+
+    Raises:
+        ValueError: when the tier is unknown.
+    """
+    if tier not in TIERS:
+        raise ValueError(f"unknown tier: {tier}")
+    if tier == "pr":
+        return []
+    cells = [cell(36, 4096)]
+    if tier in ("weekly", "release"):
+        cells.insert(0, cell(28, 2048))
+    return [dict(c, name="drive-" + c["name"]) for c in cells]
+
+
 def main(argv):
     """Prints the matrix for the tier named on the command line.
 
@@ -75,8 +102,10 @@ def main(argv):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("tier", choices=TIERS)
     parser.add_argument("--day", type=int, default=datetime.date.today().timetuple().tm_yday)
+    parser.add_argument("--drive", action="store_true", help="the Drive job's cells")
     args = parser.parse_args(argv)
-    print(json.dumps({"include": matrix(args.tier, args.day)}))
+    cells = drive_matrix(args.tier) if args.drive else matrix(args.tier, args.day)
+    print(json.dumps({"include": cells}))
     return 0
 
 

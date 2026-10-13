@@ -57,8 +57,9 @@ DRIVER_RESTARTS = 2
 TIER_TAGS = {
     "pr": {"smoke"},
     "nightly": {"full"},
-    "weekly": {"full", "roundtrip"},
-    "release": {"full", "roundtrip"},
+    # The round trips sign in with Google, so they run in the Drive job (tier drive).
+    "weekly": {"full"},
+    "release": {"full"},
     "drive": {"drive"},
     "roundtrip": {"roundtrip"},
 }
