@@ -106,8 +106,13 @@ adb shell am broadcast -n app.trecos/.TestSeedReceiver --es fixture two-houses
 |---|---|---|---|
 | `pr` | Every pull request | Android 9 / 2 GB and Android 16 / 6 GB | tagged `smoke` |
 | `nightly` | Monday to Saturday, 03:00 UTC, on `master` | One per Android version (9 to 16), memory rotating | tagged `full` |
-| `weekly` | Sunday, 03:00 UTC | All 36: Android 9 to 16 × 2, 3, 4 and 6 GB | `full` and `roundtrip` |
-| `release` | Called by `release.yml` for a `v*` tag | All 36 | `full` and `roundtrip` |
+| `weekly` | Sunday, 03:00 UTC | All 36: Android 9 to 16 × 2, 3, 4 and 6 GB | tagged `full` |
+| `release` | Called by `release.yml` for a `v*` tag | All 36 | tagged `full` |
+| `drive` | With `nightly`, `weekly` and `release`, never on pull requests | Nightly: Android 16 / 4 GB. Weekly and release: also Android 9 / 2 GB | tagged `drive`, which includes every `roundtrip` flow |
+
+`scripts/device-matrix.py <tier> --drive` lists the Drive job's cells. The
+Drive flows sign in with the Google test account (below), so every
+`roundtrip` flow is also tagged `drive` and runs only in that job.
 
 ## Running a cell like CI
 
@@ -130,8 +135,15 @@ What it does:
   - reruns a failed flow once, and marks a flow that then passes as `flaky`.
 - **Evidence:** keeps, for every failed attempt, the screenshots, Maestro's
   step log and `logcat`.
-- **Secrets:** replaces the values of the Google test secrets with `***` in
-  every output file.
+- **Secrets:** replaces the values of the Google test secrets and the test
+  account's address with `***` in every output file. When the account is set,
+  it also deletes every screenshot and recording, because Google's sign-in
+  screens show the account's addresses and an image can't be redacted.
+  `--keep-screens` keeps them for local debugging; never use it in CI.
+- **Blocked sign-in:** a flow that fails because Google refused the sign-in is
+  reported as `sign-in-blocked`. That status fails nothing (see below).
+- **Clean slate:** after every flow it turns airplane mode off, removes the
+  helper's PIN and turns Gmail back on.
 
 To repeat a CI run exactly, pass the seed printed in the run summary as
 `--seed`.
@@ -150,6 +162,9 @@ actions over HTTP on `127.0.0.1`, and flows call it through
 | `mail-apps-off` / `mail-apps-on` | Turns Gmail off or on |
 | `add-photos` | Copies the photos in `maestro/media` to the gallery (Maestro's `addMedia` fails on a fresh Android 9 emulator) |
 | `push-bad-backups` / `clear-downloads` | Puts a corrupt and a too-new backup in Downloads, or removes Trecos backups |
+| `wipe-drive` | Deletes the Trecos folder and the hidden app folder from the test account's Drive, through the debug app's `TestSeedReceiver` and its own Google authorization. Answers `no-account` on a device that never signed in |
+| `app-snapshot` / `app-restore` | Saves the app's data on the computer, then puts it back. A flow uses this to play two devices on one emulator: the phone is set aside while a cleared app, the tablet, restores and syncs |
+| `photo-files` | Counts the photo files in the app's storage, to check that a restore brought the photos back, not only their rows |
 
 The runner starts the helper and passes its port as `DEVICE_HELPER_PORT`. When
 you run a flow by hand, start it yourself:
@@ -171,6 +186,72 @@ maestro --device emulator-5556 test -e DEVICE_HELPER_PORT=7556 maestro/flows/app
 
 A cell whose emulator never booted is reported in the "Infrastructure" column,
 apart from test failures.
+
+Outside pull requests, two more jobs use the `google-test` environment:
+- **CI-signed APK:** builds the debug APK with the CI debug key
+  (`CI_DEBUG_KEYSTORE`). Google knows that key as the Android OAuth client
+  "Trecos CI debug", so the test account can sign in on any runner.
+- **Drive cells:** run one at a time, because they share the test account's
+  Drive. Each first empties the account's Drive with
+  `scripts/clean-test-drive.py`, then runs the `drive` tier.
+
+## Google test account
+
+The Drive and round-trip flows sign in with a dedicated Google account that
+holds only fixture data. It is never a personal account.
+
+**Secrets.** They live in the `google-test` environment, which only `master`
+and `v*` tags can use, so pull requests (forks included) never receive them:
+
+| Secret | What it is |
+|---|---|
+| `TEST_GOOGLE_ACCOUNT` | The test account's address |
+| `TEST_GOOGLE_PASSWORD` | Its password |
+| `TEST_GOOGLE_RECOVERY_EMAIL` | Its recovery address, which answers Google's "Verify it's you" on a new emulator |
+| `TEST_GOOGLE_DRIVE_TOKEN` | A refresh token for the account, `drive.file` scope only, for `scripts/clean-test-drive.py` |
+| `TEST_GOOGLE_OAUTH_CLIENT` | The "Trecos CI cleanup" OAuth client's id and secret, which the token was made with |
+| `CI_DEBUG_KEYSTORE` | The CI debug keystore, base64 |
+
+**Running Drive flows locally.**
+1. Copy `maestro/.env.example` to `maestro/.env` (gitignored) and fill in the
+   account, password and recovery address.
+2. Load it and run the `drive` tier:
+
+   ```bash
+   set -a; . maestro/.env; set +a
+   python3 scripts/run-device-tests.py --device emulator-5556 --tier drive
+   ```
+
+   A local debug build is signed with your own debug key, so that key's
+   SHA-1 must also be registered as an Android OAuth client of the Trecos
+   project.
+
+**Signing in.** `maestro/common/google-sign-in.yaml` connects from
+Settings > Sync. Google's screens differ between a new emulator and one that
+already has the account, so the subflow answers whichever screen shows up:
+- the SIM offer, the e-mail and the password;
+- "Verify it's you", answered with "Confirm your recovery email";
+- the terms, recovery info, home address and Google services screens;
+- the account chooser;
+- Trecos's consent ("Google hasn't verified this app" while the OAuth consent
+  screen is in testing).
+
+**Emptying Drive.** Each Drive flow starts with an empty Drive:
+- `scripts/clean-test-drive.py` empties it before a CI run. Its token reaches
+  only the Trecos folder, because Google's device flow refuses
+  `drive.appdata`.
+- `maestro/common/connect-drive.yaml` empties it again before each flow, using
+  the helper's `wipe-drive`. That also reaches the hidden app folder, where the
+  encryption key lives.
+
+**`sign-in-blocked`.** When Google asks for anything the subflow can't
+answer, such as a code sent to the phone or recovery address, or refuses with
+"Couldn't sign you in", the flow fails on the text `sign-in-blocked`. The
+runner reports it with that status: the summary lists it, but it fails no
+cell, because Google refused the account and the app was never tested. Seeing
+it again and again means the account needs attention. Sign in once by hand
+on an emulator, answering Google's question, and check that the recovery
+address is still the one in `TEST_GOOGLE_RECOVERY_EMAIL`.
 
 ## Coverage
 
