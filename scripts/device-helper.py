@@ -275,7 +275,24 @@ def app_restore(device):
     return {"restored": True}
 
 
+def photo_files(device):
+    """Counts the photo files in the app's storage (files/photos/<sha>.webp).
+
+    A restore can bring back an item's photo rows without the photos' bytes;
+    this tells the flow the files are really there. Needs a debuggable build.
+
+    Args:
+        device (str): the device serial.
+
+    Returns:
+        dict: the number of stored photos.
+    """
+    names = adb(device, "shell", "run-as", PACKAGE, "ls", "files/photos").split()
+    return {"count": sum(1 for n in names if n.endswith(".webp"))}
+
+
 ACTIONS = {
+    "photo-files": photo_files,
     "wipe-drive": wipe_drive,
     "app-snapshot": app_snapshot,
     "app-restore": app_restore,

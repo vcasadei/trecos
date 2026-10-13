@@ -1,5 +1,6 @@
 # Connects Google Drive with the Google test account, starting on the Sync
-# screen, and ends there showing "Connected as". On a device with no account,
+# screen, and ends there showing "Connected as", or the offer to restore or
+# merge the houses Drive already holds (whose dialog hides the screen). On a device with no account,
 # Google first adds it to the device through its own screens, which vary with
 # the device and over time, so this walks whichever of them shows up: the SIM
 # offer, e-mail, password, "Verify it's you" (answered with the recovery
@@ -17,10 +18,10 @@ appId: app.trecos
 - repeat:
     times: 20
     while:
-      notVisible: Connected as.*
+      notVisible: (Connected as.*|Restore from Drive\?|Drive has other houses)
     commands:
       - extendedWaitUntil:
-          visible: (?i)(connected as.*|sign in with ease|email or phone|enter your password|verify it.s you|enter recovery email address|i agree|make sure you can always sign in|set a home address|google services|.*hasn.t verified this app|.*wants (additional )?access to your google account|choose an account.*|enter (the )?code|.*couldn.t sign you in.*)
+          visible: (?i)(connected as.*|restore from drive\?|drive has other houses|sign in with ease|email or phone|enter your password|verify it.s you|enter recovery email address|i agree|make sure you can always sign in|set a home address|google services|.*hasn.t verified this app|.*wants (additional )?access to your google account|choose an account.*|enter (the )?code|.*couldn.t sign you in.*)
           timeout: 60000
       - runFlow:
           when:
@@ -107,4 +108,4 @@ appId: app.trecos
           commands:
             # Fails with "sign-in-blocked" in the log, which the runner reports.
             - assertVisible: sign-in-blocked
-- assertVisible: Connected as.*
+- assertVisible: (Connected as.*|Restore from Drive\?|Drive has other houses)

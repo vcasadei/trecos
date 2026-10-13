@@ -1,0 +1,31 @@
+# Turns encryption on (CONFIRM: Encrypt) or off (CONFIRM: Turn off) from
+# Settings, waits for Trecos to restart, and checks the setting reads EXPECT
+# ("On" or "Off").
+appId: app.trecos
+---
+- tapOn:
+    id: tab_Settings
+- scrollUntilVisible:
+    element:
+      id: setting_encryption
+    centerElement: true
+- tapOn:
+    id: setting_encryption
+- tapOn: ${CONFIRM}
+- extendedWaitUntil:
+    visible:
+      id: tab_Settings
+    timeout: 180000
+- extendedWaitUntil:
+    notVisible:
+      id: encryption_progress
+    timeout: 180000
+- tapOn:
+    id: tab_Settings
+- scrollUntilVisible:
+    element:
+      id: value_encryption
+    centerElement: true
+- assertVisible:
+    id: value_encryption
+    text: ${EXPECT}

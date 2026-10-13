@@ -1,0 +1,31 @@
+# covers: sync: New phone
+# screens: sync
+# Spec device-testing, "Sync round trip on a fresh phone": the photos fixture
+# syncs, then a freshly cleared app (a new phone) restores it from Drive.
+appId: app.trecos
+tags:
+  - roundtrip
+  - drive
+---
+- runFlow:
+    file: ../../common/connect-drive.yaml
+    env:
+      FIXTURE: photos
+# The new phone: a cleared app with only the default empty house.
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: none
+- tapOn:
+    id: continue
+- runFlow: ../../common/open-sync.yaml
+- runFlow: ../../common/google-sign-in.yaml
+- extendedWaitUntil:
+    visible: Restore from Drive\?
+    timeout: 120000
+- assertVisible: .*Apartment.*
+- tapOn: Restore
+- extendedWaitUntil:
+    visible: Last sync.*
+    timeout: 180000
+- runFlow: ../../common/check-photos-fixture.yaml
