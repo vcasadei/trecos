@@ -347,6 +347,8 @@ def main(argv):
     parser.add_argument("--seed", type=int, default=random.SystemRandom().randrange(1_000_000))
     parser.add_argument("--out", default=str(REPO / "build" / "device-results"))
     parser.add_argument("--flows", default=str(FLOWS))
+    parser.add_argument("--keep-screens", action="store_true",
+                        help="keep screenshots in Google runs too (local debugging only; never in CI)")
     parser.add_argument("--instrumented", action="store_true", help="also run connectedDebugAndroidTest (then --apk is needed)")
     args = parser.parse_args(argv)
     if args.instrumented and not args.apk:
@@ -399,7 +401,7 @@ def main(argv):
     helper.terminate()
     (out / "result.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     redact(out, [os.environ.get(k, "") for k in PRIVATE_ENV])
-    if os.environ.get("TEST_GOOGLE_ACCOUNT"):
+    if os.environ.get("TEST_GOOGLE_ACCOUNT") and not args.keep_screens:
         print(f"Dropped {drop_screens(out)} screenshots and recordings: they may show the test account")
     failed = [f for f in result["flows"] if f["status"] == "failed"] or result.get("instrumented") == "failed"
     return 1 if failed else 0

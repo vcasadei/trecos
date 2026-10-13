@@ -11,6 +11,8 @@ import app.trecos.data.Container
 import app.trecos.data.House
 import app.trecos.data.Item
 import app.trecos.data.Photo
+import app.trecos.sync.DriveClient
+import app.trecos.sync.GoogleDriveAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,8 +24,12 @@ import java.io.File
  * Run with
  * `adb shell am broadcast -n app.trecos/.TestSeedReceiver --es fixture two-houses`.
  * The fixtures are [FIXTURES]; `1000-items` is the performance pass's data
- * (task 14.8), and an `--ei count` extra changes its item count. In release
- * builds the receiver is disabled in the manifest and ignores any intent.
+ * (task 14.8), and an `--ei count` extra changes its item count.
+ * `--es action wipe-drive` instead deletes everything Trecos keeps in the
+ * signed-in test account's Drive, the Trecos folder and the hidden app folder,
+ * so each Drive flow starts from an empty Drive; the broadcast's result data
+ * says what happened. In release builds the receiver is disabled in the
+ * manifest and ignores any intent.
  */
 class TestSeedReceiver : BroadcastReceiver() {
 
@@ -35,6 +41,17 @@ class TestSeedReceiver : BroadcastReceiver() {
      */
     override fun onReceive(context: Context, intent: Intent) {
         if (!enabled) return
+        if (intent.getStringExtra("action") == WIPE_DRIVE) {
+            val pending = goAsync()
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    pending.resultData = runCatching { wipeDrive(context) }.getOrElse { "failed ${it.javaClass.simpleName}" }
+                } finally {
+                    pending.finish()
+                }
+            }
+            return
+        }
         val fixture = intent.getStringExtra("fixture") ?: THOUSAND_ITEMS
         val count = intent.getIntExtra("count", 1000)
         val pending = goAsync()
@@ -56,6 +73,7 @@ class TestSeedReceiver : BroadcastReceiver() {
         /** The fixture sets, by the name the `fixture` extra takes. */
         val FIXTURES = setOf("one-house", "two-houses", "photos", "1000-items")
 
+        private const val WIPE_DRIVE = "wipe-drive"
         private const val THOUSAND_ITEMS = "1000-items"
         private const val TWO_HOUSES = "two-houses"
         private const val PHOTOS = "photos"
@@ -92,6 +110,23 @@ class TestSeedReceiver : BroadcastReceiver() {
                 if (fixture == PHOTOS) addPhotos(context, app)
             }
             app.preferences.setLastHouse(first)
+        }
+
+        /**
+         * Deletes the Trecos folder and every hidden app file in the Drive of
+         * the account this device last authorized, without asking.
+         *
+         * @param context asks Google for a token.
+         * @return "wiped N" with the number of deleted entries, or
+         *   "no-account" when this device has no authorized account yet.
+         */
+        private suspend fun wipeDrive(context: Context): String {
+            val token = GoogleDriveAuth.token(context) ?: return "no-account"
+            val drive = DriveClient(token = { token })
+            val entries = drive.list("name = 'Trecos' and mimeType = '${DriveClient.FOLDER}' and trashed = false") +
+                drive.list("trashed = false", space = "appDataFolder")
+            entries.forEach { drive.delete(it.id) }
+            return "wiped ${entries.size}"
         }
 
         /** One house with an office, two boxes inside it and four items, one without a price. */

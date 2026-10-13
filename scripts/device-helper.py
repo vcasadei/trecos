@@ -204,7 +204,77 @@ def add_photos(device):
     return {"added": len(photos)}
 
 
+def wipe_drive(device):
+    """Empties the signed-in test account's Drive of Trecos data, through the app.
+
+    The debug app's TestSeedReceiver deletes the Trecos folder and the hidden
+    app folder with the app's own Google authorization, which reaches the
+    hidden folder that scripts/clean-test-drive.py can't.
+
+    Args:
+        device (str): the device serial.
+
+    Returns:
+        dict: the app's answer, such as "wiped 3" or "no-account".
+    """
+    done = adb(device, "shell", "am", "broadcast", "-n", f"{PACKAGE}/.TestSeedReceiver", "--es", "action", "wipe-drive")
+    answer = done.split('data="', 1)[1].split('"', 1)[0] if 'data="' in done else "no answer"
+    return {"result": answer}
+
+
+# The app's folders a snapshot keeps: its database, files and settings.
+APP_DIRS = ("databases", "files", "no_backup", "shared_prefs")
+SNAPSHOTS = pathlib.Path(tempfile.gettempdir()) / "trecos-device-helper"
+
+
+def app_snapshot(device):
+    """Saves the app's data on the computer, as "the phone" of a two-device flow.
+
+    Between app_snapshot and app_restore a flow can clear the app and use it as
+    a second device on the same Google account; restoring brings the first
+    device back, with its device id and unsynced changes. Needs a debuggable
+    build (run-as).
+
+    Args:
+        device (str): the device serial.
+
+    Returns:
+        dict: the snapshot's size in bytes.
+    """
+    adb(device, "shell", "am", "force-stop", PACKAGE)
+    present = adb(device, "shell", "run-as", PACKAGE, "ls").split()
+    dirs = [d for d in APP_DIRS if d in present]
+    data = subprocess.run(["adb", "-s", device, "exec-out", "run-as", PACKAGE, "tar", "-cf", "-", *dirs],
+                          capture_output=True, timeout=120).stdout
+    SNAPSHOTS.mkdir(exist_ok=True)
+    (SNAPSHOTS / f"{device}.tar").write_bytes(data)
+    return {"bytes": len(data)}
+
+
+def app_restore(device):
+    """Puts back the app data app_snapshot saved, replacing the current data.
+
+    Args:
+        device (str): the device serial.
+
+    Returns:
+        dict: whether a snapshot was restored.
+    """
+    snapshot = SNAPSHOTS / f"{device}.tar"
+    if not snapshot.exists():
+        return {"restored": False}
+    adb(device, "shell", "am", "force-stop", PACKAGE)
+    adb(device, "shell", "run-as", PACKAGE, "rm", "-rf", *APP_DIRS)
+    subprocess.run(["adb", "-s", device, "exec-in", "run-as", PACKAGE, "tar", "-xf", "-"],
+                   input=snapshot.read_bytes(), capture_output=True, timeout=120)
+    snapshot.unlink()
+    return {"restored": True}
+
+
 ACTIONS = {
+    "wipe-drive": wipe_drive,
+    "app-snapshot": app_snapshot,
+    "app-restore": app_restore,
     "add-photos": add_photos,
     "push-bad-backups": push_bad_backups,
     "clear-downloads": clear_downloads,

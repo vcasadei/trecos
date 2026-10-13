@@ -1,0 +1,13 @@
+# Opens Settings > Sync.
+appId: app.trecos
+---
+- tapOn:
+    id: tab_Settings
+- scrollUntilVisible:
+    element:
+      id: setting_sync
+    centerElement: true
+- tapOn:
+    id: setting_sync
+- assertVisible:
+    id: (connect_drive|sync_status)
