@@ -209,7 +209,10 @@ class SyncEngine(
         if (merged != localRows) apply(houseId, localRows, merged)
 
         val waiting = movePhotos(remote, merged, photosAllowed)
-        val theirDevice = others.keys.firstOrNull().orEmpty()
+        // The name the other device gave itself, as its latest commit records it.
+        val theirDevice = others.values.firstOrNull()?.let { ref ->
+            bytesOf(remote, houseId, ref.commitId)?.let { CommitCodec.meta(plain(it)).deviceName }
+        }.orEmpty()
         if (result.conflicts.isNotEmpty()) {
             store.update { s ->
                 val known = s.conflicts.map { it.houseId to (it.conflict.key to it.conflict.field) }.toSet()
