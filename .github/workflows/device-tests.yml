@@ -4,7 +4,7 @@
 # - nightly on master: the full suite once per Android version, memory rotating;
 # - weekly, and when release.yml calls it: the full suite on all 36 cells.
 # Outside pull requests a Drive job also signs in with the Google test account
-# (nightly on Android 16 / 4 GB; weekly and for a release on Android 9 / 2 GB
+# (nightly on Android 16 / 4 GB; weekly and for a release on Android 16 / 2 GB
 # too), using the google-test environment's secrets. Pull requests never reach it.
 # scripts/device-matrix.py defines the cells for each tier.
 name: Device tests

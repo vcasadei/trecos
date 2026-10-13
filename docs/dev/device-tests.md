@@ -108,9 +108,13 @@ adb shell am broadcast -n app.trecos/.TestSeedReceiver --es fixture two-houses
 | `nightly` | Monday to Saturday, 03:00 UTC, on `master` | One per Android version (9 to 16), memory rotating | tagged `full` |
 | `weekly` | Sunday, 03:00 UTC | All 36: Android 9 to 16 × 2, 3, 4 and 6 GB | tagged `full` |
 | `release` | Called by `release.yml` for a `v*` tag | All 36 | tagged `full` |
-| `drive` | With `nightly`, `weekly` and `release`, never on pull requests | Nightly: Android 16 / 4 GB. Weekly and release: also Android 9 / 2 GB | tagged `drive`, which includes every `roundtrip` flow |
+| `drive` | With `nightly`, `weekly` and `release`, never on pull requests | Nightly: Android 16 / 4 GB. Weekly and release: also Android 16 / 2 GB | tagged `drive`, which includes every `roundtrip` flow |
 
 `scripts/device-matrix.py <tier> --drive` lists the Drive job's cells. The
+Drive job runs only on Android 16. The Android 9 to 15 emulator images ship
+a Google Play services from 2020 that can't update without the Play Store,
+and it refuses Trecos's sign-in ("Caller not whitelisted to call
+Authorization APIs"). Real phones keep Play services up to date. The
 Drive flows sign in with the Google test account (below), so every
 `roundtrip` flow is also tagged `drive` and runs only in that job.
 

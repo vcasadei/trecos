@@ -46,10 +46,10 @@ class DeviceMatrixTest(unittest.TestCase):
     def test_drive_job_never_runs_for_pull_requests(self):
         self.assertEqual(device_matrix.drive_matrix("pr"), [])
 
-    def test_drive_job_runs_api_36_nightly_and_adds_the_reference_weekly(self):
+    def test_drive_job_runs_android_16_and_adds_2_gb_weekly(self):
         self.assertEqual([c["name"] for c in device_matrix.drive_matrix("nightly")], ["drive-android16-4g"])
         for tier in ("weekly", "release"):
-            self.assertEqual([c["name"] for c in device_matrix.drive_matrix(tier)], ["drive-android9-2g", "drive-android16-4g"])
+            self.assertEqual([c["name"] for c in device_matrix.drive_matrix(tier)], ["drive-android16-2g", "drive-android16-4g"])
 
     def test_unknown_tier_is_refused(self):
         with self.assertRaises(ValueError):

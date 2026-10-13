@@ -73,9 +73,9 @@ Each task writes the area's flows with `# covers:` and `# screens:` headers, tag
 - [x] 7.4 **(user)** Create the GitHub environment `google-test` (limited to `master` and `v*` tags) with the secrets `TEST_GOOGLE_ACCOUNT`, `TEST_GOOGLE_PASSWORD`, `TEST_GOOGLE_DRIVE_TOKEN`, `TEST_GOOGLE_OAUTH_CLIENT` and `CI_DEBUG_KEYSTORE`, through a script in `~/` run with `! bash`; verify `gh secret list --env google-test` names all five
 - [x] 7.5 Add `maestro/.env.example` with placeholders for those values and confirm `maestro/.env` is gitignored (`git check-ignore maestro/.env`)
 - [ ] 7.6 Write `scripts/clean-test-drive.py` (standard library only) and run it before the Drive flows; test scenario "Clean Drive before a run": after it, the account has no Trecos folder
-- [x] 7.7 Write the account sign-in subflow for API 28 and 36 (Settings > Accounts, password from the environment) with challenge detection; test scenario "Google challenges the sign-in" by forcing the challenge branch, which reports `sign-in-blocked` without failing the run
+- [x] 7.7 Write the account sign-in subflow for API 36 (Trecos's Sync screen, password and recovery address from the environment; older emulator images can't authorize, see design) with challenge detection; test scenario "Google challenges the sign-in" by forcing the challenge branch, which reports `sign-in-blocked` without failing the run
 - [ ] 7.8 Write the `drive` flows (connect, sync, photos uploaded, disconnect, deleted houses and their restore) and the `roundtrip` flow "Sync round trip on a fresh phone" across two app installs; verify on both local cells with the test account
-- [ ] 7.9 Wire the Drive jobs into `device-tests.yml` (nightly on API 36 / 4 GB, weekly and release on the reference emulator and API 36) using the `google-test` environment and the CI keystore; verify one nightly run and that pull request runs never receive the secrets
+- [ ] 7.9 Wire the Drive jobs into `device-tests.yml` (nightly on API 36 / 4 GB, weekly and release on API 36 / 2 GB and 4 GB) using the `google-test` environment and the CI keystore; verify one nightly run and that pull request runs never receive the secrets
 - [x] 7.10 Update `docs/dev/device-tests.md` with the test account setup, the secrets by name, and what "sign-in-blocked" means
 
 ## 8. Reference emulator and release gate

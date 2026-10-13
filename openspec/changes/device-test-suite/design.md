@@ -233,7 +233,19 @@ image revision.
 - **Schedule:** a separate Drive job runs the `drive` flows, which include
   every `roundtrip` flow:
   - nightly: on Android 16 / 4 GB;
-  - weekly and release: on the reference emulator and on Android 16 / 4 GB.
+  - weekly and release: on Android 16 / 2 GB and 4 GB.
+- **Only Android 16:** the plan was to run the round trips on the reference
+  emulator (Android 9 / 2 GB) too. That doesn't work:
+  - The `google_apis` images for Android 9 to 11 ship Google Play services
+    20.x (2020).
+  - Without the Play Store it can't update, and it refuses the Authorization
+    API that Trecos signs in with ("Caller not whitelisted to call
+    Authorization APIs").
+  - Real phones keep Play services current, so this is an emulator limit, not
+    an app one.
+  - Low memory is still covered by the 2 GB Android 16 cell.
+  - The app now says so when connecting fails, instead of doing nothing
+    (PR #31).
 
 ## Security & Observability
 

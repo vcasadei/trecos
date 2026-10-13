@@ -11,8 +11,10 @@ memory (spec device-testing, "Device matrix" and "Run tiers"):
 
 With ``--drive`` it prints the cells of the Drive job instead, which signs in
 with the Google test account (spec "Google test account"): none for ``pr``,
-Android 16 / 4 GB nightly, and also the reference emulator (Android 9 / 2 GB)
-weekly and for a release.
+Android 16 / 4 GB nightly, and Android 16 / 2 GB as well weekly and for a
+release. Only Android 16: the older emulator images ship a 2020 Google Play
+services that can't update and predates the Authorization API Trecos signs in
+with.
 
 Usage: ``scripts/device-matrix.py <tier> [--day N] [--drive]``. The output is a
 JSON object with an ``include`` list, ready for ``strategy.matrix``.
@@ -86,7 +88,7 @@ def drive_matrix(tier):
         return []
     cells = [cell(36, 4096)]
     if tier in ("weekly", "release"):
-        cells.insert(0, cell(28, 2048))
+        cells.insert(0, cell(36, 2048))
     return [dict(c, name="drive-" + c["name"]) for c in cells]
 
 
