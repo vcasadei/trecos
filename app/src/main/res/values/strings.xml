@@ -364,6 +364,7 @@
     <string name="house_restored">\"%1$s\" is back.</string>
     <string name="sync_intro">Keep your inventory in step across your devices through a visible Trecos folder in your own Google Drive. Trecos only sees files it created.</string>
     <string name="sync_connect">Connect Google Drive</string>
+    <string name="sync_connect_failed">Couldn\'t connect to Google. Check your connection and that Google Play services is up to date, then try again.</string>
     <string name="sync_connected_as">Connected as %1$s</string>
     <string name="sync_last">Last sync: %1$s</string>
     <string name="sync_never">Not synced yet</string>
