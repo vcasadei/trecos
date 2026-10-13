@@ -3,7 +3,9 @@
 
 Each flow runs on its own, in an order shuffled with a printed seed, so a
 run can be repeated exactly. A failed flow runs once more: passing then marks
-it "flaky" (spec device-testing, "Isolated and repeatable flows"). For every
+it "flaky" (spec device-testing, "Isolated and repeatable flows"). A flow
+Google kept from signing in is "sign-in-blocked", which fails nothing (spec
+"Google test account"). For every
 failed attempt the flow's screenshots, Maestro's step log and the device log
 are kept (spec "Failure evidence"). Values of the environment variables in
 PRIVATE_ENV are replaced with *** in every output file, and when the Google
@@ -281,6 +283,21 @@ def redact(out_dir, secrets):
             path.write_text(cleaned, encoding="utf-8")
 
 
+def sign_in_blocked(out_dir):
+    """Tells whether a failed attempt stopped because Google blocked the sign-in.
+
+    maestro/common/google-sign-in.yaml then fails on the text "sign-in-blocked".
+
+    Args:
+        out_dir (pathlib.Path): the attempt's folder.
+
+    Returns:
+        bool: True when the attempt's Maestro log names "sign-in-blocked".
+    """
+    log = out_dir / "maestro.log"
+    return log.exists() and "sign-in-blocked" in log.read_text(encoding="utf-8")
+
+
 def drop_screens(out_dir):
     """Deletes the screenshots and recordings under a folder.
 
@@ -366,7 +383,10 @@ def main(argv):
         restarts = 0
         attempts = 1
         passed, restarts = run_flow_surviving_driver(args.device, flow, out / name / "attempt-1", env, restarts)
-        if not passed:
+        if not passed and sign_in_blocked(out / name / "attempt-1"):
+            # Google refused the test account; that says nothing about the app.
+            status = "sign-in-blocked"
+        elif not passed:
             attempts = 2
             retried, restarts = run_flow_surviving_driver(args.device, flow, out / name / "attempt-2", env, restarts)
             status = "flaky" if retried else "failed"

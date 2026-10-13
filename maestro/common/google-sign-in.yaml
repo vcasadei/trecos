@@ -105,7 +105,6 @@ appId: app.trecos
           when:
             visible: (?i)(enter (the )?code|.*couldn.t sign you in.*)
           commands:
-            - assertTrue:
-                condition: ${false}
-                label: sign-in-blocked
+            # Fails with "sign-in-blocked" in the log, which the runner reports.
+            - assertVisible: sign-in-blocked
 - assertVisible: Connected as.*

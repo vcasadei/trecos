@@ -36,7 +36,7 @@ def count(result, status):
 
     Args:
         result (dict): one cell's result.
-        status (str): "passed", "failed" or "flaky".
+        status (str): "passed", "failed", "flaky" or "sign-in-blocked".
 
     Returns:
         int: how many flows have that status.
@@ -53,6 +53,7 @@ def summarize(results, secrets=()):
 
     Returns:
         tuple[str, bool]: the Markdown text, and whether every cell passed.
+        A flow Google kept from signing in is listed but fails no cell.
     """
     lines = ["## Device tests", "", "| Cell | Android | Memory | Passed | Failed | Flaky | Infrastructure |", "|---|---|---|---|---|---|---|"]
     problems, ok = [], True
@@ -67,10 +68,10 @@ def summarize(results, secrets=()):
         memory = f"{r.get('memory', 0) // 1024} GB" if r.get("memory") else ""
         lines.append(f"| {r.get('cell') or r.get('device')} | {r.get('android', '')} | {memory} | {count(r, 'passed')} | {failed} | {flaky} | {infra} |")
         for f in r.get("flows", []):
-            if f["status"] in ("failed", "flaky"):
+            if f["status"] in ("failed", "flaky", "sign-in-blocked"):
                 problems.append(f"- {r.get('cell') or r.get('device')}: `{f['flow']}` {f['status']}")
     if problems:
-        lines += ["", "### Failed and flaky", ""] + problems
+        lines += ["", "### Failed, flaky and blocked", ""] + problems
     seeds = sorted({str(r.get("seed")) for r in results if r.get("seed") is not None})
     if seeds:
         lines += ["", f"Shuffle seeds: {', '.join(seeds)}"]

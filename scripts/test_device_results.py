@@ -73,6 +73,24 @@ class RedactionTest(unittest.TestCase):
         self.assertNotIn("hunter2-planted", text)
 
 
+class SignInBlockedTest(unittest.TestCase):
+    """Scenario "Google challenges the sign-in": reported, and nothing else fails."""
+
+    def test_runner_spots_the_marker(self):
+        out = pathlib.Path(tempfile.mkdtemp())
+        (out / "maestro.log").write_text('Assertion is false: "sign-in-blocked" is visible\n')
+        self.assertTrue(runner.sign_in_blocked(out))
+        (out / "maestro.log").write_text("Element not found: Connected as.*\n")
+        self.assertFalse(runner.sign_in_blocked(out))
+
+    def test_summary_lists_it_without_failing(self):
+        results = [{"cell": "android16-4g", "api": 36, "memory": 4096, "flows": [
+            {"flow": "drive/connect", "status": "sign-in-blocked"}, {"flow": "items/add", "status": "passed"}]}]
+        text, ok = summary.summarize(results)
+        self.assertTrue(ok)
+        self.assertIn("`drive/connect` sign-in-blocked", text)
+
+
 class SummaryTest(unittest.TestCase):
     """Checks the merged table and its pass or fail verdict."""
 
