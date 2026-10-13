@@ -34,7 +34,7 @@ Android 16 / 6 GB.
 - [x] 4.1 Write `scripts/check-scenario-coverage.py` reading the `trecos-v1` (and later `openspec/specs/`) scenarios, the flows' `# covers:` and `# screens:` headers, `maestro/COVERAGE.md` and the app's `NavHost` routes; verify with `scripts/test_check_scenario_coverage.py`
 - [x] 4.2 Test scenario "A new scenario with no flow": a planted scenario missing from every group fails the check and is named
 - [x] 4.3 Test scenario "A screen with no flow": a planted route missing from every `# screens:` header fails the check and is named
-- [ ] 4.4 Create `maestro/COVERAGE.md` with the "device test", "Robolectric only" and "manual" scenarios and reasons (Play Billing tips, camera scanning, the Play services scanner download), and run the check in `ci.yml`; verify it fails on `master` until group 5 lands, then passes
+- [x] 4.4 Create `maestro/COVERAGE.md` with the "device test", "Robolectric only" and "manual" scenarios and reasons (Play Billing tips, camera scanning, the Play services scanner download), and run the check in `ci.yml`; verify it fails on `master` until group 5 lands, then passes
 
 ## 5. Flows for every screen and feature
 
@@ -49,16 +49,16 @@ Each task writes the area's flows with `# covers:` and `# screens:` headers, tag
 - [x] 5.7 `search`: query with accents ignored, scopes (items, containers, both), match in, filters by house, category and tag, "Clear all", sort, "search in this container", typed QR code lookup, filters kept across restarts
 - [x] 5.8 `qr-codes`: generate, duplicates refused, print through the system print dialog (save as PDF), share, label sheet; camera scanning listed as manual in `COVERAGE.md`
 - [x] 5.9 `organize` and `trash`: move, copy and duplicate within and between houses, the 30-day trash, restore, restore when the original place is gone, permanent delete, deleted houses
-- [ ] 5.10 `backup`: export to a `.zip` through the document picker, import preview, add houses, replace everything, the unencrypted-backup warning with encryption on
+- [x] 5.10 `backup`: export to a `.zip` through the document picker, import preview, add houses, replace everything, the unencrypted-backup warning with encryption on
 - [x] 5.11 `settings` and `app-lock`: every setting persists across restarts, app lock with an emulator fingerprint (`adb emu finger touch`) and PIN, lock timeout, "lock turned off" when the screen lock is removed
-- [ ] 5.12 `encryption`: turn on with the experimental warning, restart, turn off, export while encrypted; plus the `roundtrip`-tagged scenario "Encryption round trip keeps the data" on the `photos` fixture
+- [x] 5.12 `encryption`: turn on with the experimental warning, restart, turn off, export while encrypted; plus the `roundtrip`-tagged scenario "Encryption round trip keeps the data" on the `photos` fixture
 - [x] 5.13 `help-and-support`: FAQ accordion, "Contact us" opening an e-mail intent (and the copy fallback without an e-mail app), About links (website, privacy, source, licences), the tips screen when Play Billing is unavailable
 - [ ] 5.14 Verify the whole suite: all flows pass on both local cells in two shuffled orders, and `scripts/check-scenario-coverage.py` passes on the branch
 
 ## 6. CI workflow
 
-- [ ] 6.1 Write `.github/workflows/device-tests.yml`: matrix job from `device-matrix.py`, one job per cell with `reactivecircus/android-emulator-runner@v2.38.0`, the KVM step, cached boot snapshots, `fail-fast: false`, `max-parallel: 20`, a 10-minute boot timeout, Maestro installed with its checksum, and `run-device-tests.py`; verify a green `pr` tier on the pull request
-- [ ] 6.2 Add the summary job (merged table on the run page) and artifact upload with 14 days' retention; verify on the pull request run that the table and artifacts appear
+- [x] 6.1 Write `.github/workflows/device-tests.yml`: matrix job from `device-matrix.py`, one job per cell with `reactivecircus/android-emulator-runner@v2.38.0`, the KVM step, cached boot snapshots, `fail-fast: false`, `max-parallel: 20`, a 10-minute boot timeout, Maestro installed with its checksum, and `run-device-tests.py`; verify a green `pr` tier on the pull request
+- [x] 6.2 Add the summary job (merged table on the run page) and artifact upload with 14 days' retention; verify on the pull request run that the table and artifacts appear
 - [x] 6.3 Test scenario "A pull request breaks adding an item": on a throwaway branch, a deliberate break in the add-item flow fails the device check, which names the flow and the cell; close the branch without merging
 - [ ] 6.4 Test scenario "An emulator fails to boot": a cell with an impossible image (temporary matrix override) is reported "infrastructure failure" while the other cell still passes
 - [ ] 6.5 **(user)** Mark the `pr` device check as required in the branch rules for `master`; verify the merge button waits for it on the next pull request
@@ -67,16 +67,16 @@ Each task writes the area's flows with `# covers:` and `# screens:` headers, tag
 
 ## 7. Drive flows with the Google test account
 
-- [ ] 7.1 **(user)** Create a dedicated Google account for tests (never a personal one) and add it as a test user on the "Trecos" OAuth consent screen; verify it can sign in on a local emulator
+- [x] 7.1 **(user)** Create a dedicated Google account for tests (never a personal one) and add it as a test user on the "Trecos" OAuth consent screen; verify it can sign in on a local emulator
 - [ ] 7.2 Generate a fixed CI debug keystore and print its SHA-1; **(user)** register it as the Android OAuth client "Trecos CI debug" (package `app.trecos`); verify a debug build signed with it can sign in on a local cell
-- [ ] 7.3 **(user)** Create a Desktop OAuth client and, with a script the agent provides, a refresh token for the test account; verify `scripts/clean-test-drive.py` lists the account's Trecos folder locally
-- [ ] 7.4 **(user)** Create the GitHub environment `google-test` (limited to `master` and `v*` tags) with the secrets `TEST_GOOGLE_ACCOUNT`, `TEST_GOOGLE_PASSWORD`, `TEST_GOOGLE_DRIVE_TOKEN`, `TEST_GOOGLE_OAUTH_CLIENT` and `CI_DEBUG_KEYSTORE`, through a script in `~/` run with `! bash`; verify `gh secret list --env google-test` names all five
-- [ ] 7.5 Add `maestro/.env.example` with placeholders for those values and confirm `maestro/.env` is gitignored (`git check-ignore maestro/.env`)
+- [ ] 7.3 **(user)** Create a "TVs and Limited Input" OAuth client and, with a script the agent provides, a refresh token for the test account; verify `scripts/clean-test-drive.py` lists the account's Trecos folder locally
+- [x] 7.4 **(user)** Create the GitHub environment `google-test` (limited to `master` and `v*` tags) with the secrets `TEST_GOOGLE_ACCOUNT`, `TEST_GOOGLE_PASSWORD`, `TEST_GOOGLE_DRIVE_TOKEN`, `TEST_GOOGLE_OAUTH_CLIENT` and `CI_DEBUG_KEYSTORE`, through a script in `~/` run with `! bash`; verify `gh secret list --env google-test` names all five
+- [x] 7.5 Add `maestro/.env.example` with placeholders for those values and confirm `maestro/.env` is gitignored (`git check-ignore maestro/.env`)
 - [ ] 7.6 Write `scripts/clean-test-drive.py` (standard library only) and run it before the Drive flows; test scenario "Clean Drive before a run": after it, the account has no Trecos folder
-- [ ] 7.7 Write the account sign-in subflow for API 28 and 36 (Settings > Accounts, password from the environment) with challenge detection; test scenario "Google challenges the sign-in" by forcing the challenge branch, which reports `sign-in-blocked` without failing the run
+- [x] 7.7 Write the account sign-in subflow for API 28 and 36 (Settings > Accounts, password from the environment) with challenge detection; test scenario "Google challenges the sign-in" by forcing the challenge branch, which reports `sign-in-blocked` without failing the run
 - [ ] 7.8 Write the `drive` flows (connect, sync, photos uploaded, disconnect, deleted houses and their restore) and the `roundtrip` flow "Sync round trip on a fresh phone" across two app installs; verify on both local cells with the test account
 - [ ] 7.9 Wire the Drive jobs into `device-tests.yml` (nightly on API 36 / 4 GB, weekly and release on the reference emulator and API 36) using the `google-test` environment and the CI keystore; verify one nightly run and that pull request runs never receive the secrets
-- [ ] 7.10 Update `docs/dev/device-tests.md` with the test account setup, the secrets by name, and what "sign-in-blocked" means
+- [x] 7.10 Update `docs/dev/device-tests.md` with the test account setup, the secrets by name, and what "sign-in-blocked" means
 
 ## 8. Reference emulator and release gate
 

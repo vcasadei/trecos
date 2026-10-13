@@ -176,7 +176,8 @@ existing `scripts/check-benchmark.py`.
 
 The `publish` job needs both `build` and `benchmark`, so a failing budget stops
 the release before the approval request. The `release` tier of
-`device-tests.yml` runs as a needed job too, including the round-trip flows.
+`device-tests.yml` runs as a needed job too, and its Drive job runs the
+round-trip flows.
 The release run summary shows the benchmark numbers with the runner and the
 image revision.
 
@@ -185,27 +186,61 @@ image revision.
   the `CI_DEBUG_KEYSTORE` secret. Its SHA-1 is registered as a third Android
   OAuth client, "Trecos CI debug", so sign-in works on any runner. Local runs
   keep the developer's own debug keystore.
-- **Account:** a Maestro subflow adds the account through the system's
-  Settings > Accounts, with `inputText: ${TEST_GOOGLE_PASSWORD}`. The value
-  comes from the environment and is never written in a flow.
-- **Clean Drive:** before the Drive flows, `scripts/clean-test-drive.py` swaps
-  `TEST_GOOGLE_DRIVE_TOKEN` (a refresh token for the throwaway account, created
-  once with the full `drive` scope through a Desktop OAuth client) for an
-  access token and deletes the `Trecos` folder. It uses only the Python
-  standard library.
-- **Blocked sign-in:** if Google shows a challenge screen ("Verify it's you"),
-  the subflow detects it and marks the Drive flows `sign-in-blocked` instead of
-  failed.
-- **Schedule:**
-  - nightly: the `drive` flows on one cell (API 36, 4 GB);
-  - weekly and release: the `roundtrip` flows on the reference emulator and on
-    API 36.
+- **Account:** `maestro/common/google-sign-in.yaml` starts from Trecos's own
+  Settings > Sync > "Connect Google Drive". On a device without the account,
+  Google adds it through its own screens first. The subflow answers whichever
+  screen appears, so it works on a fresh emulator and on one that already has
+  the account:
+  - the SIM offer, the e-mail and the password;
+  - "Verify it's you", answered through "Confirm your recovery email" with
+    `TEST_GOOGLE_RECOVERY_EMAIL`;
+  - the terms, recovery info, home address and Google services screens;
+  - the account chooser and Trecos's consent.
+
+  Every value comes from the environment and is never written in a flow.
+- **Clean Drive:**
+  - Before a CI run, `scripts/clean-test-drive.py` swaps
+    `TEST_GOOGLE_DRIVE_TOKEN` for an access token and deletes the `Trecos`
+    folder.
+    - The token is a refresh token for the test account. It was made once,
+      through Google's device flow, with a "TVs and Limited Input" OAuth client
+      ("Trecos CI cleanup") in the Trecos project.
+    - Google's device flow grants `drive.file` but refuses `drive.appdata`.
+    - The script uses only the Python standard library.
+  - Before each flow, the device helper's `wipe-drive` empties both the Trecos
+    folder and the hidden app folder.
+    - It works through a debug-only `wipe-drive` action of `TestSeedReceiver`,
+      which uses the app's own Google authorization for the named test
+      account.
+    - That authorization includes `drive.appdata`, where the encryption key
+      lives.
+    - `TestSeedReceiver` is disabled in release builds.
+- **Two devices on one emulator:** the conflict and "unsynced changes" flows
+  need a second device on the same account. The helper's `app-snapshot`
+  saves the app's data on the computer through `run-as` (debug builds only).
+  A cleared app then acts as the second device. `app-restore` brings the
+  first device back with its device id and unsynced changes.
+- **Blocked sign-in:** some screens can't be answered from the environment,
+  such as a code sent elsewhere, or "Couldn't sign you in".
+  - On those, the subflow fails on the text `sign-in-blocked`.
+  - The runner reports such a flow as `sign-in-blocked`, not failed.
+  - The summary lists it, but it fails no cell.
+- **Privacy of outputs:** Google's screens show the account's addresses.
+  - When the account is set, the runner deletes every screenshot and recording
+    from the outputs.
+  - It also replaces the account's address and every secret with `***` in the
+    text files.
+- **Schedule:** a separate Drive job runs the `drive` flows, which include
+  every `roundtrip` flow:
+  - nightly: on Android 16 / 4 GB;
+  - weekly and release: on the reference emulator and on Android 16 / 4 GB.
 
 ## Security & Observability
 
 - **Secrets:** `TEST_GOOGLE_ACCOUNT`, `TEST_GOOGLE_PASSWORD`,
-  `TEST_GOOGLE_DRIVE_TOKEN`, `TEST_GOOGLE_OAUTH_CLIENT` (the Desktop client's id
-  and secret, used for the token swap) and `CI_DEBUG_KEYSTORE` (base64).
+  `TEST_GOOGLE_RECOVERY_EMAIL`, `TEST_GOOGLE_DRIVE_TOKEN`,
+  `TEST_GOOGLE_OAUTH_CLIENT` (the cleanup client's id and secret, used for the
+  token swap) and `CI_DEBUG_KEYSTORE` (base64).
   - They live in a new GitHub environment, `google-test`, limited to `master`
     and `v*` tags, so pull requests (including forks) never receive them.
   - Only the Drive and round-trip jobs use that environment. The repository
