@@ -13,9 +13,11 @@ appId: app.trecos
     commands:
       # It reopens where it was last; go back to Downloads first.
       - tapOn: Show roots
+      # The drawer entry, below Recent; the title also reads "Downloads" only
+      # when the picker reopens there.
       - tapOn:
           text: Downloads
-          index: 1
+          below: Recent
       - scrollUntilVisible:
           element:
             text: photo-${Number(FIRST) + 1}.png
