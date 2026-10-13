@@ -10,7 +10,7 @@ See proposal.md for the motivation. What exists today:
   backup, photos). CI never runs them.
 - The `baselineprofile` module holds `StartupBenchmark` (cold start over 10
   runs, scrolling 1,000 items) and `BaselineProfileGenerator`.
-  `scripts/check-benchmark.py` applies the 1.5 s / 5% budget. The data comes
+  `scripts/check-benchmark.py` applied the 1.5 s / 5% budget. The data comes
   from `BenchmarkSeedReceiver`, which was on only in `benchmarkRelease`
   (manifest placeholder plus `BuildConfig.BENCHMARK_SEED`).
 - The Compose UI already uses `testTag` widely (for example `rowTag(id)`,
@@ -172,7 +172,17 @@ existing `scripts/check-benchmark.py`.
 - It runs `:baselineprofile:connectedBenchmarkReleaseAndroidTest` with
   `androidx.benchmark.suppressErrors=EMULATOR`, because Macrobenchmark refuses
   emulators otherwise.
-- `scripts/check-benchmark.py` then applies the budget.
+- `scripts/release-benchmark.sh` then runs `scripts/check-benchmark.py
+  --baseline`: the median cold start may be at most 15% slower than
+  `benchmark/reference-baseline.json`. That file names the runner type and the
+  image's build fingerprint, and a run on anything else fails until the
+  baseline is recorded again on purpose. Running `release.yml` by hand with
+  "Record a new performance baseline" uploads a new file to commit.
+- Jank is recorded in the summary but doesn't gate, because the software GPU
+  makes almost every frame janky.
+- The absolute budgets (1.5 s, under 5% janky frames) move to a low-end
+  physical phone in Firebase Test Lab, checked with `check-benchmark.py
+  --budget` before a build is promoted on Google Play.
 
 The `publish` job needs both `build` and `benchmark`, so a failing budget stops
 the release before the approval request. The `release` tier of
@@ -269,10 +279,12 @@ image revision.
 
 ## Risks / Trade-offs
 
-- [Emulator timings differ from real 2 GB phones] → The budget stays the same,
-  but results carry the runner type and image revision. Trends are compared
-  only within the same runner. The developer can still run the benchmark on any
-  real phone with the same script.
+- [Emulator timings differ from real 2 GB phones, and a software GPU makes
+  almost every frame janky] → The emulator gates only regressions: at most 15%
+  slower than a baseline recorded for the same runner and image. Jank is
+  recorded, not gated. The absolute 1.5 s and 5% budgets are checked with
+  `check-benchmark.py --budget` on a low-end phone in Firebase Test Lab before a
+  Play promotion (ADR 0028).
 - [Flaky boots or slow runners on GitHub] → One rerun per flow, the "flaky"
   label, infrastructure failures reported apart from test failures, and cached
   boot snapshots.

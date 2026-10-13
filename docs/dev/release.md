@@ -108,34 +108,71 @@ SHA-1 or the package name of the client doesn't match the installed APK.
 
 ## Performance pass (release gate)
 
-Every release is measured on the **reference phone**: Android 9, 2 GB of RAM
-(spec "Performance on low-end phones", task 14.8). It must reach:
+The goal stays the same (spec "Performance on low-end phones"): on a 2 GB
+Android 9 phone, a median cold start to the interactive Home screen of **1.5 s
+or less** over 10 runs with 1,000 items stored, and **janky frames under 5%**
+while scrolling them. Two checks hold every release to it (ADR 0028):
 
-- a median cold start to the interactive Home screen of **1.5 s or less** over
-  10 runs, with 1,000 items stored;
-- **janky frames under 5%** while scrolling those items.
+**1. Every tag, on the reference emulator.** The `benchmark` job of
+`release.yml` boots Android 9, 2 GB, 2 cores (`google_apis` x86_64) and runs
+`scripts/release-benchmark.sh check`:
+- it runs `StartupBenchmark` and `ScrollJankTest`;
+- the release is not published when the median cold start is more than **15%
+  slower** than `benchmark/reference-baseline.json`;
+- jank is shown in the run summary but doesn't gate, because the emulator's
+  software GPU makes almost every frame janky.
 
-1. Connect the phone with USB debugging on. The benchmark build is profileable,
-   not debuggable, so no root is needed on a real phone.
-2. Run `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest`. The
-   benchmarks store 1,000 items through `TestSeedReceiver` (fixture
-   `1000-items`), which only test builds enable; release builds ignore it.
-3. Gate the release:
-   `scripts/check-benchmark.py baselineprofile/build/outputs/connected_android_test_additional_output/benchmarkRelease/connected/*/app.trecos.baselineprofile-benchmarkData.json`.
-   The script fails, and the release is not published, when the median cold
-   start (time to full display, reported once the Home list has loaded) is over
-   1.5 s, or when the 95th percentile of frame overruns is late.
+The baseline names the runner type and the image's build fingerprint. A run on
+another runner or image fails until the baseline is recorded again, on
+purpose:
+1. Run **Release** by hand (Actions > Release > Run workflow) with "Record a
+   new performance baseline" checked. A manual run never publishes.
+2. Download `benchmark-results` from the run and commit its
+   `benchmark/reference-baseline.json` in a pull request.
+
+A manual run without that box is a dry run of the gate. Check "Also run the
+release device tier" to include the 36 cells.
+
+**2. Before a Play promotion, on a real phone.** Run the same benchmark on a
+low-end physical phone (Android 9 or the oldest available, 2 to 3 GB) in
+Firebase Test Lab:
+
+```sh
+./gradlew :app:assembleBenchmarkRelease :baselineprofile:assembleBenchmarkRelease
+gcloud firebase test android run --type instrumentation \
+  --app app/build/outputs/apk/benchmarkRelease/app-x86_64-benchmarkRelease.apk \
+  --test baselineprofile/build/outputs/apk/benchmarkRelease/baselineprofile-benchmarkRelease.apk \
+  --device model=<low-end model>,version=28 \
+  --environment-variables additionalTestOutputDir=/sdcard/Android/media/app.trecos.baselineprofile/results \
+  --directories-to-pull /sdcard/Android/media/app.trecos.baselineprofile
+python3 scripts/check-benchmark.py --budget <pulled folder>/results/*benchmarkData.json
+```
+
+This route hasn't run yet; the first run is task 8.5 of `device-test-suite`,
+before the first Play promotion.
+
+Use the APK for the phone's ABI (`arm64-v8a` on most phones) and a model
+from `gcloud firebase test android models list`. Promote the build only when
+`--budget` passes. On a phone of your own, `./gradlew
+:baselineprofile:connectedBenchmarkReleaseAndroidTest` followed by the same
+`--budget` check does the same.
 
 Regenerate the Baseline Profile after UI changes with
 `./gradlew :app:generateBaselineProfile` on a rooted emulator (`adb root` on a
 Google APIs image). On an emulator, add
 `-Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR`.
-Emulator numbers are not valid for the gate, and the software renderer doesn't
-report frame timings.
 
 ## Publishing a release
 
-`.github/workflows/release.yml` runs when a `v*` tag is pushed:
+`.github/workflows/release.yml` runs when a `v*` tag is pushed. Two gates run
+first, and publishing waits for both:
+- **benchmark:** the cold start on the reference emulator, against the baseline
+  (above);
+- **device-tests:** the `release` tier of `device-tests.yml`, meaning all 36
+  emulator cells plus the Drive job with the Google test account
+  (`docs/dev/device-tests.md`).
+
+Then the `release` job, in the `release` environment:
 
 | Step | What it does |
 |---|---|

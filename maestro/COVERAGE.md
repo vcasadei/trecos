@@ -42,8 +42,8 @@ place.
 | app-shell: Very long name | Robolectric only | Ellipsis inside a measured line; `TextSafetyTest.veryLongName` |
 | app-shell: Long unbroken serial number | Robolectric only | Wrapping inside a measured column; `TextSafetyTest.longUnbrokenSerialNumber` |
 | app-shell: Opening a photo | Robolectric only | The 250 ms zoom; `PhotoScenariosTest.openingAPhotoAndZoomingIntoASerialLabel`. The photos flow opens the viewer |
-| app-shell: Cold start benchmark | device test | `StartupBenchmark` (Macrobenchmark) on the reference emulator, task 8.1 |
-| app-shell: Regression blocks a release | device test | The benchmark job gates `release.yml` through `scripts/check-benchmark.py`, task 8.1 |
+| app-shell: Cold start benchmark | device test | `StartupBenchmark` (Macrobenchmark) on the reference emulator in `release.yml`, against `benchmark/reference-baseline.json` (task 8.1) |
+| app-shell: Regression blocks a release | device test | The benchmark job gates `release.yml` through `scripts/check-benchmark.py --baseline` (task 8.1); its self-test covers the slow case |
 | settings: Fresh install | Robolectric only | The defaults it checks follow a Portuguese phone, and Maestro can't change the phone's language; `SettingsScenariosTest.freshInstall` |
 | settings: Immediate effect | Robolectric only | The change is a colour scheme; `SettingsScenariosTest.immediateEffect` |
 | backup: Not enough space | Robolectric only | An emulator can't run out of space on demand; `BackupScenariosTest.notEnoughSpace` |

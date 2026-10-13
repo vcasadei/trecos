@@ -1,21 +1,91 @@
 # Publishes a signed release when a v* tag is pushed (design D20, D22).
 # Only this workflow reads the signing secrets, from the `release` Environment,
 # which only v* tags can deploy to and which needs the developer's approval.
+#
+# Before publishing, two gates must pass (spec device-testing):
+# - benchmark: the cold start on the reference emulator (Android 9, 2 GB,
+#   2 cores) may be at most 15% slower than benchmark/reference-baseline.json;
+# - device-tests: the release tier of device-tests.yml, all 36 cells and the
+#   Drive job.
+# Run it by hand (workflow_dispatch) for a dry run that never publishes, or to
+# record a new baseline, which is then uploaded for committing.
 name: Release
 
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      record_baseline:
+        description: "Record a new performance baseline instead of checking it"
+        type: boolean
+        default: false
+      device_tests:
+        description: "Also run the release device tier (36 cells)"
+        type: boolean
+        default: false
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
+  benchmark:
+    name: Benchmark on the reference emulator
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Measure and gate
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: 28
+          target: google_apis
+          arch: x86_64
+          profile: pixel_5
+          ram-size: 2048M
+          cores: 2
+          disable-animations: true
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot-save -gpu swiftshader_indirect
+          script: scripts/release-benchmark.sh ${{ inputs.record_baseline && 'record' || 'check' }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: benchmark-results
+          path: |
+            baselineprofile/build/outputs/connected_android_test_additional_output/**/*benchmarkData.json
+            benchmark/reference-baseline.json
+          retention-days: 30
+
+  device-tests:
+    name: Device tests
+    if: github.event_name == 'push' || inputs.device_tests
+    uses: ./.github/workflows/device-tests.yml
+    with:
+      tier: release
+    secrets: inherit
+
   release:
     name: Build, sign and publish
+    needs: [benchmark, device-tests]
+    if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     environment: release
     timeout-minutes: 30
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
         with:

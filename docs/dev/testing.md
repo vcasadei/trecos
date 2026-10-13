@@ -77,8 +77,10 @@ for a 2 GB Android 9 phone. Reference numbers:
 | API 28 emulator, 2 GB, 2 cores, software GPU (2026-10-12) | 1,792 ms | 1,813 ms | 97.7% |
 
 An emulator without a GPU draws every frame in software, so its jank share
-says nothing about a phone; the gate for the emulator is an open decision of
-the device-test-suite change.
+says nothing about a phone. On the reference emulator the release gate
+therefore checks only that the cold start is not more than 15% slower than the
+recorded baseline. The absolute budgets are checked on a real phone in
+Firebase Test Lab (docs/dev/release.md, ADR 0028).
 
 ## Coverage
 
