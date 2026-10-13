@@ -5,8 +5,10 @@ Each flow runs on its own, in an order shuffled with a printed seed, so a
 run can be repeated exactly. A failed flow runs once more: passing then marks
 it "flaky" (spec device-testing, "Isolated and repeatable flows"). For every
 failed attempt the flow's screenshots, Maestro's step log and the device log
-are kept (spec "Failure evidence"). Values of the secret environment
-variables in SECRET_ENV are replaced with *** in every output file.
+are kept (spec "Failure evidence"). Values of the environment variables in
+PRIVATE_ENV are replaced with *** in every output file, and when the Google
+test account is in use the screenshots and recordings are dropped, because
+Google's sign-in screens show its addresses and an image can't be redacted.
 
 Usage (from the repository root):
     scripts/run-device-tests.py --device emulator-5554 --tier pr \\
@@ -39,9 +41,13 @@ CAMERA_APP_PERMISSIONS = ("android.permission.CAMERA", "android.permission.RECOR
                           "android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION",
                           "android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE")
 MAESTRO_IME_PACKAGE = "dev.mobile.maestro/"
-SECRET_ENV = ("TEST_GOOGLE_PASSWORD", "TEST_GOOGLE_DRIVE_TOKEN", "TEST_GOOGLE_OAUTH_CLIENT")
-# The environment variables passed into flows; secret ones are redacted from outputs.
-FLOW_ENV = ("TEST_GOOGLE_ACCOUNT",) + SECRET_ENV
+SECRET_ENV = ("TEST_GOOGLE_PASSWORD", "TEST_GOOGLE_RECOVERY_EMAIL", "TEST_GOOGLE_DRIVE_TOKEN", "TEST_GOOGLE_OAUTH_CLIENT")
+# Values kept out of every output: the secrets and the test account's address.
+PRIVATE_ENV = ("TEST_GOOGLE_ACCOUNT",) + SECRET_ENV
+# The environment variables passed into flows.
+FLOW_ENV = PRIVATE_ENV
+# Output files that are images or video, which redact() can't clean.
+SCREEN_SUFFIXES = (".png", ".jpg", ".jpeg", ".mp4", ".gif")
 # The PIN scripts/device-helper.py sets; the runner clears it around every flow.
 HELPER_PIN = "1111"
 # Pauses-and-retries allowed per flow when Maestro's on-device driver dies.
@@ -275,6 +281,23 @@ def redact(out_dir, secrets):
             path.write_text(cleaned, encoding="utf-8")
 
 
+def drop_screens(out_dir):
+    """Deletes the screenshots and recordings under a folder.
+
+    Args:
+        out_dir (pathlib.Path): the folder to clean.
+
+    Returns:
+        int: how many files were deleted.
+    """
+    dropped = 0
+    for path in list(out_dir.rglob("*")) if out_dir.exists() else []:
+        if path.is_file() and path.suffix.lower() in SCREEN_SUFFIXES:
+            path.unlink()
+            dropped += 1
+    return dropped
+
+
 def instrumented(device):
     """Runs the app's instrumented tests (app/src/androidTest) on the device.
 
@@ -355,7 +378,9 @@ def main(argv):
 
     helper.terminate()
     (out / "result.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
-    redact(out, [os.environ.get(k, "") for k in SECRET_ENV])
+    redact(out, [os.environ.get(k, "") for k in PRIVATE_ENV])
+    if os.environ.get("TEST_GOOGLE_ACCOUNT"):
+        print(f"Dropped {drop_screens(out)} screenshots and recordings: they may show the test account")
     failed = [f for f in result["flows"] if f["status"] == "failed"] or result.get("instrumented") == "failed"
     return 1 if failed else 0
 

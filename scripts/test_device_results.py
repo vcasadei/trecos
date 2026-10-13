@@ -57,6 +57,16 @@ class RedactionTest(unittest.TestCase):
                 self.assertNotIn("hunter2-planted", path.read_text())
         self.assertIn("***", log.read_text())
 
+    def test_runner_drops_screens_but_keeps_logs(self):
+        out = pathlib.Path(tempfile.mkdtemp())
+        shots = out / "flow" / "attempt-1" / "screenshots"
+        shots.mkdir(parents=True)
+        (shots / "step-1.png").write_bytes(b"\x89PNG")
+        (out / "flow" / "attempt-1" / "recording.MP4").write_bytes(b"0")
+        (out / "flow" / "attempt-1" / "maestro.log").write_text("ok\n")
+        self.assertEqual(runner.drop_screens(out), 2)
+        self.assertEqual([p.name for p in out.rglob("*") if p.is_file()], ["maestro.log"])
+
     def test_summary_redacts_secrets(self):
         results = [{"cell": "hunter2-planted", "api": 28, "memory": 2048, "flows": []}]
         text, _ = summary.summarize(results, ["hunter2-planted"])
