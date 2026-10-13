@@ -185,7 +185,7 @@ def prepare(device):
 
 
 def reset_phone(device):
-    """Undoes what the device helper can change: the PIN and disabled e-mail apps.
+    """Undoes what flows can change: the PIN, disabled e-mail apps and airplane mode.
 
     Args:
         device (str): the device serial.
@@ -193,6 +193,11 @@ def reset_phone(device):
     adb(device, "shell", "locksettings", "clear", "--old", HELPER_PIN)
     adb(device, "shell", "locksettings", "set-disabled", "false")
     adb(device, "shell", "pm", "enable", "com.google.android.gm")
+    if adb(device, "shell", "settings", "get", "global", "airplane_mode_on").stdout.strip() == "1":
+        # "cmd connectivity" exists from Android 11; before that the setting and its broadcast do it.
+        adb(device, "shell", "cmd", "connectivity", "airplane-mode", "disable")
+        adb(device, "shell", "settings", "put", "global", "airplane_mode_on", "0")
+        adb(device, "shell", "am", "broadcast", "-a", "android.intent.action.AIRPLANE_MODE", "--ez", "state", "false")
 
 
 def run_flow(device, flow, out_dir, env):

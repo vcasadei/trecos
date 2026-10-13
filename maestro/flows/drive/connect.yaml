@@ -1,4 +1,6 @@
-# covers: sync: First connection, sync: Viewing history, sync: Nothing changed
+# covers: sync: First connection
+# covers: sync: Viewing history
+# covers: sync: Nothing changed
 # screens: sync, history
 appId: app.trecos
 tags:

@@ -1,4 +1,6 @@
-# covers: sync: No conflict, sync: Same field, sync: Edit versus delete
+# covers: sync: No conflict
+# covers: sync: Same field
+# covers: sync: Edit versus delete
 # screens: sync, conflicts
 # Two devices on one emulator: the phone's app data is set aside (helper
 # app-snapshot) while a cleared app, the tablet, restores from Drive, makes its

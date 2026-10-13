@@ -1,0 +1,53 @@
+# covers: sync: Drive unreachable
+# covers: sync: Folder deleted
+# screens: sync
+appId: app.trecos
+tags:
+  - drive
+---
+- runFlow:
+    file: ../../common/connect-drive.yaml
+    env:
+      FIXTURE: one-house
+# Offline, a sync fails quietly: the last good sync stays, and a retry is scheduled.
+- setAirplaneMode: enabled
+- tapOn:
+    id: sync_now
+- extendedWaitUntil:
+    visible: Couldn't reach Google Drive\. Trecos will try again later\.
+    timeout: 120000
+- assertVisible: Trecos will try again automatically\.
+- assertVisible: Last sync.*
+- setAirplaneMode: disabled
+# The Trecos folder deleted in Drive: the app says so and offers to upload again.
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: wipe-drive
+- assertTrue:
+    condition: ${output.device.result.startsWith('wiped')}
+    label: The Trecos folder was deleted
+- repeat:
+    times: 6
+    while:
+      notVisible: The Trecos folder in your Drive is missing or was changed outside the app\.
+    commands:
+      - tapOn:
+          id: sync_now
+      - extendedWaitUntil:
+          notVisible:
+            id: sync_running
+          timeout: 120000
+- assertVisible: The Trecos folder in your Drive is missing or was changed outside the app\.
+- tapOn:
+    id: upload_again
+- extendedWaitUntil:
+    notVisible: The Trecos folder in your Drive is missing.*
+    timeout: 120000
+- extendedWaitUntil:
+    notVisible:
+      id: sync_running
+    timeout: 120000
+- assertNotVisible:
+    id: sync_error
+- assertVisible: Last sync.*

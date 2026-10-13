@@ -56,3 +56,9 @@ place.
 | photos: Unreadable file | Robolectric only | The photo picker only offers readable images; `PhotoStoreTest.unreadableFile` feeds an undecodable file |
 | photos: Thumbnail regenerated | Robolectric only | Needs a thumbnail deleted from app-private storage; `PhotoStoreTest.thumbnailRegenerated` and `PhotoScenariosTest.thumbnailRegenerated` |
 | photos: Zooming into a serial label | Robolectric only | Maestro has no pinch gesture; `PhotoScenariosTest.openingAPhotoAndZoomingIntoASerialLabel` |
+| sync: Daily sync | Robolectric only | Needs a day to pass for WorkManager's periodic job; `SyncScenariosTest.dailySync` runs the scheduled worker with a test clock. The Drive flows check that connecting schedules sync ("Sync automatically: Every day") |
+| sync: Mobile data | Robolectric only | An emulator's network is always Wi-Fi to the app; `SyncScenariosTest.mobileData` and `SyncEngineTest.photosUploadOnceAndWaitForWifi` fake a metered network |
+| sync: Interrupted sync | Robolectric only | Losing the signal at an exact point of a sync can't be timed from Maestro; `SyncEngineTest.interruptedSync` fails the Drive calls part way |
+| sync: Old app, new data | Robolectric only | Needs Drive data written by a newer app version; `SyncEngineTest.oldAppNewData` and `SyncScenariosTest.oldAppNewData` plant a newer format |
+| encryption: Drive copy | Robolectric only | The device flows can't download and read the raw Drive files; `EncryptionScenariosTest.driveCopy` and `EncryptionSwapTest.driveCopiesAreUnreadableWithoutTheKey` read them |
+| encryption: Interrupted encryption | Robolectric only | A shutdown at an exact step of encryption can't be timed from Maestro; `EncryptionScenariosTest.interruptedEncryption`, `interruptedByAShutdown` and the `EncryptionSwapTest.interrupted*` tests stop it at each step |

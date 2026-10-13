@@ -1,4 +1,5 @@
-# covers: sync: Deleting a synced house, sync: Restoring a deleted house
+# covers: sync: Deleting a synced house
+# covers: sync: Restoring a deleted house
 # screens: sync, deleted_houses
 appId: app.trecos
 tags:

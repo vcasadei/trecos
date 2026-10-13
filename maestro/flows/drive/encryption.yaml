@@ -1,6 +1,9 @@
-# covers: encryption: Experimental warning, encryption: Turning encryption on
-# covers: encryption: Disconnecting with encryption on, encryption: Disabling
-# covers: backup: Replacing with sync on, backup: Export with encryption on
+# covers: encryption: Experimental warning
+# covers: encryption: Turning encryption on
+# covers: encryption: Disconnecting with encryption on
+# covers: encryption: Disabling
+# covers: backup: Replacing with sync on
+# covers: backup: Export with encryption on
 # screens: sync, settings, backup
 appId: app.trecos
 tags:
