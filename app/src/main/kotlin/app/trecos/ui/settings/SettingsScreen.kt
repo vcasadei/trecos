@@ -26,10 +26,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -635,6 +637,18 @@ private fun LinkRow(key: String, @StringRes label: Int, value: String, onClick: 
 @Composable
 private fun <T> ChoiceRow(key: String, @StringRes label: Int, selected: T, options: List<Pair<T, String>>, onSelect: (T) -> Unit) {
     var open by remember { mutableStateOf(false) }
+    // The choice waits until the menu's window is gone: a language change
+    // recreates the activity, and on Android 12 recreating it under the open
+    // menu leaves the screen without an accessibility tree, so TalkBack (and
+    // UI tests) see nothing until another window opens.
+    var pending by remember { mutableStateOf<List<T>>(emptyList()) }
+    LaunchedEffect(pending) {
+        val value = pending.singleOrNull() ?: return@LaunchedEffect
+        withFrameNanos { }
+        withFrameNanos { }
+        pending = emptyList()
+        onSelect(value)
+    }
     Box {
         LinkRow(key, label, options.firstOrNull { it.first == selected }?.second.orEmpty()) { open = true }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
@@ -643,7 +657,7 @@ private fun <T> ChoiceRow(key: String, @StringRes label: Int, selected: T, optio
                     text = { Text(text) },
                     onClick = {
                         open = false
-                        if (value != selected) onSelect(value)
+                        if (value != selected) pending = listOf(value)
                     },
                     modifier = Modifier.testTag("option_${key}_$value"),
                 )
