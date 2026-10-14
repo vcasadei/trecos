@@ -1,0 +1,7 @@
+{
+  "runner": "ubuntu24 4 cores",
+  "image": "google/sdk_gphone_x86_64/generic_x86_64:9/PSR1.180720.122/6736742:userdebug/dev-keys",
+  "start_median_ms": 3081,
+  "jank_percent": null,
+  "recorded": "2026-10-14"
+}
