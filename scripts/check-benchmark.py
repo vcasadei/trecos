@@ -187,6 +187,8 @@ def record(numbers, path, runner, image, today=None):
         raise ValueError("no cold start result to record")
     baseline = {"runner": runner, "image": image, "start_median_ms": round(numbers["start_ms"]),
                 "jank_percent": numbers["jank_percent"], "recorded": today or datetime.date.today().isoformat()}
+    # The first baseline is written before its folder is in the repository.
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(baseline, f, indent=2)
         f.write("\n")
@@ -225,7 +227,7 @@ def self_test():
     text = summary(measure(sample(start_ms=1900.0, jank=97.7)), base, "r", "i")
     assert "1900 ms" in text and "1800 ms" in text and "2070 ms" in text and "97.7%" in text and "| Runner | r |" in text
     # Recording a baseline.
-    path = os.path.join(tempfile.mkdtemp(), "baseline.json")
+    path = os.path.join(tempfile.mkdtemp(), "benchmark", "baseline.json")
     written = record(measure(sample(start_ms=1792.4, jank=97.7)), path, "r", "i", today="2026-10-13")
     with open(path, encoding="utf-8") as f:
         assert json.load(f) == written and written["start_median_ms"] == 1792
