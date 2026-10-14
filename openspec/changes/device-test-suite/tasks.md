@@ -53,7 +53,7 @@ Each task writes the area's flows with `# covers:` and `# screens:` headers, tag
 - [x] 5.11 `settings` and `app-lock`: every setting persists across restarts, app lock with an emulator fingerprint (`adb emu finger touch`) and PIN, lock timeout, "lock turned off" when the screen lock is removed
 - [x] 5.12 `encryption`: turn on with the experimental warning, restart, turn off, export while encrypted; plus the `roundtrip`-tagged scenario "Encryption round trip keeps the data" on the `photos` fixture
 - [x] 5.13 `help-and-support`: FAQ accordion, "Contact us" opening an e-mail intent (and the copy fallback without an e-mail app), About links (website, privacy, source, licences), the tips screen when Play Billing is unavailable
-- [ ] 5.14 Verify the whole suite: all flows pass on both local cells in two shuffled orders, and `scripts/check-scenario-coverage.py` passes on the branch
+- [x] 5.14 Verify the whole suite: all flows pass on both local cells in two shuffled orders, and `scripts/check-scenario-coverage.py` passes on the branch
 
 ## 6. CI workflow
 
@@ -93,6 +93,6 @@ Each task writes the area's flows with `# covers:` and `# screens:` headers, tag
 - [x] 9.3 Unit and screenshot tests pass: `./gradlew testDebugUnitTest verifyRoborazziDebug`
 - [x] 9.4 Coverage threshold holds: `./gradlew jacocoCoverageVerification`
 - [x] 9.5 Script tests pass: `python3 -m unittest discover -s scripts -p 'test_*.py'`
-- [ ] 9.6 Scenario coverage passes: `python3 scripts/check-scenario-coverage.py`
+- [x] 9.6 Scenario coverage passes: `python3 scripts/check-scenario-coverage.py`
 - [x] 9.7 The OpenSpec change validates: `openspec validate device-test-suite --strict`
 - [x] 9.8 Secret scan passes over the branch: `pre-commit run gitleaks --all-files`
