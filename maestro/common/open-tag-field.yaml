@@ -11,8 +11,17 @@ appId: app.trecos
     file: tap.yaml
     env:
       ID: more_fields
-- scrollUntilVisible:
-    element:
-      id: field_tag
-- tapOn:
-    id: field_tag
+# The form can still be moving while the keyboard opens, and then the tap misses
+# and the name field keeps the focus, so tap until the tag field has it.
+- repeat:
+    while:
+      notVisible:
+        id: field_tag
+        focused: true
+    times: 3
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: field_tag
+      - tapOn:
+          id: field_tag
