@@ -198,6 +198,18 @@ class SyncScenariosTest : PlacesTestBase() {
     }
 
     @Test
+    fun aFailedSignInSaysSo() {
+        house()
+        auth.outcome = AuthOutcome.Failed("ApiException")
+        openSync()
+        click("connect_drive")
+
+        eventually(10_000) { rule.onAllNodes(hasText("Couldn't connect to Google", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        assertFalse(app.sync.store.load().connected)
+        tag("connect_drive")
+    }
+
+    @Test
     fun driveUnreachable() {
         house()
         connect()

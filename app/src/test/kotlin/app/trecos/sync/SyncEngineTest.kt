@@ -129,8 +129,8 @@ class SyncEngineTest {
         /** @return an item. */
         fun item(id: String) = runBlocking { db.items().get(id) }
 
-        /** Changes an item. */
-        fun edit(id: String, change: (Item) -> Item) = runBlocking { db.items().update(change(db.items().get(id)!!)) }
+        /** Changes an item and stamps the edit time, as the app's forms do. */
+        fun edit(id: String, change: (Item) -> Item) = runBlocking { db.items().update(change(db.items().get(id)!!).copy(updatedAt = now++)) }
     }
 
     private val remote = FakeRemote()
@@ -346,6 +346,7 @@ class SyncEngineTest {
         assertEquals("2", conflict.mine.toString())
         assertEquals("5", conflict.theirs.toString())
         assertEquals(2, phone.item("pi")!!.quantity)
+        assertEquals("the other device by its name", "tablet", phone.store.load().conflicts.single().theirDevice)
     }
 
     @Test
