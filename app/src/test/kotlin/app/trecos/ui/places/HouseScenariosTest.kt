@@ -180,9 +180,10 @@ class HouseScenariosTest : PlacesTestBase() {
         rule.onRoot().captureRoboImage("src/test/screenshots/HouseList_$theme.png")
     }
 
-    /** Checks that a row's text contains [text]. */
+    /** Checks that a row's text contains [text], waiting for counts and values that load after the row. */
     private fun rowShows(id: String, text: String) {
-        rule.onNode(hasTestTag(rowTag(id)) and hasAnyDescendant(hasText(text, substring = true)), useUnmergedTree = true).assertExists()
+        val row = hasTestTag(rowTag(id)) and hasAnyDescendant(hasText(text, substring = true))
+        rule.waitUntil(10_000) { rule.onAllNodes(row, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
     }
 
     /** Taps the node and waits for the UI to settle. */
