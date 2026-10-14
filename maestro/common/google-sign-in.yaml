@@ -8,7 +8,8 @@
 # consent for Trecos (while in testing, "Google hasn't verified this app").
 # Reads TEST_GOOGLE_ACCOUNT, TEST_GOOGLE_PASSWORD and TEST_GOOGLE_RECOVERY_EMAIL
 # (maestro/.env locally, the google-test environment in CI). When Google asks
-# for anything else, such as a code or a phone number, the flow fails on
+# for anything else, such as a code, a phone number or approval on another
+# device signed in to the account ("Check your <device>"), the flow fails on
 # "sign-in-blocked" instead of a missing element.
 # These screens show the account's addresses: keep them out of public artifacts.
 appId: app.trecos
@@ -21,7 +22,7 @@ appId: app.trecos
       notVisible: (Connected as.*|Restore from Drive\?|Drive has other houses)
     commands:
       - extendedWaitUntil:
-          visible: (?i)(connected as.*|restore from drive\?|drive has other houses|sign in with ease|email or phone|enter your password|verify it.s you|enter recovery email address|i agree|make sure you can always sign in|set a home address|google services|.*hasn.t verified this app|.*wants (additional )?access to your google account|choose an account.*|enter (the )?code|.*couldn.t sign you in.*)
+          visible: (?i)(connected as.*|restore from drive\?|drive has other houses|sign in with ease|email or phone|enter your password|verify it.s you|enter recovery email address|i agree|make sure you can always sign in|set a home address|google services|.*hasn.t verified this app|.*wants (additional )?access to your google account|choose an account.*|enter (the )?code|.*couldn.t sign you in.*|check your .*)
           timeout: 60000
       - runFlow:
           when:
@@ -104,7 +105,7 @@ appId: app.trecos
       # A code sent elsewhere, or a refusal, is Google blocking this sign-in.
       - runFlow:
           when:
-            visible: (?i)(enter (the )?code|.*couldn.t sign you in.*)
+            visible: (?i)(enter (the )?code|.*couldn.t sign you in.*|check your .*)
           commands:
             # Fails with "sign-in-blocked" in the log, which the runner reports.
             - assertVisible: sign-in-blocked
