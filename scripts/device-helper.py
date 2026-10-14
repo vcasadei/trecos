@@ -17,7 +17,6 @@ import http.server
 import json
 import os
 import pathlib
-import re
 import subprocess
 import sys
 import tempfile
@@ -25,6 +24,7 @@ import time
 import zipfile
 
 PIN = "1111"
+WRONG_PIN = "2222"
 PACKAGE = "app.trecos"
 MAIL_APPS = ("com.google.android.gm",)
 
@@ -67,36 +67,37 @@ def screen_lock_on(device):
         Android confirmed it.
     """
     # A disabled lock screen (seen on Android 9 emulators) makes the phone look
-    # unsecured even with a PIN, so it is turned back on first. The PIN is then
-    # verified, and set again if Android didn't take it.
-    for _ in range(3):
-        adb(device, "shell", "locksettings", "set-disabled", "false")
-        adb(device, "shell", "locksettings", "set-pin", PIN)
-        if "verified successfully" in adb(device, "shell", "locksettings", "verify", "--old", PIN):
-            return {"pin": PIN, "verified": keyguard_secure(device)}
-        time.sleep(2)
-    return {"pin": PIN, "verified": False}
+    # unsecured even with a PIN, so it is turned back on first. A PIN left by an
+    # earlier attempt is cleared first, because setting one over it counts as a
+    # failed attempt.
+    adb(device, "shell", "locksettings", "set-disabled", "false")
+    if has_pin(device):
+        adb(device, "shell", "locksettings", "clear", "--old", PIN)
+    adb(device, "shell", "locksettings", "set-pin", PIN)
+    return {"pin": PIN, "verified": has_pin(device)}
 
 
-def keyguard_secure(device):
-    """Waits for the lock screen to count the new PIN, as apps see it.
+def has_pin(device):
+    """Tells whether the phone's PIN is PIN, without leaving failed attempts.
 
-    On Android 9 the keyguard can report the phone unsecured for a moment
-    after the PIN is set, and an app asking then is told there is no lock.
+    Each failed attempt counts towards the gatekeeper's lockout, and once it
+    locks out, set-pin and clear still print success but change nothing. Any
+    command given --old on a phone with no PIN is a failed attempt (clear
+    fails with "Failed to enroll pattern" on Android 9), while verify with no
+    PIN accepts anything without asking the gatekeeper. So the check is that a
+    wrong PIN is refused, after and before verifies with the right one, which
+    reset the failure count.
 
     Args:
         device (str): the device serial.
 
     Returns:
-        bool: True once ``dumpsys window policy`` says ``secure=true``, or
-        when it has no such line; False after ten seconds.
+        bool: True when the phone has the helper's PIN.
     """
-    for _ in range(20):
-        states = re.findall(r"^\s+secure=(\w+)", adb(device, "shell", "dumpsys", "window", "policy"), re.M)
-        if not states or "true" in states:
-            return True
-        time.sleep(0.5)
-    return False
+    adb(device, "shell", "locksettings", "verify", "--old", PIN)
+    wrong = adb(device, "shell", "locksettings", "verify", "--old", WRONG_PIN)
+    right = adb(device, "shell", "locksettings", "verify", "--old", PIN)
+    return "verified successfully" not in wrong and "verified successfully" in right
 
 
 def screen_lock_off(device):
@@ -108,7 +109,8 @@ def screen_lock_off(device):
     Returns:
         dict: an empty result.
     """
-    adb(device, "shell", "locksettings", "clear", "--old", PIN)
+    if has_pin(device):
+        adb(device, "shell", "locksettings", "clear", "--old", PIN)
     return {}
 
 

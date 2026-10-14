@@ -55,6 +55,7 @@ FLOW_ENV = PRIVATE_ENV
 SCREEN_SUFFIXES = (".png", ".jpg", ".jpeg", ".mp4", ".gif")
 # The PIN scripts/device-helper.py sets; the runner clears it around every flow.
 HELPER_PIN = "1111"
+WRONG_PIN = "2222"
 # Pauses-and-retries allowed per flow when Maestro's on-device driver dies.
 DRIVER_RESTARTS = 2
 TIER_TAGS = {
@@ -194,7 +195,14 @@ def reset_phone(device):
     Args:
         device (str): the device serial.
     """
-    adb(device, "shell", "locksettings", "clear", "--old", HELPER_PIN)
+    # Clearing a PIN that isn't there counts as a failed attempt, and enough of
+    # those lock the gatekeeper out until the emulator restarts (see the helper's
+    # has_pin). Verify with no PIN accepts anything, so a refused wrong PIN means
+    # there is one; the verifies with the right PIN reset the failure count.
+    verify = lambda pin: adb(device, "shell", "locksettings", "verify", "--old", pin).stdout
+    verify(HELPER_PIN)
+    if "verified successfully" not in verify(WRONG_PIN) and "verified successfully" in verify(HELPER_PIN):
+        adb(device, "shell", "locksettings", "clear", "--old", HELPER_PIN)
     adb(device, "shell", "locksettings", "set-disabled", "false")
     adb(device, "shell", "pm", "enable", "com.google.android.gm")
     if adb(device, "shell", "settings", "get", "global", "airplane_mode_on").stdout.strip() == "1":
