@@ -66,6 +66,7 @@ jobs:
           name: benchmark-results
           path: |
             baselineprofile/build/outputs/connected_android_test_additional_output/**/*benchmarkData.json
+            baselineprofile/build/outputs/androidTest-results/connected/**/*.xml
             benchmark/reference-baseline.json
           retention-days: 30
 
