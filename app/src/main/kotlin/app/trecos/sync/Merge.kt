@@ -66,6 +66,9 @@ data class MergeResult(val rows: Rows, val conflicts: List<Conflict>, val change
 object Merge {
     private const val DELETED_AT = "deletedAt"
 
+    /** Bookkeeping, not something the user edits: the later time wins without asking. */
+    private const val UPDATED_AT = "updatedAt"
+
     /**
      * Merges [theirs] into [mine], with [base] their last common state.
      *
@@ -124,8 +127,8 @@ object Merge {
     private fun mergeRow(key: String, b: JsonObject, m: JsonObject, t: JsonObject, conflicts: MutableList<Conflict>): JsonObject {
         val trashedHere = isTrashed(m) && !isTrashed(b)
         val trashedThere = isTrashed(t) && !isTrashed(b)
-        val editedHere = changedFields(b, m).any { it != DELETED_AT }
-        val editedThere = changedFields(b, t).any { it != DELETED_AT }
+        val editedHere = changedFields(b, m).any { it != DELETED_AT && it != UPDATED_AT }
+        val editedThere = changedFields(b, t).any { it != DELETED_AT && it != UPDATED_AT }
         if (trashedHere && !trashedThere && editedThere) {
             conflicts += Conflict(key, ConflictKind.EditVersusDelete, mine = m, theirs = t, deletedHere = true)
             return m
@@ -143,6 +146,7 @@ object Merge {
                 mv == tv -> mv
                 mv == bv -> tv
                 tv == bv -> mv
+                field == UPDATED_AT -> later(mv, tv)
                 else -> {
                     conflicts += Conflict(key, ConflictKind.SameField, field = field, mine = mv, theirs = tv)
                     mv
@@ -150,6 +154,13 @@ object Merge {
             }
         }
         return JsonObject(fields)
+    }
+
+    /** @return the later of two times; a missing or unreadable one loses. */
+    private fun later(a: JsonElement, b: JsonElement): JsonElement {
+        val x = (a as? JsonPrimitive)?.contentOrNull?.toLongOrNull()
+        val y = (b as? JsonPrimitive)?.contentOrNull?.toLongOrNull()
+        return if ((y ?: Long.MIN_VALUE) > (x ?: Long.MIN_VALUE)) b else a
     }
 
     /** @return the fields whose values differ between two versions of a row. */

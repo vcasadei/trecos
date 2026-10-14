@@ -42,6 +42,26 @@ class MergeTest {
     }
 
     @Test
+    fun editTimesAloneAreNoConflict() {
+        val base = pi.with("updatedAt" to 100)
+        val mine = base.with("quantity" to 2, "updatedAt" to 200)
+        val theirs = base.with("description" to "4 GB", "updatedAt" to 300)
+        val result = Merge.merge(mapOf(key to base), mapOf(key to mine), mapOf(key to theirs))
+
+        assertTrue(result.conflicts.isEmpty())
+        assertEquals(base.with("quantity" to 2, "description" to "4 GB", "updatedAt" to 300), result.rows[key])
+    }
+
+    @Test
+    fun trashVersusATimeOnlyChangeIsNoConflict() {
+        val base = pi.with("updatedAt" to 100)
+        val trashed = base.with("deletedAt" to 150, "updatedAt" to 150)
+        val touched = base.with("updatedAt" to 120)
+        val result = Merge.merge(mapOf(key to base), mapOf(key to trashed), mapOf(key to touched))
+        assertTrue(result.conflicts.isEmpty())
+    }
+
+    @Test
     fun sameField() {
         val result = Merge.merge(mapOf(key to pi), mapOf(key to pi.with("quantity" to 2)), mapOf(key to pi.with("quantity" to 5)))
 

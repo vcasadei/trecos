@@ -372,6 +372,7 @@
     <string name="house_restored">\"%1$s\" voltou.</string>
     <string name="sync_intro">Mantenha seu inventário igual em todos os seus aparelhos por meio de uma pasta Trecos visível no seu próprio Google Drive. O Trecos só vê os arquivos que ele criou.</string>
     <string name="sync_connect">Conectar o Google Drive</string>
+    <string name="sync_connect_failed">Não foi possível conectar ao Google. Verifique a conexão e se o Google Play services está atualizado, e tente de novo.</string>
     <string name="sync_connected_as">Conectado como %1$s</string>
     <string name="sync_last">Última sincronização: %1$s</string>
     <string name="sync_never">Ainda não sincronizado</string>

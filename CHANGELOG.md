@@ -6,6 +6,13 @@ All notable changes to Trecos are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Scanning a QR code on a phone that never downloaded Google's scanner, while offline, now says it needs a one-time download instead of doing nothing.
+- Sync no longer asks about an item's "updatedAt" time when two devices edit different fields of it; those edits merge without a question, as intended.
+- A sync conflict now names the other device by its name instead of an internal ID.
+- Connecting Google Drive on a phone whose Google Play services can't sign in now says so, instead of doing nothing.
+
 ### Added
 
 - The Trecos app icon: a cardboard box with a lid and a handwritten "t" on its label, on violet. Android 13+ can tint it to match the wallpaper.

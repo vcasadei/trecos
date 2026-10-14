@@ -106,6 +106,8 @@ class SyncViewModel(private val app: AppContainer) : ViewModel() {
      * @param outcome how it ended.
      */
     fun onAuth(outcome: AuthOutcome) {
+        // Without this, a phone whose Google Play services can't authorize showed nothing at all.
+        if (outcome is AuthOutcome.Failed) app.messages.tryEmit(AppMessage(app.resources.getString(R.string.sync_connect_failed)))
         if (outcome !is AuthOutcome.Granted) return
         token = outcome.token
         app.scope.launch {
