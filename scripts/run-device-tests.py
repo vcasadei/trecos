@@ -165,7 +165,7 @@ def prepare(device):
 
     Disables the on-screen keyboards and other input methods, which
     autocorrect or cover what flows type (Gboard turned "dos meus" into "do
-    mess" on Android 9), turns off system animations, grants the emulator
+    mess" on Android 9), turns off system animations and error dialogs, grants the emulator
     Camera app its permissions, and wakes the screen.
 
     Args:
@@ -181,6 +181,9 @@ def prepare(device):
             adb(device, "shell", "ime", "disable", ime)
     for scale in ("window_animation_scale", "transition_animation_scale", "animator_duration_scale"):
         adb(device, "shell", "settings", "put", "global", scale, "0")
+    # A slow emulator's own System UI can stop responding, and its "isn't responding"
+    # dialog then covers the app for every later flow (seen on Android 16 in CI).
+    adb(device, "shell", "settings", "put", "global", "hide_error_dialogs", "1")
     # The emulator's Camera app asks for its own permissions on first use (Android 9),
     # on a screen Back can't leave; Trecos itself asks for none.
     for permission in CAMERA_APP_PERMISSIONS:
