@@ -17,6 +17,7 @@ import http.server
 import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -72,9 +73,30 @@ def screen_lock_on(device):
         adb(device, "shell", "locksettings", "set-disabled", "false")
         adb(device, "shell", "locksettings", "set-pin", PIN)
         if "verified successfully" in adb(device, "shell", "locksettings", "verify", "--old", PIN):
-            return {"pin": PIN, "verified": True}
+            return {"pin": PIN, "verified": keyguard_secure(device)}
         time.sleep(2)
     return {"pin": PIN, "verified": False}
+
+
+def keyguard_secure(device):
+    """Waits for the lock screen to count the new PIN, as apps see it.
+
+    On Android 9 the keyguard can report the phone unsecured for a moment
+    after the PIN is set, and an app asking then is told there is no lock.
+
+    Args:
+        device (str): the device serial.
+
+    Returns:
+        bool: True once ``dumpsys window policy`` says ``secure=true``, or
+        when it has no such line; False after ten seconds.
+    """
+    for _ in range(20):
+        states = re.findall(r"^\s+secure=(\w+)", adb(device, "shell", "dumpsys", "window", "policy"), re.M)
+        if not states or "true" in states:
+            return True
+        time.sleep(0.5)
+    return False
 
 
 def screen_lock_off(device):

@@ -75,8 +75,11 @@ tags:
     file: ../../common/tap.yaml
     env:
       ID: add_item_field
-- tapOn:
-    id: item_field_name
+# Centred first: the new field opens at the bottom, partly behind the Save bar.
+- runFlow:
+    file: ../../common/tap-row.yaml
+    env:
+      ID: item_field_name
 - inputText: Firmware
 - runFlow:
     file: ../../common/tap.yaml

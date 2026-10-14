@@ -38,7 +38,10 @@ PACKAGE = "app.trecos"
 FLOW_TIMEOUT_S = 600
 # Apps that provide input methods on the emulator images: Gboard, the AOSP keyboard, and
 # the Google app, whose voice input Android 9 switches to when no keyboard is left.
-KEYBOARDS = ("com.google.android.inputmethod.latin", "com.android.inputmethod.latin", "com.google.android.googlequicksearchbox")
+# Android 16's image has no keyboard but Google's voice input (in the speech services app),
+# which Android turns back on after "ime disable" and whose hidden window takes taps.
+KEYBOARDS = ("com.google.android.inputmethod.latin", "com.android.inputmethod.latin",
+             "com.google.android.googlequicksearchbox", "com.google.android.tts")
 CAMERA_APP_PERMISSIONS = ("android.permission.CAMERA", "android.permission.RECORD_AUDIO",
                           "android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION",
                           "android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE")

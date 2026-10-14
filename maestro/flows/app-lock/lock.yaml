@@ -31,8 +31,12 @@ tags:
     env:
       ACTION: screen-lock-on
 - assertTrue: ${output.device.verified}
-- tapOn:
-    id: setting_app_lock
+# Through tap-row: on a small screen the row can sit under the bottom bar,
+# which would take the tap and open Home.
+- runFlow:
+    file: ../../common/tap-row.yaml
+    env:
+      ID: setting_app_lock
 - runFlow: ../../common/enter-pin.yaml
 - assertVisible:
     id: setting_app_lock

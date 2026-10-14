@@ -3,7 +3,8 @@
 # which otherwise catches taps on rows at the bottom edge. A row near the end
 # of the list can't be centred; then the plain scroll brings it into view and
 # the list's bottom padding keeps it above the bar. Use tap.yaml for buttons
-# fixed to the bottom of a form.
+# fixed to the bottom of a form; a form field that can sit behind those buttons
+# is tapped with this file too.
 appId: app.trecos
 ---
 - scrollUntilVisible:

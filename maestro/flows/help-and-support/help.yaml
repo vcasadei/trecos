@@ -36,13 +36,31 @@ tags:
     env:
       ID: setting_contact
 - tapOn: License quote
+# Gmail can take a few seconds to start on a small emulator.
 - runFlow:
     file: ../../common/device.yaml
     env:
       ACTION: top-package
+- repeat:
+    times: 10
+    while:
+      true: ${output.device.package != 'com.google.android.gm'}
+    commands:
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - runFlow:
+          file: ../../common/device.yaml
+          env:
+            ACTION: top-package
 - assertTrue: ${output.device.package == 'com.google.android.gm'}
-- launchApp:
-    stopApp: false
+# Gmail opens in Trecos's task, sometimes on its welcome screen: back out of it.
+- repeat:
+    times: 5
+    while:
+      notVisible:
+        id: tab_Settings
+    commands:
+      - back
 - tapOn:
     id: tab_Settings
 # Without an e-mail app, the address is shown with a copy button.
