@@ -46,8 +46,10 @@ Regenerate it when a release changes startup or a main screen.
 ## Startup benchmark
 
 `StartupBenchmark` cold-starts the app 10 times without a profile and with the
-Baseline Profile, and reports `timeToInitialDisplayMs` in
-`baselineprofile/build/outputs/connected_android_test_additional_output/`.
+Baseline Profile, and reports `timeToFullDisplayMs` (the Home list loaded and
+reported drawn) and `timeToInitialDisplayMs` (the first frame) in
+`baselineprofile/build/outputs/connected_android_test_additional_output/`. The
+release gate uses only `timeToFullDisplayMs`.
 
 Macrobenchmark refuses to run on an emulator unless told to, because emulator
 numbers don't represent real phones. To compare builds on the headless

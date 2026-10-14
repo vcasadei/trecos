@@ -61,11 +61,14 @@ class MainActivity : AppCompatActivity() {
      * Android 9 draws no frame after reportFullyDrawn() on its own, and the startup
      * benchmark needs one to close its measurement (task 14.8); newer versions draw it.
      * The frame is asked for here, after the call: the fully-drawn listener runs
-     * before it, because the activity defers the call to its next draw.
+     * before it, because the activity defers the call to its next draw. That call
+     * comes from inside the draw, where an invalidate can join the frame being
+     * drawn, so it is posted to run once that frame is done.
      */
     override fun reportFullyDrawn() {
         super.reportFullyDrawn()
-        window.decorView.postInvalidate()
+        val decor = window.decorView
+        decor.post { decor.invalidate() }
     }
 
     /**

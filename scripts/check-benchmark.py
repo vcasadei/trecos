@@ -73,7 +73,9 @@ def measure(results):
     numbers = {"start_ms": None, "jank_percent": None, "overrun_p95_ms": None, "has_scroll": False}
     for b in benchmarks:
         if b.get("name") == "coldStartWithBaselineProfile":
-            m = metric(b, "timeToFullDisplayMs", "timeToInitialDisplayMs")
+            # Only time to full display: the interactive list, not the first frame. A
+            # run without it has no cold start, rather than a smaller number.
+            m = metric(b, "timeToFullDisplayMs")
             numbers["start_ms"] = m and m.get("median")
         if b.get("name") == "scrollingOneThousandItems":
             numbers["has_scroll"] = True
@@ -210,6 +212,8 @@ def self_test():
     assert check_budget(measure(sample(jank=2.0))) == []
     assert any("janky" in f for f in check_budget(measure(sample(jank=7.5)))), "the gfxinfo jank share gates too"
     assert check_budget(measure([{"benchmarks": []}])), "missing results block a release"
+    first_frame_only = [{"benchmarks": [{"name": "coldStartWithBaselineProfile", "metrics": {"timeToInitialDisplayMs": {"median": 900.0}}}]}]
+    assert measure(first_frame_only)["start_ms"] is None, "the first frame alone is not a cold start"
     # Baseline on the reference emulator.
     base = {"runner": "r", "image": "i", "start_median_ms": 1800, "recorded": "2026-10-13"}
     within = check_baseline(measure(sample(start_ms=1900.0, jank=97.7)), base, "r", "i")

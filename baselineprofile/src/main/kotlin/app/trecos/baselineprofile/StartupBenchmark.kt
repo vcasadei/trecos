@@ -7,7 +7,9 @@ import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.Until
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -55,9 +57,16 @@ class StartupBenchmark {
         setupBlock = { pressHome() },
     ) {
         startActivityAndWait()
+        // startActivityAndWait() returns at the first frame. The list reports fully
+        // drawn once it has loaded, and the trace must still be running then, with
+        // the frame after it, or there is no time to full display on a slow emulator.
+        device.wait(Until.hasObject(By.res(PLACE_LIST_TAG)), WAIT_MS)
+        device.waitForIdle()
     }
 
     private companion object {
         const val SEED_WAIT_MS = 8_000L
+        const val WAIT_MS = 10_000L
+        const val PLACE_LIST_TAG = "place_list"
     }
 }
