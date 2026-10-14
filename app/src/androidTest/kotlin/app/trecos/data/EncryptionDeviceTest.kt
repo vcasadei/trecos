@@ -42,7 +42,7 @@ class EncryptionDeviceTest {
     }
 
     /** @return the first bytes of the database file. */
-    private fun header() = dbFile.inputStream().use { String(it.readNBytes(15)) }
+    private fun header() = dbFile.inputStream().use { String(ByteArray(15).also(java.io.DataInputStream(it)::readFully)) }
 
     @Test
     fun encryptAndDecryptKeepEverything() = runBlocking {

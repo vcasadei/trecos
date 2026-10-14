@@ -10,8 +10,8 @@ See proposal.md for the motivation. What exists today:
   backup, photos). CI never runs them.
 - The `baselineprofile` module holds `StartupBenchmark` (cold start over 10
   runs, scrolling 1,000 items) and `BaselineProfileGenerator`.
-  `scripts/check-benchmark.py` applies the 1.5 s / 5% budget. The data comes
-  from `BenchmarkSeedReceiver`, which is on only in `benchmarkRelease`
+  `scripts/check-benchmark.py` applied the 1.5 s / 5% budget. The data comes
+  from `BenchmarkSeedReceiver`, which was on only in `benchmarkRelease`
   (manifest placeholder plus `BuildConfig.BENCHMARK_SEED`).
 - The Compose UI already uses `testTag` widely (for example `rowTag(id)`,
   `tabTag(tab)`, `about_privacy`), because the Robolectric tests depend on it.
@@ -60,24 +60,30 @@ Layout:
   (`# screens: house_list, container`).
 
 ### 2. Test tags as resource ids
-`TrecosApp`'s root sets `Modifier.semantics { testTagsAsResourceId = true }`,
-so Maestro's `id:` selectors match the existing Compose test tags. It is set in
+The activity's Compose root (around the lock gate and `TrecosApp`) sets
+`Modifier.semantics { testTagsAsResourceId = true }`,
+so Maestro's `id:` selectors match the existing Compose test tags, the lock
+screen's included. Dialogs are separate windows that do not inherit the flag,
+so flows find dialog controls by their visible text. It is set in
 every build, so CI tests the same UI tree users get. The cost is extra resource
 ids in the accessibility tree, which expose nothing private.
 - **Alternative:** debug-only. Rejected: two UI trees would mean flows test
   something different from what ships.
 
 ### 3. Fixtures through the existing seed receiver
-`BenchmarkSeedReceiver` becomes `TestSeedReceiver`. It gets a `fixture` extra
-naming a set:
-- `empty`, `one-house`, `two-houses`, `photos` and `1000-items`;
-- `1000-items` is today's benchmark data.
+`BenchmarkSeedReceiver` becomes `TestSeedReceiver`, with a `fixture` extra naming a set:
+- `one-house`: an apartment with an office, two boxes and four items (one without a price);
+- `two-houses`: the same plus a second house, for the house list and moves between houses;
+- `photos`: `one-house` with three photos on the laptop, generated as plain
+  bitmaps and stored through the real photo pipeline;
+- `1000-items`: today's benchmark data.
 
-It is enabled in the `debug` and `benchmarkRelease` builds and stays disabled in
-`release`: the manifest placeholder is off and the `BuildConfig` check returns
-early. The benchmark keeps calling it with `fixture=1000-items`. Photo fixtures
-are bundled test images that the receiver copies into the photo store. Flows
-that test creation, import or restore build their data through the UI instead.
+A fresh install already has no data (the first-run prompt), so there is no
+`empty` fixture: flows that need it clear the app's data. The receiver is
+enabled in the `debug` and `benchmarkRelease` builds (`BuildConfig.TEST_SEED`
+and the `testSeed` manifest placeholder) and stays disabled in `release`, where
+the check also returns early. The benchmark calls it with `fixture=1000-items`.
+Flows that test creation, import or restore build their data through the UI.
 - **Why reuse:** the benchmark is the concrete second user of this receiver, so
   there is one seeding path, not two.
 - **Alternative:** importing a fixture backup through the document picker at
@@ -90,8 +96,9 @@ that test creation, import or restore build their data through the UI instead.
   Play services and account sign-in.
 - **Memory:** the AVD gets `hw.ramSize` and `-memory` set to the cell's size,
   2 CPU cores, `-no-snapshot-save`, `-no-audio` and `-no-boot-anim`.
-- **Snapshot cache:** a clean-boot snapshot is cached per API level and image
-  with `actions/cache`, keyed on the image's revision, so boots stay short.
+- **Snapshot cache:** not used at first. A cached AVD could carry one cell's
+  memory size into another, and a cold boot costs only 2 to 3 minutes per cell.
+  Revisit once the suite is green in CI.
 - **Reference emulator:** API 28 `google_apis` x86_64, 2048 MB, 2 cores, on
   `ubuntu-24.04`. The image revision is recorded in the results.
 
@@ -111,7 +118,10 @@ the matrix. Then one job runs per cell, with `fail-fast: false` and
 documentation gives. The user approved this action on 2026-10-12.
 
 ### 6. Running a cell
-`scripts/run-device-tests.sh <tier>` runs on a cell, locally or in CI:
+`scripts/run-device-tests.py --device <serial> --tier <tier>` runs on a cell,
+locally or in CI. It is Python rather than shell because it drives each flow
+separately (one Maestro run per flow), which is what makes the shuffled order
+and the single rerun possible:
 1. Installs the debug APK, or the `benchmarkRelease` APK for the benchmark.
 2. Runs `connectedDebugAndroidTest` for the four existing instrumented tests.
 3. Runs Maestro over the tier's tags with JUnit output. The order is shuffled
@@ -126,12 +136,30 @@ documentation gives. The user approved this action on 2026-10-12.
 A final job in the workflow merges every cell's `result.json` into the run
 summary table. It uploads the artifacts with 14 days' retention.
 
+### 6b. A device helper for what flows can't do
+Maestro flows can't run `adb`, but their `runScript` steps can make HTTP calls
+from the machine running Maestro. `scripts/device-helper.py` listens on
+`127.0.0.1` and runs a fixed list of `adb` actions against one device:
+- set or clear the phone's PIN;
+- report whether the app hides its recent-apps preview (FLAG_SECURE on
+  Android 9 to 12; Android 13+ doesn't expose it, so the answer is "unknown"
+  there).
+
+Anything else returns 404. `run-device-tests.py` starts the helper per cell,
+passes its port to the flows as `DEVICE_HELPER_PORT`, and clears the PIN
+around every flow so a failure can't leak into the next one.
+- **Why:** the app lock scenarios need a phone PIN that appears and disappears
+  mid-flow.
+- **Alternative:** driving the Settings app with Maestro. Rejected: its
+  screens differ on every Android version, and removing a PIN asks for it
+  again inside secure windows Maestro can't read.
+
 ### 7. Coverage check without an emulator
 `scripts/check-scenario-coverage.py` runs in `ci.yml`. It reads:
 - every `#### Scenario:` in `openspec/changes/trecos-v1/specs/*/spec.md` (and
   in `openspec/specs/` once `trecos-v1` is archived);
 - the `# covers:` and `# screens:` headers of every flow;
-- `maestro/COVERAGE.md`, which lists the scenarios marked "Robolectric only" or
+- `maestro/COVERAGE.md`, which lists the scenarios marked "device test", "Robolectric only" or
   "manual" with a reason;
 - the navigation routes declared in the app's `NavHost`.
 
@@ -144,11 +172,22 @@ existing `scripts/check-benchmark.py`.
 - It runs `:baselineprofile:connectedBenchmarkReleaseAndroidTest` with
   `androidx.benchmark.suppressErrors=EMULATOR`, because Macrobenchmark refuses
   emulators otherwise.
-- `scripts/check-benchmark.py` then applies the budget.
+- `scripts/release-benchmark.sh` then runs `scripts/check-benchmark.py
+  --baseline`: the median cold start may be at most 15% slower than
+  `benchmark/reference-baseline.json`. That file names the runner type and the
+  image's build fingerprint, and a run on anything else fails until the
+  baseline is recorded again on purpose. Running `release.yml` by hand with
+  "Record a new performance baseline" uploads a new file to commit.
+- Jank is recorded in the summary but doesn't gate, because the software GPU
+  makes almost every frame janky.
+- The absolute budgets (1.5 s, under 5% janky frames) move to a low-end
+  physical phone in Firebase Test Lab, checked with `check-benchmark.py
+  --budget` before a build is promoted on Google Play.
 
 The `publish` job needs both `build` and `benchmark`, so a failing budget stops
 the release before the approval request. The `release` tier of
-`device-tests.yml` runs as a needed job too, including the round-trip flows.
+`device-tests.yml` runs as a needed job too, and its Drive job runs the
+round-trip flows.
 The release run summary shows the benchmark numbers with the runner and the
 image revision.
 
@@ -157,27 +196,73 @@ image revision.
   the `CI_DEBUG_KEYSTORE` secret. Its SHA-1 is registered as a third Android
   OAuth client, "Trecos CI debug", so sign-in works on any runner. Local runs
   keep the developer's own debug keystore.
-- **Account:** a Maestro subflow adds the account through the system's
-  Settings > Accounts, with `inputText: ${TEST_GOOGLE_PASSWORD}`. The value
-  comes from the environment and is never written in a flow.
-- **Clean Drive:** before the Drive flows, `scripts/clean-test-drive.py` swaps
-  `TEST_GOOGLE_DRIVE_TOKEN` (a refresh token for the throwaway account, created
-  once with the full `drive` scope through a Desktop OAuth client) for an
-  access token and deletes the `Trecos` folder. It uses only the Python
-  standard library.
-- **Blocked sign-in:** if Google shows a challenge screen ("Verify it's you"),
-  the subflow detects it and marks the Drive flows `sign-in-blocked` instead of
-  failed.
-- **Schedule:**
-  - nightly: the `drive` flows on one cell (API 36, 4 GB);
-  - weekly and release: the `roundtrip` flows on the reference emulator and on
-    API 36.
+- **Account:** `maestro/common/google-sign-in.yaml` starts from Trecos's own
+  Settings > Sync > "Connect Google Drive". On a device without the account,
+  Google adds it through its own screens first. The subflow answers whichever
+  screen appears, so it works on a fresh emulator and on one that already has
+  the account:
+  - the SIM offer, the e-mail and the password;
+  - "Verify it's you", answered through "Confirm your recovery email" with
+    `TEST_GOOGLE_RECOVERY_EMAIL`;
+  - the terms, recovery info, home address and Google services screens;
+  - the account chooser and Trecos's consent.
+
+  Every value comes from the environment and is never written in a flow.
+- **Clean Drive:**
+  - Before a CI run, `scripts/clean-test-drive.py` swaps
+    `TEST_GOOGLE_DRIVE_TOKEN` for an access token and deletes the `Trecos`
+    folder.
+    - The token is a refresh token for the test account. It was made once,
+      through Google's device flow, with a "TVs and Limited Input" OAuth client
+      ("Trecos CI cleanup") in the Trecos project.
+    - Google's device flow grants `drive.file` but refuses `drive.appdata`.
+    - The script uses only the Python standard library.
+  - Before each flow, the device helper's `wipe-drive` empties both the Trecos
+    folder and the hidden app folder.
+    - It works through a debug-only `wipe-drive` action of `TestSeedReceiver`,
+      which uses the app's own Google authorization for the named test
+      account.
+    - That authorization includes `drive.appdata`, where the encryption key
+      lives.
+    - `TestSeedReceiver` is disabled in release builds.
+- **Two devices on one emulator:** the conflict and "unsynced changes" flows
+  need a second device on the same account. The helper's `app-snapshot`
+  saves the app's data on the computer through `run-as` (debug builds only).
+  A cleared app then acts as the second device. `app-restore` brings the
+  first device back with its device id and unsynced changes.
+- **Blocked sign-in:** some screens can't be answered from the environment,
+  such as a code sent elsewhere, or "Couldn't sign you in".
+  - On those, the subflow fails on the text `sign-in-blocked`.
+  - The runner reports such a flow as `sign-in-blocked`, not failed.
+  - The summary lists it, but it fails no cell.
+- **Privacy of outputs:** Google's screens show the account's addresses.
+  - When the account is set, the runner deletes every screenshot and recording
+    from the outputs.
+  - It also replaces the account's address and every secret with `***` in the
+    text files.
+- **Schedule:** a separate Drive job runs the `drive` flows, which include
+  every `roundtrip` flow:
+  - nightly: on Android 16 / 4 GB;
+  - weekly and release: on Android 16 / 2 GB and 4 GB.
+- **Only Android 16:** the plan was to run the round trips on the reference
+  emulator (Android 9 / 2 GB) too. That doesn't work:
+  - The `google_apis` images for Android 9 to 11 ship Google Play services
+    20.x (2020).
+  - Without the Play Store it can't update, and it refuses the Authorization
+    API that Trecos signs in with ("Caller not whitelisted to call
+    Authorization APIs").
+  - Real phones keep Play services current, so this is an emulator limit, not
+    an app one.
+  - Low memory is still covered by the 2 GB Android 16 cell.
+  - The app now says so when connecting fails, instead of doing nothing
+    (PR #31).
 
 ## Security & Observability
 
 - **Secrets:** `TEST_GOOGLE_ACCOUNT`, `TEST_GOOGLE_PASSWORD`,
-  `TEST_GOOGLE_DRIVE_TOKEN`, `TEST_GOOGLE_OAUTH_CLIENT` (the Desktop client's id
-  and secret, used for the token swap) and `CI_DEBUG_KEYSTORE` (base64).
+  `TEST_GOOGLE_RECOVERY_EMAIL`, `TEST_GOOGLE_DRIVE_TOKEN`,
+  `TEST_GOOGLE_OAUTH_CLIENT` (the cleanup client's id and secret, used for the
+  token swap) and `CI_DEBUG_KEYSTORE` (base64).
   - They live in a new GitHub environment, `google-test`, limited to `master`
     and `v*` tags, so pull requests (including forks) never receive them.
   - Only the Drive and round-trip jobs use that environment. The repository
@@ -185,7 +270,7 @@ image revision.
   - Locally, a developer who wants to run Drive flows exports them from a
     gitignored `maestro/.env`. The committed `maestro/.env.example` holds only
     placeholders.
-- **Redaction:** after every run, `run-device-tests.sh` replaces the password
+- **Redaction:** after every run, `run-device-tests.py` replaces the password
   and token values in every file under `build/device-results/` with `***`
   before upload. This is a second guard, on top of Maestro's own masking of
   values read from the environment.
@@ -194,10 +279,12 @@ image revision.
 
 ## Risks / Trade-offs
 
-- [Emulator timings differ from real 2 GB phones] → The budget stays the same,
-  but results carry the runner type and image revision. Trends are compared
-  only within the same runner. The developer can still run the benchmark on any
-  real phone with the same script.
+- [Emulator timings differ from real 2 GB phones, and a software GPU makes
+  almost every frame janky] → The emulator gates only regressions: at most 15%
+  slower than a baseline recorded for the same runner and image. Jank is
+  recorded, not gated. The absolute 1.5 s and 5% budgets are checked with
+  `check-benchmark.py --budget` on a low-end phone in Firebase Test Lab before a
+  Play promotion (ADR 0028).
 - [Flaky boots or slow runners on GitHub] → One rerun per flow, the "flaky"
   label, infrastructure failures reported apart from test failures, and cached
   boot snapshots.

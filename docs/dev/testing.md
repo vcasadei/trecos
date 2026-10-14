@@ -1,8 +1,9 @@
 # Testing
 
-Every test except the benchmarks runs on the JVM, so the headless machine and
-CI need no emulator for them. The emulator is used only for Baseline Profiles
-and Macrobenchmark; set it up with [setup-headless-linux.md](setup-headless-linux.md).
+Most tests run on the JVM, so the main CI job needs no emulator. The device
+suite (instrumented tests and Maestro flows), Baseline Profiles and
+Macrobenchmark run on emulators; see [device-tests.md](device-tests.md) and
+[setup-headless-linux.md](setup-headless-linux.md).
 
 ## Test types
 
@@ -14,6 +15,9 @@ and Macrobenchmark; set it up with [setup-headless-linux.md](setup-headless-linu
 | Screenshot tests (Roborazzi) | `app/src/test`, baselines in `app/src/test/screenshots/` | JVM | `./gradlew verifyRoborazziDebug` |
 | Baseline Profile generation | `baselineprofile/` (`BaselineProfileGenerator`) | Emulator or rooted device | `./gradlew :app:generateBaselineProfile` |
 | Startup benchmark | `baselineprofile/` (`StartupBenchmark`) | Device (emulator with a flag, below) | `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest` |
+| Instrumented tests | `app/src/androidTest` (SQLCipher, encryption, backup, photos) | Emulator cells of the device suite | `./gradlew connectedDebugAndroidTest` |
+| Device flows (Maestro) | `maestro/flows/`, coverage in `maestro/COVERAGE.md` | Emulator cells, Android 9 to 16 × 2 to 6 GB | `scripts/run-device-tests.py`, see [device-tests.md](device-tests.md) |
+| Script tests | `scripts/test_*.py` | Python 3 | `python3 -m unittest discover -s scripts -p 'test_*.py'` |
 
 ## Screenshot tests
 
@@ -54,9 +58,29 @@ machine anyway:
   -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR
 ```
 
-The release gate (median of 1.5 s or less) is measured on the 2 GB Android 9
-reference phone, without that flag. For reference, 0.1 on the API 36 emulator:
-894 ms with the Baseline Profile, 939 ms without.
+`ScrollJankTest` flings the Home list of 1,000 items and reads the share of
+janky frames from `dumpsys gfxinfo` while the app is open. It writes
+`scroll-jank-benchmarkData.json` next to the startup results, in the same
+shape, so `scripts/check-benchmark.py` reads both. Macrobenchmark's own frame
+metrics fail on Android 9: the traced one misses an app that started before
+tracing, and the gfxinfo one reads after the app is stopped.
+
+On Android 9, Macrobenchmark also needs a frame after `reportFullyDrawn()`,
+which Android 9 doesn't draw by itself; `MainActivity` requests one.
+
+The release gate (median of 1.5 s or less, janky frames under 5%) was written
+for a 2 GB Android 9 phone. Reference numbers:
+
+| Device | Cold start, with profile | Cold start, without | Janky frames scrolling 1,000 items |
+|---|---|---|---|
+| API 36 emulator, release 0.1 | 894 ms | 939 ms | not measured |
+| API 28 emulator, 2 GB, 2 cores, software GPU (2026-10-12) | 1,792 ms | 1,813 ms | 97.7% |
+
+An emulator without a GPU draws every frame in software, so its jank share
+says nothing about a phone. On the reference emulator the release gate
+therefore checks only that the cold start is not more than 15% slower than the
+recorded baseline. The absolute budgets are checked on a real phone in
+Firebase Test Lab (docs/dev/release.md, ADR 0028).
 
 ## Coverage
 

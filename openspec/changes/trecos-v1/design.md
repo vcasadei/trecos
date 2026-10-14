@@ -253,8 +253,14 @@ There's no remote configuration (there is no server), so flags are build-time
   testing. Removal: at 1.0, after 30 days on the closed track without data-loss
   reports.
 - `FEATURE_ENCRYPTION`: default `false`, turned on in 0.12. Removal: at 1.0,
-  after on/off round trips pass on a physical Android 9 phone and on a current
-  Android phone.
+  once both of these pass in the weekly and release device runs (change
+  `device-test-suite`):
+  - `EncryptionDeviceTest` on the reference emulator (Android 9, 2 GB), which
+    checks the Keystore-wrapped key and the re-encryption;
+  - the encryption and sync round-trip flows on Android 16. Older emulator
+    images can't sign in to Drive.
+
+  This replaces the physical Android 9 phone the criterion first named.
 - Since 2026-10-09 both flags default to `true`: the developer tested sync,
   encryption and restore on their phone. Encryption is shown as
   "Experimental" until its removal criteria are met. The flags stay as an
@@ -392,7 +398,9 @@ people will have installed from the internal and closed test tracks.
 
 - [Compose performance on 2 GB Android 9 phones] → Baseline Profiles, R8
   full mode, thumbnails-only lists, stable list keys; measured with
-  Macrobenchmark before each release.
+  Macrobenchmark on the reference emulator for every release tag (gated
+  against a baseline) and on a low-end phone in Firebase Test Lab before a
+  Play promotion.
 - [Sync merge bugs could lose data] → the JVM merge engine has exhaustive
   unit tests, the build flag stays off until 0.11, commits are retained on
   Drive, and export is available before sync ships (0.10).

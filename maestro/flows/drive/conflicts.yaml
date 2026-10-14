@@ -1,0 +1,141 @@
+# covers: sync: No conflict
+# covers: sync: Same field
+# covers: sync: Edit versus delete
+# screens: sync, conflicts
+# Two devices on one emulator: the phone's app data is set aside (helper
+# app-snapshot) while a cleared app, the tablet, restores from Drive, makes its
+# own changes and syncs; then the phone comes back (app-restore) and syncs.
+appId: app.trecos
+tags:
+  - drive
+---
+- runFlow:
+    file: ../../common/connect-drive.yaml
+    env:
+      FIXTURE: one-house
+# The phone's changes, not synced yet.
+- runFlow:
+    file: ../../common/edit-item.yaml
+    env:
+      QUERY: USB-C
+      ROW: row_usb-cable
+      FIELD: field_quantity
+      VALUE: "2"
+- runFlow:
+    file: ../../common/edit-item.yaml
+    env:
+      QUERY: hub
+      ROW: row_usb-hub
+      FIELD: field_quantity
+      VALUE: "4"
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- eraseText
+- inputText: Unlabelled
+- tapOn:
+    id: row_mystery
+- tapOn: More options
+- tapOn: Delete
+- tapOn: Delete
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: app-snapshot
+# The tablet: restores, changes the same quantity, the hub's name and the
+# phone's trashed item, and syncs.
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: none
+- tapOn:
+    id: continue
+- runFlow: ../../common/open-sync.yaml
+- runFlow: ../../common/google-sign-in.yaml
+- extendedWaitUntil:
+    visible: Restore from Drive\?
+    timeout: 120000
+- tapOn: Restore
+- extendedWaitUntil:
+    visible: Last sync.*
+    timeout: 180000
+- runFlow:
+    file: ../../common/edit-item.yaml
+    env:
+      QUERY: USB-C
+      ROW: row_usb-cable
+      FIELD: field_quantity
+      VALUE: "5"
+- runFlow:
+    file: ../../common/edit-item.yaml
+    env:
+      QUERY: hub
+      ROW: row_usb-hub
+      FIELD: field_name
+      VALUE: USB hub Anker
+- runFlow:
+    file: ../../common/edit-item.yaml
+    env:
+      QUERY: Unlabelled
+      ROW: row_mystery
+      FIELD: field_quantity
+      VALUE: "7"
+- runFlow: ../../common/open-sync.yaml
+- tapOn:
+    id: sync_now
+- extendedWaitUntil:
+    notVisible:
+      id: sync_running
+    timeout: 180000
+# Back to the phone, which now syncs.
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: app-restore
+- assertTrue:
+    condition: ${output.device.restored}
+    label: The phone's data is back
+- launchApp:
+    stopApp: true
+- runFlow: ../../common/open-sync.yaml
+- tapOn:
+    id: sync_now
+- extendedWaitUntil:
+    notVisible:
+      id: sync_running
+    timeout: 180000
+- assertVisible: 2 conflicts to resolve
+- tapOn:
+    id: open_conflicts
+- assertVisible: "Quantity: 2 or 5\\?"
+- tapOn: Keep theirs.*
+- assertVisible: Deleted or trashed on this phone, changed on sdk_gphone.*\. Delete it or keep it\?
+- tapOn: Keep it
+- assertVisible:
+    id: no_conflicts
+# Different fields merged without asking: the hub has the phone's quantity
+# and the tablet's name.
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- eraseText
+- inputText: hub
+- tapOn:
+    id: row_usb-hub
+- assertVisible: USB hub Anker
+- assertVisible:
+    text: "4"
+    below: Quantity
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- eraseText
+- inputText: USB-C
+- tapOn:
+    id: row_usb-cable
+- assertVisible:
+    text: "5"
+    below: Quantity

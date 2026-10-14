@@ -1,0 +1,135 @@
+# covers: custom-fields: Adding a house-wide field
+# covers: custom-fields: Wrong type
+# covers: custom-fields: Number with unit
+# covers: custom-fields: One-off field
+# covers: custom-fields: Searching a custom value
+# covers: custom-fields: Deleting a used field
+# screens: settings, fields, place, item_form, item, search
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# House-wide fields for Apartment: RAM (Number, GB) and Purchase date (Date).
+- tapOn:
+    id: tab_Settings
+- runFlow:
+    file: ../../common/tap-row.yaml
+    env:
+      ID: setting_fields
+- tapOn:
+    id: field_type
+- tapOn: Number
+- tapOn:
+    id: new_field_name
+- inputText: RAM
+- tapOn:
+    id: new_field_unit
+- inputText: GB
+- tapOn:
+    id: add_field
+- tapOn:
+    id: new_field_name
+- inputText: Purchase date
+- tapOn:
+    id: field_type
+- tapOn: Date
+- tapOn:
+    id: add_field
+- assertVisible:
+    id: field_row_RAM
+# Every item form in Apartment offers them under "More fields", empty.
+- tapOn:
+    id: tab_Home
+- runFlow:
+    file: ../../common/open-tag-field.yaml
+    env:
+      NAME: Mini PC
+- scrollUntilVisible:
+    element:
+      id: add_item_field
+- assertVisible:
+    id: custom_Purchase date
+- assertVisible:
+    id: custom_RAM
+    text: ""
+# A Number field refuses words, then shows its unit.
+- tapOn:
+    id: custom_RAM
+- inputText: four
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible:
+    id: error_custom_RAM
+- tapOn:
+    id: custom_RAM
+- eraseText
+- inputText: "4"
+# A one-off Text field on this item only.
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: add_item_field
+# Centred first: the new field opens at the bottom, partly behind the Save bar.
+- runFlow:
+    file: ../../common/tap-row.yaml
+    env:
+      ID: item_field_name
+- inputText: Firmware
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: confirm_item_field
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: custom_Firmware
+- inputText: Klipper
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn: Mini PC
+- assertVisible: 4 GB
+- assertVisible: Klipper
+- back
+- tapOn: Office
+- tapOn: Laptop
+- assertNotVisible: Firmware
+- assertNotVisible: Klipper
+# Search finds the custom value when matching descriptions.
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: match
+- tapOn: Description
+- tapOn:
+    id: search_field
+- inputText: Klipper
+- assertVisible:
+    id: result_count
+    text: 1 item
+- assertVisible: Mini PC
+# Deleting a field in use says how many values go, and changes nothing until confirmed.
+- tapOn:
+    id: tab_Settings
+- runFlow:
+    file: ../../common/tap-row.yaml
+    env:
+      ID: setting_fields
+- tapOn:
+    id: delete_RAM
+- assertVisible: 1 item has a value for .*RAM.*
+- tapOn: Cancel
+- assertVisible:
+    id: field_row_RAM
+- tapOn:
+    id: delete_RAM
+- tapOn: Delete
+- assertNotVisible:
+    id: field_row_RAM

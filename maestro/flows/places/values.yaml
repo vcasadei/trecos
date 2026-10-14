@@ -1,0 +1,47 @@
+# covers: places: Override counts upward
+# covers: places: Unpriced items
+# screens: place, container_form
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# Office: laptop 3,500 + hub 159 + Box A 89.70 (3 × 29.90); Box B has one unpriced item.
+- tapOn:
+    id: row_office
+- assertVisible:
+    id: place_value
+    text: "Value: \\$3,748.70 · automatic"
+- assertVisible:
+    id: unpriced_hint
+    text: 1 item has no price
+- tapOn:
+    id: row_box-b
+- tapOn: Edit
+- tapOn:
+    id: field_override
+- inputText: "500"
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible:
+    id: place_value
+    text: "Value: \\$500.00 · manual"
+- assertVisible:
+    id: clear_override
+- back
+# The manual 500 replaces Box B's 0 in Office's automatic total.
+- assertVisible:
+    id: place_value
+    text: "Value: \\$4,248.70 · automatic"
+- tapOn:
+    id: row_box-b
+- tapOn:
+    id: clear_override
+- assertVisible:
+    id: place_value
+    text: "Value: \\$0.00 · automatic"

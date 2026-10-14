@@ -1,0 +1,128 @@
+# covers: encryption: Experimental warning
+# covers: encryption: Turning encryption on
+# covers: encryption: Disconnecting with encryption on
+# covers: encryption: Disabling
+# covers: backup: Replacing with sync on
+# covers: backup: Export with encryption on
+# screens: sync, settings, backup
+appId: app.trecos
+tags:
+  - drive
+---
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: clear-downloads
+- runFlow:
+    file: ../../common/connect-drive.yaml
+    env:
+      FIXTURE: one-house
+# With sync on, replacing everything from a backup warns about the other devices.
+- tapOn:
+    id: tab_Settings
+- runFlow:
+    file: ../../common/tap-row.yaml
+    env:
+      ID: setting_backup
+- tapOn:
+    id: export
+- tapOn: (?i)save
+- assertVisible: Backup saved\.
+- tapOn:
+    id: import
+- tapOn: trecos-backup-.*\.zip
+- tapOn: Replace everything
+- assertVisible: .*Sync is on, so your other devices will receive this data at the next sync\.
+- tapOn: Cancel
+- tapOn: Cancel
+- back
+# The setting is labelled Experimental and warns before anything is encrypted.
+- scrollUntilVisible:
+    element:
+      id: setting_encryption
+    direction: UP
+    centerElement: true
+- assertVisible: Experimental
+- tapOn:
+    id: setting_encryption
+- assertVisible: Encrypt your data\?
+- assertVisible: Encryption is experimental.*Export a backup first.*
+- tapOn: Cancel
+- assertVisible:
+    id: value_encryption
+    text: "Off"
+- tapOn:
+    id: setting_encryption
+- tapOn: Encrypt
+# Trecos restarts when it is done.
+- extendedWaitUntil:
+    visible:
+      id: tab_Settings
+    timeout: 180000
+- extendedWaitUntil:
+    notVisible:
+      id: encryption_progress
+    timeout: 180000
+- tapOn:
+    id: tab_Settings
+- scrollUntilVisible:
+    element:
+      id: value_encryption
+    centerElement: true
+- assertVisible:
+    id: value_encryption
+    text: "On"
+# A backup file is never encrypted: export warns, and Cancel writes nothing.
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: clear-downloads
+- runFlow:
+    file: ../../common/tap-row.yaml
+    env:
+      ID: setting_backup
+- tapOn:
+    id: export
+- assertVisible: This backup won't be encrypted
+- assertVisible: Encryption is on, but backup files are never encrypted.*
+- tapOn: Cancel
+- assertNotVisible: (?i)save
+- assertNotVisible: Backup saved\.
+- back
+# Disconnecting is refused while encryption is on.
+- runFlow: ../../common/open-sync.yaml
+- scrollUntilVisible:
+    element:
+      id: disconnect
+- tapOn:
+    id: disconnect
+- assertVisible: Turn encryption off before disconnecting.*
+- assertVisible: Connected as.*
+# Turning it off decrypts, and Trecos restarts again.
+- back
+- scrollUntilVisible:
+    element:
+      id: setting_encryption
+    direction: UP
+    centerElement: true
+- tapOn:
+    id: setting_encryption
+- assertVisible: Turn encryption off\?
+- tapOn: Turn off
+- extendedWaitUntil:
+    visible:
+      id: tab_Settings
+    timeout: 180000
+- extendedWaitUntil:
+    notVisible:
+      id: encryption_progress
+    timeout: 180000
+- tapOn:
+    id: tab_Settings
+- scrollUntilVisible:
+    element:
+      id: value_encryption
+    centerElement: true
+- assertVisible:
+    id: value_encryption
+    text: "Off"

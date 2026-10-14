@@ -49,7 +49,8 @@ full suite MUST run on all 36 cells.
 The Maestro flows SHALL cover every screen of the app and every user-facing
 `trecos-v1` scenario that can run on an emulator. A coverage report in the
 repository MUST map each `trecos-v1` scenario to the flows that check it, or
-mark it "Robolectric only" or "manual" with a reason. The suite MUST fail when
+mark it "device test" (an instrumented test run on the same cells),
+"Robolectric only" or "manual", with a reason. The suite MUST fail when
 a scenario is in none of those groups.
 
 #### Scenario: A new scenario with no flow
@@ -104,32 +105,54 @@ password and the keystore are never written to logs or artifacts.
 
 ### Requirement: Reference emulator and performance gate
 A reference emulator SHALL be defined as Android 9 (API 28), 2 GB of memory,
-2 CPU cores and a fixed system image, and it replaces the physical reference
-phone in the `trecos-v1` performance requirement and in design D19. On it, the
-release benchmark MUST measure the median cold start over 10 runs with 1,000
-items stored, and the share of janky frames while scrolling those items. A
-release tag MUST NOT publish its APKs when the median cold start exceeds 1.5 s or
-janky frames reach 5%. Emulator timings are approximate, so each result MUST be
-recorded with the runner type to compare runs on the same hardware.
+2 CPU cores and a fixed system image. It replaces the physical reference phone
+for the release gate in the `trecos-v1` performance requirement and in design
+D19.
 
-#### Scenario: A release within budget
+On it, the release benchmark MUST measure, with 1,000 items stored:
+- the median cold start over 10 runs;
+- the share of janky frames while scrolling those items.
+
+Emulator timings don't match a real phone, and a software GPU makes almost
+every frame janky, so the emulator gates regressions, not the absolute budget:
+- A release tag MUST NOT publish its APKs when the median cold start is more
+  than 15% slower than the recorded baseline for the same runner type and
+  system image.
+- The jank share MUST be recorded but does not gate on the emulator.
+- The baseline, a committed file naming its runner type and image, MUST change
+  only on purpose, for example when the runner or image changes.
+
+The absolute budgets stay with real hardware. Before a build is promoted on
+Google Play, the same benchmark MUST run on a low-end physical phone in
+Firebase Test Lab: a median cold start of at most 1.5 s, and fewer than 5%
+janky frames.
+
+#### Scenario: A release within the baseline
 - **AS A** the release workflow
-- **WHEN** the reference benchmark measures a 1.2 s median cold start and 2% janky frames
+- **WHEN** the reference benchmark measures a 1,900 ms median cold start against a 1,800 ms baseline
 - **THEN** the release continues to the approval step
-- **AND** the numbers appear in the release run summary
+- **AND** the run summary shows the measured value, the baseline, the runner and the jank share
 
 #### Scenario: A slow build blocks the release
 - **AS A** the release workflow
-- **WHEN** the reference benchmark measures a 1.7 s median cold start
+- **WHEN** the reference benchmark measures a 2,200 ms median cold start against a 1,800 ms baseline
 - **THEN** the release stops before publishing
-- **AND** the summary shows the measured and allowed values
+- **AND** the summary shows the measured value, the baseline and the allowed maximum (2,070 ms)
+
+#### Scenario: Budgets on a real phone
+- **AS A** the developer promoting a build on Google Play
+- **WHEN** the Firebase Test Lab run on a low-end physical phone measures a 1.7 s median cold start
+- **THEN** `scripts/check-benchmark.py --budget` fails with the measured and allowed values
+- **AND** the build is not promoted
 
 ### Requirement: Encryption and sync round trips
 The suite SHALL include round-trip flows that turn encryption on and off and
 sync on and off, checking that every house, item and photo is unchanged after
-each switch. They MUST run on the reference emulator and on Android 16 in the
-weekly run and for every release tag, and these results are the D19 removal
-criterion for `FEATURE_ENCRYPTION`.
+each switch. They MUST run on Android 16, with 2 GB and with 4 GB of memory,
+in the weekly run and for every release tag. These results are the D19
+removal criterion for `FEATURE_ENCRYPTION`. Older emulator images can't run
+them: their Google Play services is too old to authorize Drive access and
+can't update.
 
 #### Scenario: Encryption round trip keeps the data
 - **AS A** the round-trip flow

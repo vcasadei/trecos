@@ -1,0 +1,9 @@
+# Starts the app from a cleared state, seeded with the fixture in FIXTURE
+# (one-house, two-houses, photos, 1000-items; anything else starts empty).
+appId: app.trecos
+---
+- launchApp:
+    clearState: true
+    stopApp: true
+    arguments:
+      fixture: ${FIXTURE}

@@ -1,0 +1,9 @@
+# On the Search tab, scrolls the chip row and opens the Filters dialog.
+appId: app.trecos
+---
+- swipe:
+    from:
+      id: match
+    direction: LEFT
+- tapOn:
+    id: filters

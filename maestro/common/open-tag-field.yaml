@@ -1,0 +1,18 @@
+# Opens a new item form in the current place, names the item NAME and focuses its tag field.
+appId: app.trecos
+---
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: field_name
+- inputText: ${NAME}
+- runFlow:
+    file: tap.yaml
+    env:
+      ID: more_fields
+- scrollUntilVisible:
+    element:
+      id: field_tag
+- tapOn:
+    id: field_tag

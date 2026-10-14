@@ -1,0 +1,13 @@
+# Adds an item named NAME to the place on screen and saves it.
+appId: app.trecos
+---
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: field_name
+- inputText: ${NAME}
+- runFlow:
+    file: tap.yaml
+    env:
+      ID: save

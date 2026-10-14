@@ -36,9 +36,9 @@ android {
         // their removal criteria are met: -Ptrecos.driveSync=false or -Ptrecos.encryption=false.
         buildConfigField("boolean", "FEATURE_DRIVE_SYNC", (findProperty("trecos.driveSync") ?: "true").toString())
         buildConfigField("boolean", "FEATURE_ENCRYPTION", (findProperty("trecos.encryption") ?: "true").toString())
-        // The benchmark seed receiver (task 14.8) is on only in benchmarkRelease; see androidComponents below.
-        buildConfigField("boolean", "BENCHMARK_SEED", "false")
-        manifestPlaceholders["benchmarkSeed"] = "false"
+        // The test seed receiver (device flows, task 14.8) is on only in debug and benchmarkRelease; see androidComponents below.
+        buildConfigField("boolean", "TEST_SEED", "false")
+        manifestPlaceholders["testSeed"] = "false"
     }
 
     // Release signing reads only these environment variables (design D22); CI sets
@@ -53,6 +53,13 @@ android {
                 keyPassword = System.getenv("TRECOS_KEY_PASSWORD")
             }
         }
+    }
+
+    // Device tests in CI sign debug builds with a fixed keystore (the CI_DEBUG_KEYSTORE
+    // secret), so Google sign-in recognises the app on any runner. Local builds keep
+    // the machine's own debug keystore.
+    System.getenv("TRECOS_CI_DEBUG_KEYSTORE")?.let { ciDebugKeystore ->
+        signingConfigs.getByName("debug") { storeFile = file(ciDebugKeystore) }
     }
 
     splits {
@@ -121,9 +128,9 @@ val faqAssets = tasks.register<FaqAssets>("faqAssets") {
 androidComponents {
     onVariants { variant ->
         variant.sources.assets?.addGeneratedSourceDirectory(faqAssets, FaqAssets::output)
-        if (variant.name == "benchmarkRelease") {
-            variant.manifestPlaceholders.put("benchmarkSeed", "true")
-            variant.buildConfigFields?.put("BENCHMARK_SEED", com.android.build.api.variant.BuildConfigField("boolean", "true", "Benchmark seeding"))
+        if (variant.name == "benchmarkRelease" || variant.name == "debug") {
+            variant.manifestPlaceholders.put("testSeed", "true")
+            variant.buildConfigFields?.put("TEST_SEED", com.android.build.api.variant.BuildConfigField("boolean", "true", "Test fixture seeding"))
         }
     }
 }

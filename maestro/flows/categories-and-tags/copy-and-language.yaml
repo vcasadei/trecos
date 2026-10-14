@@ -1,0 +1,93 @@
+# covers: categories-and-tags: Copying from another house
+# covers: categories-and-tags: Built-ins in Portuguese
+# screens: place, item_form, house_form, home, settings
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# Apartment gets a custom category and a tag, on an item.
+- runFlow:
+    file: ../../common/open-tag-field.yaml
+    env:
+      NAME: Catan
+- inputText: lent
+- tapOn:
+    id: add_tag
+- scrollUntilVisible:
+    element:
+      id: add_category
+    direction: UP
+- tapOn:
+    id: add_category
+- tapOn:
+    id: new_category
+- tapOn:
+    id: new_category_name
+- inputText: Board games
+- tapOn: Save
+- tapOn:
+    id: picker_done
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+# Beach house copies Apartment's categories and tags, but none of its items.
+- tapOn: Switch house
+- tapOn: Add house
+- tapOn:
+    id: field_name
+- inputText: Beach house
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: copy_from
+- tapOn: Apartment
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn: Beach house
+- assertVisible:
+    id: empty_hint
+- runFlow:
+    file: ../../common/open-tag-field.yaml
+    env:
+      NAME: Uno
+- inputText: len
+- assertVisible:
+    id: complete_lent
+- scrollUntilVisible:
+    element:
+      id: add_category
+    direction: UP
+- tapOn:
+    id: add_category
+- tapOn:
+    id: category_search
+- inputText: Board
+- assertVisible: Board games
+- tapOn:
+    id: picker_done
+- back
+# Built-in categories follow the app language.
+- tapOn:
+    id: tab_Settings
+- tapOn:
+    id: setting_language
+- tapOn: Português (Brasil)
+- tapOn:
+    id: tab_Home
+- tapOn: Beach house
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: add_category
+- tapOn:
+    id: category_search
+- inputText: USB-C
+- assertVisible: Cabos > USB-C

@@ -1,0 +1,92 @@
+# covers: app-lock: Phone without a screen lock
+# covers: app-lock: Turning it on
+# covers: app-lock: Recent-apps preview
+# covers: app-lock: Returning quickly
+# covers: app-lock: Failed unlock
+# covers: app-lock: User removed their phone PIN
+# screens: settings, home
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# Without a screen lock, App lock explains why it can't turn on.
+- tapOn:
+    id: tab_Settings
+- runFlow:
+    file: ../../common/tap-row.yaml
+    env:
+      ID: setting_app_lock
+- assertVisible: App lock uses your phone's screen lock.*
+- tapOn: OK
+- assertVisible:
+    id: setting_app_lock
+    checked: false
+# With a PIN on the phone, confirming with it turns the lock on.
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: screen-lock-on
+- assertTrue: ${output.device.verified}
+# Through tap-row: on a small screen the row can sit under the bottom bar,
+# which would take the tap and open Home.
+- runFlow:
+    file: ../../common/tap-row.yaml
+    env:
+      ID: setting_app_lock
+- runFlow: ../../common/enter-pin.yaml
+- assertVisible:
+    id: setting_app_lock
+    checked: true
+# The recent-apps preview hides inventory (checked on Android 9-12; unknown on 13+, see the helper).
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: recents-hidden
+- assertTrue: ${output.device.hidden !== false}
+# With the 1-minute timeout, coming back after 30 seconds doesn't ask.
+- runFlow:
+    file: ../../common/tap-row.yaml
+    env:
+      ID: setting_lock_timeout
+- tapOn: 1 minute
+- pressKey: Home
+- runScript:
+    file: ../../common/wait.js
+    env:
+      SECONDS: "30"
+- launchApp:
+    stopApp: false
+- assertVisible:
+    id: screen_settings
+# After a restart it is locked; cancelling the prompt leaves only Unlock.
+- stopApp
+- launchApp
+# The prompt is a secure window Maestro can't see, so wait for it before cancelling.
+- runScript:
+    file: ../../common/wait.js
+    env:
+      SECONDS: "3"
+- pressKey: Back
+- assertVisible: Trecos is locked
+- assertVisible: Unlock
+- assertNotVisible:
+    id: tab_Home
+- tapOn: Unlock
+- runFlow: ../../common/enter-pin.yaml
+- assertVisible:
+    id: tab_Home
+# Removing the phone's PIN turns App lock off, and the app says so.
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: screen-lock-off
+- stopApp
+- launchApp
+- assertVisible: App lock was turned off because this phone no longer has a screen lock\.
+- tapOn: OK
+- assertVisible:
+    id: tab_Home

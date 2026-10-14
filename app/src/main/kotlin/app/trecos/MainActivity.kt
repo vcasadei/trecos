@@ -6,11 +6,14 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import app.trecos.help.RatingPolicy
+import app.trecos.ui.exposeTestTags
 import app.trecos.ui.lock.LockGate
 import app.trecos.ui.shell.TrecosApp
 import app.trecos.ui.theme.TrecosTheme
@@ -37,6 +40,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Test builds only: device flows seed a cleared app through this launch argument.
+        intent?.getStringExtra("fixture")?.let { runBlocking { TestSeedReceiver.seed(this@MainActivity, container, it) } }
         val themes = container.preferences.theme
         // Read once before the first frame so a Dark choice never flashes White.
         val initial = runBlocking { themes.first() }
@@ -44,10 +49,15 @@ class MainActivity : AppCompatActivity() {
             val theme by themes.collectAsState(initial = initial)
             val navController = rememberNavController()
             TrecosTheme(mode = theme) {
-                LockGate { TrecosApp(navController) }
+                Box(Modifier.exposeTestTags()) {
+                    LockGate { TrecosApp(navController) }
+                }
             }
         }
         lifecycleScope.launch { container.preferences.appLock.collect(::hideFromRecents) }
+        // Android 9 draws no frame after reportFullyDrawn() on its own, and the startup
+        // benchmark needs one to close its measurement (task 14.8); newer versions draw it.
+        fullyDrawnReporter.addOnReportDrawnListener { window.decorView.postInvalidate() }
     }
 
     /**

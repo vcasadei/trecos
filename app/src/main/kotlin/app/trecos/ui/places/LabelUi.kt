@@ -47,6 +47,7 @@ import app.trecos.places.Label
 import app.trecos.places.QrLabels
 import java.io.File
 import java.io.FileOutputStream
+import app.trecos.ui.exposeTestTags
 
 /** Prints labels; replaced by a fake in tests, which can't open the system print dialog. */
 interface LabelPrinter {
@@ -128,7 +129,7 @@ fun QrLabelView(label: Label, onDismiss: () -> Unit) {
     val image = remember(label) { QrLabels.render(label).asImageBitmap() }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(
-            Modifier.fillMaxSize().background(Color.White).statusBarsPadding().padding(24.dp).testTag("qr_label"),
+            Modifier.exposeTestTags().fillMaxSize().background(Color.White).statusBarsPadding().padding(24.dp).testTag("qr_label"),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {

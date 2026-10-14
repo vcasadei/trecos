@@ -44,6 +44,7 @@ import app.trecos.places.PlaceTree
 import app.trecos.ui.appContainer
 import app.trecos.ui.text.SafeText
 import kotlinx.coroutines.flow.combine
+import app.trecos.ui.exposeTestTags
 
 /**
  * Returns the test tag of a container row in the destination picker.
@@ -99,7 +100,7 @@ fun DestinationPicker(
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(
-            Modifier
+            Modifier.exposeTestTags()
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .statusBarsPadding()

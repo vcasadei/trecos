@@ -1,0 +1,52 @@
+# covers: app-shell: Switching tabs
+# covers: app-shell: A tab always opens its root
+# covers: app-shell: Back from a tab root
+# screens: home, search, settings, currency
+appId: app.trecos
+tags:
+  - smoke
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- assertVisible:
+    id: screen_home
+- assertVisible: Apartment
+- assertVisible:
+    id: tab_Home
+    selected: true
+- tapOn:
+    id: tab_Search
+- assertVisible:
+    id: screen_search
+- assertVisible:
+    id: tab_Search
+    selected: true
+- assertVisible:
+    id: tab_Home
+    selected: false
+- tapOn:
+    id: tab_Settings
+- assertVisible:
+    id: screen_settings
+- tapOn:
+    id: setting_currency
+- assertNotVisible:
+    id: screen_settings
+- assertVisible:
+    id: tab_Settings
+    selected: true
+- tapOn:
+    id: tab_Home
+- tapOn:
+    id: tab_Settings
+- assertVisible:
+    id: screen_settings
+- back
+- assertVisible:
+    id: screen_home
+- back
+- assertNotVisible:
+    id: screen_home

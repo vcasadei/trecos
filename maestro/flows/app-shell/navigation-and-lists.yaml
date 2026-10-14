@@ -1,0 +1,67 @@
+# covers: app-shell: Home goes all the way back
+# covers: app-shell: Switching to detailed view
+# covers: app-shell: Item without price
+# covers: app-shell: Changing language in the app
+# screens: home, place, item, settings, extras
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+# From an item two boxes deep, Home returns to the house's top level.
+- tapOn:
+    id: row_office
+- tapOn:
+    id: row_box-a
+- tapOn: USB-C cable 1m
+- tapOn:
+    id: tab_Home
+- assertVisible:
+    id: row_office
+- assertVisible:
+    id: screen_home
+# Detailed view applies everywhere and survives a restart; an unpriced item shows no price.
+- tapOn:
+    id: view_toggle
+- tapOn:
+    id: row_office
+- assertVisible: .*Unit price. \$3,500\.00.*
+- tapOn:
+    id: row_box-b
+- assertVisible: Unlabelled cable
+- assertVisible: "Quantity: 1"
+- assertNotVisible: .*Unit price.*
+- stopApp
+- launchApp
+- tapOn:
+    id: row_office
+- assertVisible: .*Unit price. \$3,500\.00.*
+- tapOn:
+    id: tab_Settings
+- runFlow:
+    file: ../../common/tap-row.yaml
+    env:
+      ID: setting_extras
+- back
+# The app's own language switch, kept after a restart (on Android 9 too).
+- scrollUntilVisible:
+    element:
+      id: setting_language
+    direction: UP
+    centerElement: true
+- tapOn:
+    id: setting_language
+- tapOn: Português (Brasil)
+- assertVisible: Ajustes
+- stopApp
+- launchApp
+- assertVisible: Início
+- tapOn:
+    id: tab_Settings
+- tapOn:
+    id: setting_language
+- tapOn: English
+- assertVisible: Settings

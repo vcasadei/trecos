@@ -1,0 +1,58 @@
+# covers: app-shell: Using the app in airplane mode
+# screens: place, item_form, item, search
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- setAirplaneMode: enabled
+# Add, edit, search, move and delete, all offline.
+- runFlow:
+    file: ../../common/add-item.yaml
+    env:
+      NAME: Offline lamp
+- tapOn: Offline lamp
+- tapOn: Edit
+- tapOn:
+    id: field_quantity
+- eraseText
+- inputText: "2"
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn: More options
+- tapOn: Move
+- tapOn:
+    id: dest_office
+- tapOn:
+    id: dest_confirm
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- inputText: offline
+- assertVisible:
+    id: result_count
+    text: 1 item
+- tapOn: Offline lamp
+- assertVisible: .*Office.*
+- assertVisible:
+    text: "2"
+    below: Quantity
+- tapOn: More options
+- tapOn: Delete
+- tapOn: Delete
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- eraseText
+- inputText: offline
+- assertVisible:
+    id: result_count
+    text: 0 items
+- setAirplaneMode: disabled

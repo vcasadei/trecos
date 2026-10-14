@@ -43,7 +43,7 @@ class SqlCipherEngineTest {
         }
         assertTrue("cipher_version is $version", !version.isNullOrBlank())
 
-        val header = context.getDatabasePath(TrecosDatabase.FILE_NAME).inputStream().use { it.readNBytes(15) }
+        val header = context.getDatabasePath(TrecosDatabase.FILE_NAME).inputStream().use { ByteArray(15).also(java.io.DataInputStream(it)::readFully) }
         assertEquals("SQLite format 3", String(header))
     }
 

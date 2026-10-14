@@ -1,0 +1,111 @@
+# Connects Google Drive with the Google test account, starting on the Sync
+# screen, and ends there showing "Connected as", or the offer to restore or
+# merge the houses Drive already holds (whose dialog hides the screen). On a device with no account,
+# Google first adds it to the device through its own screens, which vary with
+# the device and over time, so this walks whichever of them shows up: the SIM
+# offer, e-mail, password, "Verify it's you" (answered with the recovery
+# e-mail), terms, recovery info, home address, Google services, then the
+# consent for Trecos (while in testing, "Google hasn't verified this app").
+# Reads TEST_GOOGLE_ACCOUNT, TEST_GOOGLE_PASSWORD and TEST_GOOGLE_RECOVERY_EMAIL
+# (maestro/.env locally, the google-test environment in CI). When Google asks
+# for anything else, such as a code or a phone number, the flow fails on
+# "sign-in-blocked" instead of a missing element.
+# These screens show the account's addresses: keep them out of public artifacts.
+appId: app.trecos
+---
+- tapOn:
+    id: connect_drive
+- repeat:
+    times: 20
+    while:
+      notVisible: (Connected as.*|Restore from Drive\?|Drive has other houses)
+    commands:
+      - extendedWaitUntil:
+          visible: (?i)(connected as.*|restore from drive\?|drive has other houses|sign in with ease|email or phone|enter your password|verify it.s you|enter recovery email address|i agree|make sure you can always sign in|set a home address|google services|.*hasn.t verified this app|.*wants (additional )?access to your google account|choose an account.*|enter (the )?code|.*couldn.t sign you in.*)
+          timeout: 60000
+      - runFlow:
+          when:
+            visible: (?i)sign in with ease
+          commands:
+            - tapOn: (?i)skip
+      - runFlow:
+          when:
+            visible: (?i)email or phone
+          commands:
+            - tapOn: (?i)email or phone
+            - inputText: ${TEST_GOOGLE_ACCOUNT}
+            - tapOn: (?i)next
+      - runFlow:
+          when:
+            visible: (?i)enter your password
+          commands:
+            - tapOn: (?i)enter your password
+            - inputText: ${TEST_GOOGLE_PASSWORD}
+            - tapOn: (?i)next
+      - runFlow:
+          when:
+            visible: (?i)confirm your recovery email
+          commands:
+            - tapOn: (?i)confirm your recovery email
+            - extendedWaitUntil:
+                visible: (?i)enter recovery email address
+                timeout: 60000
+      - runFlow:
+          when:
+            visible: (?i)enter recovery email address
+          commands:
+            - tapOn: (?i)enter recovery email address
+            - inputText: ${TEST_GOOGLE_RECOVERY_EMAIL}
+            - tapOn: (?i)next
+      - runFlow:
+          when:
+            visible: (?i)i agree
+          commands:
+            - tapOn: (?i)i agree
+      - runFlow:
+          when:
+            visible: (?i)make sure you can always sign in
+          commands:
+            - tapOn: (?i)cancel
+      - runFlow:
+          when:
+            visible: (?i)set a home address
+          commands:
+            - tapOn: (?i)skip
+      - runFlow:
+          when:
+            visible: (?i)google services
+          commands:
+            - repeat:
+                times: 10
+                while:
+                  visible: MORE
+                commands:
+                  - tapOn: MORE
+            - tapOn: (?i)accept
+      - runFlow:
+          when:
+            visible: (?i)choose an account.*
+          commands:
+            - tapOn: ${TEST_GOOGLE_ACCOUNT}
+      - runFlow:
+          when:
+            visible: (?i).*hasn.t verified this app
+          commands:
+            - tapOn: Continue
+      - runFlow:
+          when:
+            visible: (?i).*wants (additional )?access to your google account
+          commands:
+            - scrollUntilVisible:
+                element:
+                  text: (?i)(continue|allow)
+            - tapOn: (?i)(continue|allow)
+      # A code sent elsewhere, or a refusal, is Google blocking this sign-in.
+      - runFlow:
+          when:
+            visible: (?i)(enter (the )?code|.*couldn.t sign you in.*)
+          commands:
+            # Fails with "sign-in-blocked" in the log, which the runner reports.
+            - assertVisible: sign-in-blocked
+- assertVisible: (Connected as.*|Restore from Drive\?|Drive has other houses)

@@ -1,0 +1,52 @@
+# covers: items: Price formatting in English
+# covers: items: Price formatting in Portuguese
+# screens: settings, currency, item_form, item
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- tapOn:
+    id: tab_Settings
+- tapOn:
+    id: setting_currency
+- tapOn:
+    id: currency_search
+- inputText: BRL
+- tapOn:
+    id: currency_BRL
+- tapOn: Change
+- tapOn:
+    id: tab_Home
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: field_name
+- inputText: Monitor
+- tapOn:
+    id: field_price
+- inputText: "1234.5"
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn: Monitor
+- assertVisible:
+    text: R\$1,234\.50
+    below: Unit price
+# The same price in Portuguese.
+- tapOn:
+    id: tab_Settings
+- tapOn:
+    id: setting_language
+- tapOn: Português (Brasil)
+- tapOn:
+    id: tab_Home
+- tapOn: Monitor
+- assertVisible:
+    text: R\$\s1\.234,50
+    below: Preço unitário

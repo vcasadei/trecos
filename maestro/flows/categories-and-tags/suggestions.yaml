@@ -1,0 +1,97 @@
+# covers: categories-and-tags: Cable with two ends
+# covers: categories-and-tags: Changing the main category
+# covers: categories-and-tags: Keyword match
+# covers: categories-and-tags: Nothing recognised
+# covers: categories-and-tags: Learning my vocabulary
+# screens: place, item_form
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- tapOn:
+    id: add_button
+- tapOn: Item
+# Keywords suggest categories, but nothing is assigned until a chip is tapped.
+- tapOn:
+    id: field_name
+- inputText: cabo usb-c para hdmi
+- assertVisible:
+    id: suggest_cables.usb_c
+- assertVisible:
+    id: suggest_cables.hdmi
+- assertNotVisible:
+    id: chosen_.*
+# Two categories: the first picked is the main one, until another is set as main.
+- tapOn:
+    id: add_category
+- tapOn:
+    id: category_search
+- inputText: USB
+- tapOn:
+    id: pick_cables.usb_c
+- tapOn:
+    id: pick_cables.usb_a
+- assertVisible: ★ Cables > USB-C
+- tapOn:
+    id: set_main_cables.usb_a
+- assertVisible: ★ Cables > USB-A
+- tapOn:
+    id: picker_done
+- assertVisible: "Main: Cables > USB-A"
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+# Words the app doesn't know suggest nothing, and the form still saves.
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: field_name
+- inputText: misc thing
+- assertNotVisible: Suggestions
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible: misc thing
+# A made-up word no keyword knows: after three "zorblat" items get HDMI, a new one is suggested HDMI.
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: field_name
+- inputText: zorblat zero
+- assertNotVisible:
+    id: suggest_cables.hdmi
+- back
+- runFlow:
+    file: ../../common/add-categorised-item.yaml
+    env:
+      NAME: zorblat one
+      SEARCH: HDMI
+      CATEGORY: cables.hdmi
+- runFlow:
+    file: ../../common/add-categorised-item.yaml
+    env:
+      NAME: zorblat two
+      SEARCH: HDMI
+      CATEGORY: cables.hdmi
+- runFlow:
+    file: ../../common/add-categorised-item.yaml
+    env:
+      NAME: zorblat three
+      SEARCH: HDMI
+      CATEGORY: cables.hdmi
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: field_name
+- inputText: zorblat zero
+- assertVisible:
+    id: suggest_cables.hdmi

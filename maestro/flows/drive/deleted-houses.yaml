@@ -1,0 +1,68 @@
+# covers: sync: Deleting a synced house
+# covers: sync: Restoring a deleted house
+# screens: sync, deleted_houses
+appId: app.trecos
+tags:
+  - drive
+---
+- runFlow:
+    file: ../../common/connect-drive.yaml
+    env:
+      FIXTURE: two-houses
+# Delete the synced "Parents' house" on this phone.
+- tapOn:
+    id: tab_Home
+- runFlow:
+    when:
+      visible:
+        id: row_office
+    commands:
+      - back
+- tapOn: Parents' house
+- tapOn: More options
+- tapOn: Delete
+- tapOn:
+    id: type_house_name
+- inputText: Parents' house
+- tapOn:
+    id: confirm_delete_house
+- assertVisible:
+    id: row_office
+# It is gone from the phone, and its data stays in Drive, listed as deleted.
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- inputText: lamp
+- assertVisible:
+    id: result_count
+    text: 0 items
+- runFlow: ../../common/open-sync.yaml
+- tapOn:
+    id: sync_now
+- extendedWaitUntil:
+    notVisible:
+      id: sync_running
+    timeout: 120000
+- tapOn:
+    id: open_deleted_houses
+- extendedWaitUntil:
+    visible:
+      id: deleted_parents
+    timeout: 60000
+- assertVisible: Deleted on .*
+# Restoring brings it back as of its last sync.
+- tapOn:
+    id: restore_parents
+- extendedWaitUntil:
+    visible: '"Parents'' house" is back.'
+    timeout: 60000
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- eraseText
+- inputText: lamp
+- assertVisible:
+    id: result_count
+    text: 1 item

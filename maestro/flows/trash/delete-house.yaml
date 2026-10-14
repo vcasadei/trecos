@@ -1,0 +1,44 @@
+# covers: trash: Wrong name typed
+# covers: trash: Deleting a house
+# screens: home, place, delete_house
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: two-houses
+- assertVisible:
+    id: row_office
+- back
+- tapOn: Parents' house
+- tapOn: More options
+- tapOn: Delete
+- tapOn:
+    id: type_house_name
+- inputText: Parents house
+- assertVisible:
+    id: confirm_delete_house
+    enabled: false
+- eraseText
+- inputText: Parents' house
+- assertVisible:
+    id: confirm_delete_house
+    enabled: true
+- tapOn:
+    id: confirm_delete_house
+# With one house left, Home opens it directly; Parents' things are gone from search.
+- tapOn:
+    id: tab_Home
+- assertVisible:
+    id: row_office
+- assertNotVisible: Parents' house
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- inputText: lamp
+- assertVisible:
+    id: result_count
+    text: 0 items

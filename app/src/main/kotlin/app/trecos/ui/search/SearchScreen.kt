@@ -63,6 +63,7 @@ import androidx.compose.ui.platform.LocalContext
 import app.trecos.ui.text.Breadcrumb
 import app.trecos.ui.text.SafeText
 import app.trecos.ui.theme.PaletteColor
+import app.trecos.ui.exposeTestTags
 
 /** Test tag of the search field. */
 const val SEARCH_FIELD_TAG = "search_field"
@@ -260,7 +261,7 @@ private fun FiltersDialog(state: SearchState, vm: SearchViewModel, onDone: () ->
     val language = AppLanguage.current()
     val filters = state.filters
     Dialog(onDismissRequest = onDone, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding().padding(16.dp).testTag("filters_dialog")) {
+        Column(Modifier.exposeTestTags().fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding().padding(16.dp).testTag("filters_dialog")) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.filters), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
                 TextButton(onClick = vm::clearFilters, modifier = Modifier.testTag("clear_all")) { Text(stringResource(R.string.clear_all)) }

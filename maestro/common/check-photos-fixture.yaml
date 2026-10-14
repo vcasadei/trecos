@@ -1,0 +1,41 @@
+# Checks that the "photos" fixture is all there: the Apartment's containers and
+# four items, and the laptop's three photos, their files included.
+appId: app.trecos
+---
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- eraseText
+- inputText: USB
+- assertVisible:
+    id: result_count
+    text: 2 items
+- eraseText
+- inputText: cable
+- assertVisible:
+    id: result_count
+    text: 2 items
+- eraseText
+- inputText: Laptop
+- tapOn:
+    id: row_laptop
+- assertVisible: PF-12345
+- assertVisible: Photo 1 of 3
+- runFlow:
+    file: device.yaml
+    env:
+      ACTION: photo-files
+- assertTrue:
+    condition: ${output.device.count === 3}
+    label: The three photo files are stored
+- tapOn:
+    id: tab_Home
+- runFlow:
+    when:
+      notVisible:
+        id: row_office
+    commands:
+      - tapOn: Apartment
+- assertVisible:
+    id: row_office

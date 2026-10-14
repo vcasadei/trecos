@@ -1,0 +1,67 @@
+# covers: search: Browsing everything
+# covers: search: No results
+# covers: search: Finding by serial number
+# covers: search: Containers only
+# covers: search: Accent-insensitive
+# covers: search: Partial words
+# screens: search, place, item_form
+appId: app.trecos
+tags:
+  - smoke
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: two-houses
+# Items whose names test partial words; the fixture has "Cabeça de impressão".
+- runFlow:
+    file: ../../common/add-item.yaml
+    env:
+      NAME: Raspberry Pi 4
+- runFlow:
+    file: ../../common/add-item.yaml
+    env:
+      NAME: Raspberry Pi 3
+# Without a query every item is listed, and the field isn't focused.
+- tapOn:
+    id: tab_Search
+- assertVisible:
+    id: result_count
+    text: 9 items
+- assertVisible:
+    id: search_field
+    focused: false
+- tapOn:
+    id: search_field
+- inputText: cabeca
+- assertVisible: Cabeça de impressão
+- eraseText
+- inputText: rasp 4
+- assertVisible: Raspberry Pi 4
+- assertNotVisible: Raspberry Pi 3
+# The laptop's serial is PF-12345; name matching includes serial numbers.
+- tapOn:
+    id: match
+- tapOn: Name
+- eraseText
+- inputText: PF-123
+- assertVisible:
+    id: result_count
+    text: 1 item
+- assertVisible: Laptop
+- eraseText
+- inputText: zzzz nothing
+- assertVisible:
+    id: result_count
+    text: 0 items
+- assertVisible:
+    id: no_results
+# Containers only.
+- eraseText
+- inputText: box
+- tapOn:
+    id: scope_Containers
+- assertVisible: Box A
+- assertVisible: Box B
+- assertNotVisible: .*cable.*

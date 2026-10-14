@@ -1,0 +1,36 @@
+# covers: sync: First connection
+# covers: sync: Viewing history
+# covers: sync: Nothing changed
+# screens: sync, history
+appId: app.trecos
+tags:
+  - drive
+---
+- runFlow:
+    file: ../../common/connect-drive.yaml
+    env:
+      FIXTURE: one-house
+- assertVisible: Connected as.*
+- assertNotVisible: Not synced yet
+# Two syncs with nothing changed in between add at most one history entry.
+- tapOn:
+    id: sync_now
+- extendedWaitUntil:
+    notVisible:
+      id: sync_running
+    timeout: 120000
+- tapOn:
+    id: sync_now
+- extendedWaitUntil:
+    notVisible:
+      id: sync_running
+    timeout: 120000
+- tapOn:
+    id: open_history
+- assertVisible:
+    id: history_.*
+    index: 0
+- assertVisible: .*\d+ changes?.*
+- assertNotVisible:
+    id: history_.*
+    index: 2

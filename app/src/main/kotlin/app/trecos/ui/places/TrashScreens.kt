@@ -57,6 +57,7 @@ import app.trecos.ui.shell.TrecosTopBar
 import app.trecos.ui.text.SafeText
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import app.trecos.ui.exposeTestTags
 
 /**
  * Returns the test tag of a trash row.
@@ -335,7 +336,7 @@ private fun NameDialog(onDismiss: () -> Unit, onName: (String) -> Unit) {
     var name by remember { mutableStateOf("") }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(
-            Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding().padding(24.dp),
+            Modifier.exposeTestTags().fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding().padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             OutlinedTextField(

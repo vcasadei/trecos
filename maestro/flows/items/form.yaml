@@ -1,0 +1,84 @@
+# covers: items: Missing name
+# covers: items: Invalid quantity
+# covers: items: Minimal item
+# covers: items: Screws
+# screens: place, item_form, item
+appId: app.trecos
+tags:
+  - smoke
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- tapOn:
+    id: add_button
+- tapOn: Item
+# A name is required.
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible:
+    id: error_name
+# Quantity must be a whole number from 0.
+- tapOn:
+    id: field_name
+- inputText: Raspberry Pi 4
+- tapOn:
+    id: field_quantity
+- eraseText
+- inputText: "2.5"
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible:
+    id: error_quantity
+- tapOn:
+    id: field_quantity
+- eraseText
+- inputText: "-1"
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible:
+    id: error_quantity
+# Only a name: quantity 1 and no price.
+- tapOn:
+    id: field_quantity
+- eraseText
+- inputText: "1"
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn: Raspberry Pi 4
+- assertVisible:
+    text: "1"
+    below: Quantity
+- assertNotVisible: Unit price
+- assertNotVisible: Total value
+# 200 × 0.10 = 20.00.
+- tapOn: Edit
+- tapOn:
+    id: field_name
+- eraseText
+- inputText: M3 screws
+- tapOn:
+    id: field_quantity
+- eraseText
+- inputText: "200"
+- tapOn:
+    id: field_price
+- inputText: "0.10"
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- assertVisible: M3 screws
+- assertVisible:
+    text: "\\$20.00"
+    below: Total value

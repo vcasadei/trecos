@@ -1,0 +1,71 @@
+# covers: photos: Keep asking
+# covers: photos: Picking from the gallery
+# covers: photos: Limit reached
+# covers: photos: Setting the main photo
+# screens: place, item_form, item
+appId: app.trecos
+tags:
+  - smoke
+  - full
+---
+- runFlow: ../../common/add-gallery-media.yaml
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- tapOn:
+    id: add_button
+- tapOn: Item
+- tapOn:
+    id: field_name
+- inputText: Camera bag
+# Not remembering the choice: the question comes back next time.
+- tapOn:
+    id: add_photo
+- tapOn: Remember my choice
+- tapOn: Gallery
+- runFlow:
+    file: ../../common/pick-photos.yaml
+    env:
+      FIRST: "0"
+- tapOn:
+    id: add_photo
+- assertVisible: Add a photo from
+- tapOn: Remember my choice
+- tapOn: Gallery
+# With one photo attached, the picker takes up to two more.
+- runFlow:
+    file: ../../common/pick-photos.yaml
+    env:
+      FIRST: "1"
+      SECOND: "2"
+- assertVisible:
+    id: photo_limit
+    text: 3 photos is the maximum\.
+- assertVisible:
+    id: add_photo
+    enabled: false
+# "Set as main" moves the third photo first; the first photo has no such option.
+- tapOn:
+    id: photo_[0-9a-f]{64}
+    index: 2
+- tapOn: Set as main
+- tapOn:
+    id: photo_[0-9a-f]{64}
+    index: 0
+- assertNotVisible: Set as main
+- tapOn: Remove
+- runFlow:
+    file: ../../common/tap.yaml
+    env:
+      ID: save
+- tapOn: Camera bag
+- assertVisible:
+    id: carousel
+# Tapping the carousel opens the full-screen viewer, main photo first.
+- tapOn:
+    id: carousel_.*
+    index: 0
+- assertVisible:
+    id: photo_viewer
+- back

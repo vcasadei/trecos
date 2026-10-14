@@ -1,0 +1,23 @@
+# Finds the item QUERY through Search, opens the row with test tag ROW, and in
+# its form types VALUE into the field with test tag FIELD, then saves.
+appId: app.trecos
+---
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- eraseText
+- inputText: ${QUERY}
+- tapOn:
+    id: ${ROW}
+- tapOn: Edit
+- runFlow:
+    file: tap.yaml
+    env:
+      ID: ${FIELD}
+- eraseText
+- inputText: ${VALUE}
+- runFlow:
+    file: tap.yaml
+    env:
+      ID: save

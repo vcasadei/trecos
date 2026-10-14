@@ -1,0 +1,34 @@
+# Types the device helper's PIN (1111) into the system's screen-lock prompt.
+# On Android 9 the prompt is a Settings screen whose PIN field needs a tap
+# first, and it sometimes misses the first entry, so the flow types again
+# while the screen is still there. On newer versions it is a secure window
+# with no readable hierarchy, so the flow waits briefly, types and presses Enter.
+appId: app.trecos
+---
+- extendedWaitUntil:
+    visible:
+      id: .*password_entry
+    timeout: 8000
+    optional: true
+- tapOn:
+    id: .*password_entry
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 1000
+- inputText: "1111"
+- pressKey: Enter
+- waitForAnimationToEnd:
+    timeout: 3000
+- repeat:
+    while:
+      visible:
+        id: .*password_entry
+    times: 2
+    commands:
+      - tapOn:
+          id: .*password_entry
+      - eraseText
+      - inputText: "1111"
+      - pressKey: Enter
+      - waitForAnimationToEnd:
+          timeout: 3000

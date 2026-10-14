@@ -1,0 +1,3 @@
+# Maestro workspace for the Trecos device suite (docs/dev/device-tests.md).
+flows:
+  - "flows/**"

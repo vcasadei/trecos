@@ -1,0 +1,8 @@
+# Puts the four test photos in the phone's gallery, through the device helper
+# (Maestro's addMedia fails on a freshly booted Android 9 emulator).
+appId: app.trecos
+---
+- runFlow:
+    file: device.yaml
+    env:
+      ACTION: add-photos

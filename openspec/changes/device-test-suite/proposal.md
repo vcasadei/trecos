@@ -79,10 +79,11 @@ is still in progress:
   challenge or block automated sign-ins, so these flows run on a schedule on one
   cell and do not block pull requests.
 - **New secrets** (GitHub secrets, by name only): `TEST_GOOGLE_ACCOUNT` and
-  `TEST_GOOGLE_PASSWORD` for the test account, `TEST_GOOGLE_DRIVE_TOKEN` (an
-  OAuth refresh token on that account, used only to empty its Trecos folder
-  before a run), `TEST_GOOGLE_OAUTH_CLIENT` (the Desktop OAuth client that
-  refresh token belongs to), and `CI_DEBUG_KEYSTORE` (a fixed
+  `TEST_GOOGLE_PASSWORD` for the test account, `TEST_GOOGLE_RECOVERY_EMAIL`
+  (its recovery address, which answers Google's "Verify it's you" on a new
+  emulator), `TEST_GOOGLE_DRIVE_TOKEN` (an OAuth refresh token on that account,
+  used only to empty its Trecos folder before a run), `TEST_GOOGLE_OAUTH_CLIENT`
+  (the "TVs and Limited Input" OAuth client that refresh token belongs to), and `CI_DEBUG_KEYSTORE` (a fixed
   debug keystore whose SHA-1 is registered as an OAuth client, so sign-in works
   on any runner). The user creates the account and the secrets.
 - **Not automatable on emulators**: Google Play Billing tips and camera QR

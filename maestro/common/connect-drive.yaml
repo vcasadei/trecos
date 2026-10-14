@@ -1,0 +1,23 @@
+# Starts the app on FIXTURE with an empty test Drive, opens Settings > Sync,
+# connects the Google test account and waits for the first sync to finish.
+# The Drive is emptied through the app (helper action wipe-drive); on a device
+# that has never signed in there is nothing to empty, and the run's
+# scripts/clean-test-drive.py has already cleaned it.
+appId: app.trecos
+---
+- runFlow:
+    file: start.yaml
+    env:
+      FIXTURE: ${FIXTURE}
+- runFlow:
+    file: device.yaml
+    env:
+      ACTION: wipe-drive
+- assertTrue:
+    condition: ${output.device.result.startsWith('wiped') || output.device.result === 'no-account'}
+    label: The test Drive was emptied
+- runFlow: open-sync.yaml
+- runFlow: google-sign-in.yaml
+- extendedWaitUntil:
+    visible: Last sync.*
+    timeout: 120000

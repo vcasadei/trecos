@@ -1,0 +1,99 @@
+# covers: sync: Unsynced changes on another device
+# screens: sync, deleted_houses
+# Two devices on one emulator (helper app-snapshot and app-restore): the
+# tablet changes "Parents' house" without syncing, the phone deletes it, and
+# the tablet's next sync keeps it.
+appId: app.trecos
+tags:
+  - drive
+---
+- runFlow:
+    file: ../../common/connect-drive.yaml
+    env:
+      FIXTURE: two-houses
+# The tablet's change, not synced yet.
+- runFlow:
+    file: ../../common/edit-item.yaml
+    env:
+      QUERY: lamp
+      ROW: row_lamp
+      FIELD: field_quantity
+      VALUE: "3"
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: app-snapshot
+# The phone restores both houses, deletes "Parents' house" and syncs.
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: none
+- tapOn:
+    id: continue
+- runFlow: ../../common/open-sync.yaml
+- runFlow: ../../common/google-sign-in.yaml
+- extendedWaitUntil:
+    visible: Restore from Drive\?
+    timeout: 120000
+- tapOn: Restore
+- extendedWaitUntil:
+    visible: Last sync.*
+    timeout: 180000
+- tapOn:
+    id: tab_Home
+- runFlow:
+    when:
+      notVisible: Houses
+    commands:
+      - back
+- tapOn: Parents' house
+- tapOn: More options
+- tapOn: Delete
+- tapOn:
+    id: type_house_name
+- inputText: Parents' house
+- tapOn:
+    id: confirm_delete_house
+- runFlow: ../../common/open-sync.yaml
+- tapOn:
+    id: sync_now
+- extendedWaitUntil:
+    notVisible:
+      id: sync_running
+    timeout: 180000
+# Back to the tablet: its sync keeps the house with its change.
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: app-restore
+- assertTrue:
+    condition: ${output.device.restored}
+    label: The tablet's data is back
+- launchApp:
+    stopApp: true
+- runFlow: ../../common/open-sync.yaml
+- tapOn:
+    id: sync_now
+- extendedWaitUntil:
+    notVisible:
+      id: sync_running
+    timeout: 180000
+- assertNotVisible:
+    id: sync_error
+- tapOn:
+    id: open_deleted_houses
+- extendedWaitUntil:
+    visible:
+      id: no_deleted_houses
+    timeout: 60000
+- tapOn:
+    id: tab_Search
+- tapOn:
+    id: search_field
+- eraseText
+- inputText: lamp
+- tapOn:
+    id: row_lamp
+- assertVisible:
+    text: "3"
+    below: Quantity

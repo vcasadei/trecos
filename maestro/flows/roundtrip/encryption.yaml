@@ -1,0 +1,60 @@
+# covers: encryption: Lost phone
+# screens: sync, settings
+# Spec device-testing, "Encryption round trip keeps the data": with encryption
+# on, after a restart and on a new phone restoring from Drive, and after
+# turning it off again, every fixture house, item and photo is still there.
+appId: app.trecos
+tags:
+  - roundtrip
+  - drive
+---
+- runFlow:
+    file: ../../common/connect-drive.yaml
+    env:
+      FIXTURE: photos
+- runFlow:
+    file: ../../common/switch-encryption.yaml
+    env:
+      CONFIRM: Encrypt
+      EXPECT: "On"
+- runFlow: ../../common/check-photos-fixture.yaml
+# Upload the encrypted data, then lose the phone.
+- runFlow: ../../common/open-sync.yaml
+- tapOn:
+    id: sync_now
+- extendedWaitUntil:
+    notVisible:
+      id: sync_running
+    timeout: 180000
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: none
+- tapOn:
+    id: continue
+- runFlow: ../../common/open-sync.yaml
+- runFlow: ../../common/google-sign-in.yaml
+- extendedWaitUntil:
+    visible: Restore from Drive\?
+    timeout: 120000
+- tapOn: Restore
+- extendedWaitUntil:
+    visible: Last sync.*
+    timeout: 180000
+- runFlow: ../../common/check-photos-fixture.yaml
+# The new phone encrypts too, since the account's data is encrypted.
+- tapOn:
+    id: tab_Settings
+- scrollUntilVisible:
+    element:
+      id: value_encryption
+    centerElement: true
+- assertVisible:
+    id: value_encryption
+    text: "On"
+- runFlow:
+    file: ../../common/switch-encryption.yaml
+    env:
+      CONFIRM: Turn off
+      EXPECT: "Off"
+- runFlow: ../../common/check-photos-fixture.yaml

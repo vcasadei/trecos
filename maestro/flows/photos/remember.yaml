@@ -1,0 +1,33 @@
+# covers: photos: Remembering
+# screens: item_form
+appId: app.trecos
+tags:
+  - full
+---
+- runFlow:
+    file: ../../common/start.yaml
+    env:
+      FIXTURE: one-house
+- tapOn:
+    id: add_button
+- tapOn: Item
+# Camera, remembered: the next photo goes straight to the camera.
+- tapOn:
+    id: add_photo
+- assertVisible: Remember my choice
+- tapOn: Camera
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: top-package
+- assertTrue: ${output.device.package != 'app.trecos'}
+- back
+- tapOn:
+    id: add_photo
+- assertNotVisible: Add a photo from
+- runFlow:
+    file: ../../common/device.yaml
+    env:
+      ACTION: top-package
+- assertTrue: ${output.device.package != 'app.trecos'}
+- back

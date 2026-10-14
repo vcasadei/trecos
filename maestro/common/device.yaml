@@ -1,0 +1,12 @@
+# Runs a whitelisted adb action on the phone through the device helper:
+# ACTION is one of the helper's ACTIONS (screen-lock-on, screen-lock-off,
+# recents-hidden, top-package, mail-apps-off, mail-apps-on, add-photos,
+# push-bad-backups, clear-downloads, wipe-drive, app-snapshot, app-restore,
+# photo-files).
+# The answer is in output.device.
+appId: app.trecos
+---
+- runScript:
+    file: device.js
+    env:
+      ACTION: ${ACTION}
