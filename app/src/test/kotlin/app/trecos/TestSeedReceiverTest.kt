@@ -32,7 +32,8 @@ class TestSeedReceiverTest {
     @Test
     fun oneHouse() {
         seed("one-house")
-        eventually { runBlocking { db.items().countActive() } == 4 }
+        // The last house is stored after the items, so wait for both.
+        eventually { runBlocking { db.items().countActive() == 4 && app.container.preferences.lastHouseId.first() != null } }
         runBlocking {
             assertEquals(listOf("Apartment"), db.houses().observeAll().first().map { it.name })
             assertEquals(3, db.containers().observeAllInHouse("apartment").first().size)
@@ -58,7 +59,7 @@ class TestSeedReceiverTest {
     @Test
     fun thousandItems() {
         seed("1000-items")
-        eventually { runBlocking { db.items().countActive() } == 1000 }
+        eventually { runBlocking { db.items().countActive() == 1000 && app.container.preferences.lastHouseId.first() != null } }
         runBlocking { assertEquals("benchmark-house", app.container.preferences.lastHouseId.first()) }
     }
 
