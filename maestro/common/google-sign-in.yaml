@@ -102,6 +102,14 @@ appId: app.trecos
                 element:
                   text: (?i)(continue|allow)
             - tapOn: (?i)(continue|allow)
+      # "Verify it's you" with no recovery email to confirm offers only ways the
+      # flow can't take (a prompt or a code on a phone), so Google blocks it.
+      - runFlow:
+          when:
+            visible: (?i)choose how you want to sign in.*
+            notVisible: (?i)confirm your recovery email
+          commands:
+            - assertVisible: sign-in-blocked
       # A code sent elsewhere, or a refusal, is Google blocking this sign-in.
       - runFlow:
           when:
