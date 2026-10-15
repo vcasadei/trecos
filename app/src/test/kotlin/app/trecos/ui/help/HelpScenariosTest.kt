@@ -167,7 +167,7 @@ class HelpScenariosTest : PlacesTestBase() {
     fun theSinglePrompt() {
         returnHomeAfter(days = 15, items = 20, sessions = 5)
         val shown = runCatching { eventually(PREFERENCE_WRITE_MS) { reviews == 1 } }.isSuccess
-        assertTrue("no prompt: ${ratingState()}", shown)
+        assertTrue("no single prompt (reviews=$reviews): ${ratingState()}", shown)
 
         click(tabTag(TrecosTab.Settings))
         click(tabTag(TrecosTab.Home))

@@ -13,6 +13,7 @@ All notable changes to Trecos are recorded here. The format follows
 - A sync conflict now names the other device by its name instead of an internal ID.
 - Connecting Google Drive on a phone whose Google Play services can't sign in now says so, instead of doing nothing.
 - On Android 12, changing the language in Settings no longer leaves the screen empty for TalkBack until another window opens.
+- The rating prompt can no longer be asked twice when you go back to Home quickly after it first appears.
 
 ### Added
 
