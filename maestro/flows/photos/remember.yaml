@@ -21,7 +21,14 @@ tags:
     env:
       ACTION: top-package
 - assertTrue: ${output.device.package != 'app.trecos'}
-- back
+# Back to the form, unless the camera already closed: Android 10's emulator
+# Camera app crashes on start, and Back would then leave the form.
+- runFlow:
+    when:
+      notVisible:
+        id: add_photo
+    commands:
+      - back
 - tapOn:
     id: add_photo
 - assertNotVisible: Add a photo from
@@ -30,4 +37,10 @@ tags:
     env:
       ACTION: top-package
 - assertTrue: ${output.device.package != 'app.trecos'}
-- back
+# Back to the form, unless the camera already closed (as above).
+- runFlow:
+    when:
+      notVisible:
+        id: add_photo
+    commands:
+      - back

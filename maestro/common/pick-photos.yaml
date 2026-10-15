@@ -1,12 +1,12 @@
 # Picks gallery photos at positions FIRST and, when set, SECOND, then confirms
-# when the picker asks for it. Android 11+ shows the system photo picker: with
+# when the picker asks for it. Where the system photo picker is installed: with
 # one slot left it may return on the first tap, otherwise it needs "Done", or
-# "Add (N)" on the Android 11 to 15 picker.
-# Android 9 and 10 show the Files app, in Downloads, where photos are picked by
-# name (photo-N.png, N = position + 1; Android 10's grid view adds the size and
-# time after a comma): one tap returns a single photo, and
-# several need a long press, another tap and "Select". The app keeps
-# each image once, so pick different positions each time.
+# "Add (N)" on the Android 12 to 15 picker.
+# Android 9 and 10, and the Android 11 emulator image, show the Files app, in
+# Downloads, where photos are picked by name (photo-N.png, N = position + 1;
+# the grid view adds the size and time after a comma): one tap returns a single
+# photo, and several need a long press, another tap and, except on Android 11,
+# "Select". The app keeps each image once, so pick different positions each time.
 appId: app.trecos
 ---
 - runFlow:
@@ -37,7 +37,10 @@ appId: app.trecos
                 element:
                   text: photo-${Number(SECOND) + 1}\.png(,.*)?
             - tapOn: photo-${Number(SECOND) + 1}\.png(,.*)?
-            - tapOn: (?i)select|open
+            # Android 11's Files app can return both photos on that tap.
+            - tapOn:
+                text: (?i)select|open
+                optional: true
 - runFlow:
     when:
       notVisible: Show roots
