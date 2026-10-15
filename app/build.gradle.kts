@@ -30,7 +30,7 @@ android {
         targetSdk = 36
         versionCode = appVersion.second
         versionName = appVersion.first
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "app.trecos.DeviceTestRunner"
         // Feature flags (design D19): on since the developer's phone test on 2026-10-09
         // (encryption is shown as experimental). They stay as an emergency off switch until
         // their removal criteria are met: -Ptrecos.driveSync=false or -Ptrecos.encryption=false.

@@ -14,3 +14,11 @@ appId: app.trecos
     stopApp: true
     arguments:
       fixture: ${FIXTURE}
+# A slow Android 14 can remove the previous screen only after this launch and
+# kill the new process with it; the app then comes back about 20 seconds later.
+# Wait for its first screen (the first-run prompt or the tabs) for that long.
+- extendedWaitUntil:
+    visible:
+      id: continue|tab_.*
+    timeout: 45000
+    optional: true
