@@ -15,6 +15,7 @@ All notable changes to Trecos are recorded here. The format follows
 - On Android 12, changing the language in Settings no longer leaves the screen empty for TalkBack until another window opens.
 - The rating prompt can no longer be asked twice when you go back to Home quickly after it first appears.
 - TalkBack now reads each search filter as one checkbox with its name and whether it is on, instead of a separate unlabelled checkbox.
+- Turning encryption on or off no longer fails at random while the app is reading the database in the background.
 
 ### Added
 

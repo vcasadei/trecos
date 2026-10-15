@@ -111,7 +111,7 @@ class EncryptionScenariosTest : PlacesTestBase() {
         app.sync.connectTo = { DriveSession(remote, { user }, vault) }
         app.sync.onUnmeteredNetwork = { true }
         app.encryption.wrapper = AesKeyWrapper(KeyGenerator.getInstance("AES").apply { init(256) }.generateKey())
-        app.encryption.cipher = DatabaseCipher { _, target, key, _ ->
+        app.encryption.cipher = DatabaseCipher { _, _, target, key, _ ->
             if (exportFails) error("Power lost")
             target.writeText(if (key == null) "plain" else "encrypted")
         }
