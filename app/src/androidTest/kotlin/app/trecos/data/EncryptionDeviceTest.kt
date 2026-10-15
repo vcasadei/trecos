@@ -8,6 +8,8 @@ import app.trecos.crypto.DatabaseKeys
 import app.trecos.crypto.EncryptionSwap
 import app.trecos.crypto.SqlCipherExport
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import kotlin.concurrent.thread
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -51,7 +53,7 @@ class EncryptionDeviceTest {
         db.items().insert(Item(id = "i1", houseId = "h1", name = "Cabeça de impressão", createdAt = 1, updatedAt = 1))
 
         val key = DatabaseKeys.newKey()
-        swap.prepare(key) { target -> SqlCipherExport.export(db.openHelper.writableDatabase, target, key, TrecosDatabase.VERSION) }
+        swap.prepare(key) { target -> SqlCipherExport.export(dbFile, null, target, key, TrecosDatabase.VERSION) }
         db.close()
         swap.finish()
 
@@ -62,7 +64,7 @@ class EncryptionDeviceTest {
         db.items().insert(Item(id = "i2", houseId = "h1", name = "Mouse", createdAt = 2, updatedAt = 2))
         assertEquals(listOf("i2"), db.search().matches("mouse*").map { it.refId })
 
-        swap.prepare(null) { target -> SqlCipherExport.export(db.openHelper.writableDatabase, target, null, TrecosDatabase.VERSION) }
+        swap.prepare(null) { target -> SqlCipherExport.export(dbFile, keys.current(), target, null, TrecosDatabase.VERSION) }
         db.close()
         swap.finish()
 
@@ -70,6 +72,38 @@ class EncryptionDeviceTest {
         assertTrue(keys.current() == null)
         db = TrecosDatabase.open(context)
         assertEquals(setOf("i1", "i2"), db.snapshots().items("h1").map { it.id }.toSet())
+        db.close()
+    }
+
+    /** The export runs while the app's screens use the database on other threads. */
+    @Test
+    fun encryptWhileTheDatabaseIsInUse() = runBlocking {
+        var db = TrecosDatabase.open(context)
+        db.houses().insert(House(id = "h1", name = "Apartment", icon = "house", createdAt = 1, updatedAt = 1))
+        db.items().insert(Item(id = "i1", houseId = "h1", name = "Mouse", createdAt = 1, updatedAt = 1))
+        val busy = CountDownLatch(1)
+        val done = CountDownLatch(1)
+        val other = thread {
+            db.runInTransaction {
+                busy.countDown()
+                done.await()
+            }
+        }
+        busy.await()
+
+        val key = DatabaseKeys.newKey()
+        try {
+            swap.prepare(key) { target -> SqlCipherExport.export(dbFile, null, target, key, TrecosDatabase.VERSION) }
+        } finally {
+            done.countDown()
+            other.join()
+        }
+        db.close()
+        swap.finish()
+
+        assertNotEquals("the file is encrypted", "SQLite format 3", header())
+        db = TrecosDatabase.open(context, DatabaseKeys.passphrase(keys.current()))
+        assertEquals("Mouse", db.items().get("i1")?.name)
         db.close()
     }
 }

@@ -26,9 +26,8 @@ data class EncryptionStatus(val on: Boolean, val working: Boolean = false, val p
  * swapped in at the next start; Drive snapshots are encrypted with the same key.
  *
  * @param context the application context.
- * @param database the open database.
  */
-class EncryptionManager(private val context: Context, private val database: () -> TrecosDatabase) {
+class EncryptionManager(private val context: Context) {
     /** Protects the key on the device; tests use a plain AES key. */
     var wrapper: KeyWrapper = AndroidKeystoreWrapper
 
@@ -132,7 +131,8 @@ class EncryptionManager(private val context: Context, private val database: () -
     /** Writes the next database; an interruption leaves the current one in use. */
     private suspend fun prepare(key: ByteArray?) = withContext(Dispatchers.IO) {
         try {
-            swap.prepare(key) { target -> cipher.export(database().openHelper.writableDatabase, target, key, TrecosDatabase.VERSION) }
+            val source = context.getDatabasePath(TrecosDatabase.FILE_NAME)
+            swap.prepare(key) { target -> cipher.export(source, keys.current(), target, key, TrecosDatabase.VERSION) }
         } catch (e: Exception) {
             if (swap.isPending()) swap.finish()
             throw e

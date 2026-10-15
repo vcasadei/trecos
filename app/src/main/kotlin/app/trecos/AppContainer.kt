@@ -40,7 +40,7 @@ class AppContainer(
     val appContext: Context = context
 
     /** Optional database encryption. */
-    val encryption: EncryptionManager = EncryptionManager(context) { database }
+    val encryption: EncryptionManager = EncryptionManager(context)
 
     /**
      * The database, opened on first access, after finishing any re-encryption
