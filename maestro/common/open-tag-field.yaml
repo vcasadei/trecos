@@ -11,8 +11,9 @@ appId: app.trecos
     file: tap.yaml
     env:
       ID: more_fields
-# Maestro counts the field as visible even when the floating Save bar covers
-# its lower half, and its centre is then under the bar: centre it on screen.
+# Compose reports the full bounds of a field only partly scrolled into view, so
+# Maestro counts it as visible and its centre can be on the Save bar: centre it
+# when it can be (see tap.yaml).
 # A tap can still miss while the form moves (category suggestions load after
 # the name), and the name field keeps the focus, so tap until the tag field has it.
 - repeat:
@@ -25,6 +26,11 @@ appId: app.trecos
       - scrollUntilVisible:
           element:
             id: field_tag
+          timeout: 5000
           centerElement: true
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: field_tag
       - tapOn:
           id: field_tag
