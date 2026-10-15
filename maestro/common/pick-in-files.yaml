@@ -1,0 +1,16 @@
+# Picks photo-PHOTO.png in the Files app's Downloads (Android 9 to 11), which
+# returns it to Trecos. In grid view (Android 10 and 11) its label also has the
+# size and time after a comma.
+appId: app.trecos
+---
+# It reopens where it was last; go back to Downloads first.
+- tapOn: Show roots
+# The drawer entry, below Recent; the title also reads "Downloads" only
+# when the picker reopens there.
+- tapOn:
+    text: Downloads
+    below: Recent
+- scrollUntilVisible:
+    element:
+      text: photo-${PHOTO}\.png(,.*)?
+- tapOn: photo-${PHOTO}\.png(,.*)?

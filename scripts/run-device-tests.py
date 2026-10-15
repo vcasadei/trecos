@@ -195,6 +195,10 @@ def prepare(device):
 def reset_phone(device):
     """Undoes what flows can change: the PIN, disabled e-mail apps and airplane mode.
 
+    It also wakes the screen and leaves the lock screen, which can come back
+    in a long run: a cell whose screen went to sleep failed every later flow
+    on the lock screen (Android 10 and 14 in CI).
+
     Args:
         device (str): the device serial.
     """
@@ -213,6 +217,10 @@ def reset_phone(device):
         adb(device, "shell", "cmd", "connectivity", "airplane-mode", "disable")
         adb(device, "shell", "settings", "put", "global", "airplane_mode_on", "0")
         adb(device, "shell", "am", "broadcast", "-a", "android.intent.action.AIRPLANE_MODE", "--ez", "state", "false")
+    # After the PIN is gone, so the lock screen can be dismissed without it.
+    adb(device, "shell", "svc", "power", "stayon", "true")
+    adb(device, "shell", "input", "keyevent", "KEYCODE_WAKEUP")
+    adb(device, "shell", "wm", "dismiss-keyguard")
 
 
 def run_flow(device, flow, out_dir, env):
@@ -249,13 +257,43 @@ def run_flow(device, flow, out_dir, env):
     return passed
 
 
+def tool_failed(out_dir):
+    """Tells whether an attempt failed because the test tooling lost the device.
+
+    Args:
+        out_dir (pathlib.Path): the attempt's files.
+
+    Returns:
+        bool: True when Maestro's driver died ("DeviceServerDied") or adb lost
+        the emulator ("device offline").
+    """
+    # Maestro writes each run under a timestamped folder; only the latest counts.
+    files = [out_dir / "maestro.log", out_dir / "junit.xml", *sorted(out_dir.glob("*/*/commands.json"))[-1:]]
+    return any(path.exists() and any(sign in path.read_text(encoding="utf-8", errors="replace")
+                                     for sign in ("DeviceServerDied", "device offline"))
+               for path in files)
+
+
+def wait_for_device(device, timeout_s=300):
+    """Waits until the device is back online and booted.
+
+    Args:
+        device (str): the device serial.
+        timeout_s (int): how long to wait at most.
+    """
+    end = time.monotonic() + timeout_s
+    while time.monotonic() < end and not device_ready(device):
+        time.sleep(5)
+
+
 def run_flow_surviving_driver(device, flow, out_dir, env, restarts):
-    """Runs a flow, retrying without counting an attempt when Maestro's driver died.
+    """Runs a flow, retrying without counting an attempt when the tooling lost the device.
 
     Maestro's on-device server sometimes dies on the 2 GB Android 9 emulator
-    before a flow starts ("DeviceServerDiedException"). That is the test
-    tool failing, not the app, so the flow runs again after a pause, at most
-    DRIVER_RESTARTS times.
+    before a flow starts ("DeviceServerDiedException"), and a slow emulator can
+    drop off adb for a while ("device offline", Android 15 / 2 GB in CI). That
+    is the test tool failing, not the app, so the flow runs again once the
+    device is back, at most DRIVER_RESTARTS times.
 
     Args:
         device (str): the device serial.
@@ -269,13 +307,10 @@ def run_flow_surviving_driver(device, flow, out_dir, env, restarts):
     """
     while True:
         passed = run_flow(device, flow, out_dir, env)
-        log = out_dir / "maestro.log"
-        died = not passed and log.exists() and "DeviceServerDied" in log.read_text(encoding="utf-8")
-        junit = out_dir / "junit.xml"
-        died = died or (not passed and junit.exists() and "DeviceServerDied" in junit.read_text(encoding="utf-8"))
-        if not died or restarts >= DRIVER_RESTARTS:
+        if passed or not tool_failed(out_dir) or restarts >= DRIVER_RESTARTS:
             return passed, restarts
         restarts += 1
+        wait_for_device(device)
         time.sleep(15)
 
 
@@ -335,17 +370,29 @@ def drop_screens(out_dir):
     return dropped
 
 
-def instrumented(device):
+def instrumented(device, out):
     """Runs the app's instrumented tests (app/src/androidTest) on the device.
+
+    Keeps their JUnit results in ``out/instrumented``, which the cell's artifact
+    uploads, and prints the failed tests.
 
     Args:
         device (str): the device serial.
+        out (pathlib.Path): the cell's results folder.
 
     Returns:
         str: "passed" or "failed".
     """
     done = subprocess.run(["./gradlew", "--no-daemon", "-q", "connectedDebugAndroidTest"], cwd=REPO,
                           env={**os.environ, "ANDROID_SERIAL": device})
+    results = REPO / "app" / "build" / "outputs" / "androidTest-results" / "connected"
+    keep = out / "instrumented"
+    for xml in results.rglob("*.xml"):
+        keep.mkdir(parents=True, exist_ok=True)
+        shutil.copy(xml, keep / xml.name)
+        text = xml.read_text(encoding="utf-8", errors="replace")
+        for case in re.finditer(r'<testcase name="([^"]+)" classname="([^"]+)"[^>]*>\s*<failure', text):
+            print(f"  instrumented test failed: {case.group(2)}.{case.group(1)}")
     return "passed" if done.returncode == 0 else "failed"
 
 
@@ -388,7 +435,7 @@ def main(argv):
     prepare(args.device)
     # The instrumented tests uninstall the app when they finish, so they run before the install.
     if args.instrumented:
-        result["instrumented"] = instrumented(args.device)
+        result["instrumented"] = instrumented(args.device, out)
     if args.apk:
         adb(args.device, "install", "-r", args.apk, timeout=300).check_returncode()
 

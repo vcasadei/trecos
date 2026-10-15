@@ -1,12 +1,38 @@
 # Scrolls until the control with test tag ID is on screen, then taps it.
 # Forms are taller than small screens, so their buttons can start below the fold.
+# A form control is centred first when it can be: Compose reports the full
+# bounds of a field only partly scrolled into view, so Maestro counts it as
+# visible and its centre can be below the fields, on the Save bar. Centring only
+# scrolls down, so a control already above the middle can't be centred; it is
+# clear of the bar then, and the plain scroll below finds it. Save and Save + new
+# are in the bar and never scroll.
 # For rows of a list under the floating bottom bar, use tap-row.yaml instead.
 appId: app.trecos
 ---
-- scrollUntilVisible:
-    element:
-      id: ${ID}
-    direction: DOWN
-    timeout: 10000
+- runFlow:
+    when:
+      true: ${ID == 'save' || ID == 'save_new'}
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: ${ID}
+          direction: DOWN
+          timeout: 10000
+- runFlow:
+    when:
+      true: ${ID != 'save' && ID != 'save_new'}
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: ${ID}
+          direction: DOWN
+          timeout: 5000
+          centerElement: true
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: ${ID}
+          direction: DOWN
+          timeout: 10000
 - tapOn:
     id: ${ID}

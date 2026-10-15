@@ -1,43 +1,37 @@
 # Picks gallery photos at positions FIRST and, when set, SECOND, then confirms
-# when the picker asks for it. Android 11+ shows the system photo picker: with
+# when the picker asks for it. Where the system photo picker is installed: with
 # one slot left it may return on the first tap, otherwise it needs "Done", or
-# "Add (N)" on the Android 11 to 15 picker.
-# Android 9 and 10 show the Files app, in Downloads, where photos are picked by
-# name (photo-N.png, N = position + 1; Android 10's grid view adds the size and
-# time after a comma): one tap returns a single photo, and
-# several need a long press, another tap and "Select". The app keeps
-# each image once, so pick different positions each time.
+# "Add (N)" on the Android 12 to 15 picker.
+# Android 9 and 10, and the Android 11 emulator image, show the Files app
+# instead (pick-in-files.yaml), where each photo is picked by name, one at a time.
+# The app keeps each image once, so pick different positions each time.
 appId: app.trecos
 ---
 - runFlow:
     when:
       visible: Show roots
     commands:
-      # It reopens where it was last; go back to Downloads first.
-      - tapOn: Show roots
-      # The drawer entry, below Recent; the title also reads "Downloads" only
-      # when the picker reopens there.
-      - tapOn:
-          text: Downloads
-          below: Recent
-      - scrollUntilVisible:
-          element:
-            text: photo-${Number(FIRST) + 1}\.png(,.*)?
       - runFlow:
-          when:
-            true: ${typeof SECOND === 'undefined' || SECOND === ''}
-          commands:
-            - tapOn: photo-${Number(FIRST) + 1}\.png(,.*)?
+          file: pick-in-files.yaml
+          env:
+            PHOTO: ${Number(FIRST) + 1}
+      # One photo at a time: Android 11's Files app doesn't start a selection on a
+      # long press, so the second photo comes from opening the picker again.
       - runFlow:
           when:
             true: ${typeof SECOND !== 'undefined' && SECOND !== ''}
           commands:
-            - longPressOn: photo-${Number(FIRST) + 1}\.png(,.*)?
-            - scrollUntilVisible:
-                element:
-                  text: photo-${Number(SECOND) + 1}\.png(,.*)?
-            - tapOn: photo-${Number(SECOND) + 1}\.png(,.*)?
-            - tapOn: (?i)select|open
+            - tapOn:
+                id: add_photo
+            - runFlow:
+                when:
+                  visible: Add a photo from
+                commands:
+                  - tapOn: Gallery
+            - runFlow:
+                file: pick-in-files.yaml
+                env:
+                  PHOTO: ${Number(SECOND) + 1}
 - runFlow:
     when:
       notVisible: Show roots

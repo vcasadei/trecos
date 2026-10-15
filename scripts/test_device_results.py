@@ -206,6 +206,19 @@ class RunnerEndToEndTest(unittest.TestCase):
         self.assertEqual(done.returncode, 0)
         self.assertEqual([(f["status"], f["attempts"]) for f in result["flows"]], [("passed", 1)])
 
+    def test_a_device_that_went_offline_is_retried_without_counting(self):
+        import stat
+        (self.tmp / "flows" / "area" / "always-fails.yaml").unlink()
+        (self.tmp / "flows" / "area" / "first-try-fails.yaml").rename(self.tmp / "flows" / "area" / "offline.yaml")
+        (self.tmp / "bin" / "maestro").write_text(
+            '#!/bin/sh\nn="$FAKE_STATE/offline.count"; c=$(cat "$n" 2>/dev/null || echo 0); c=$((c+1)); echo $c > "$n"\n'
+            '[ "$c" -ge 2 ] && exit 0; echo "Command failed (host:transport:emulator-5554): device offline"; exit 1\n')
+        maestro = self.tmp / "bin" / "maestro"
+        maestro.chmod(maestro.stat().st_mode | stat.S_IEXEC)
+        done, result = self.run_runner()
+        self.assertEqual(done.returncode, 0)
+        self.assertEqual([(f["status"], f["attempts"], f["driver_restarts"]) for f in result["flows"]], [("passed", 1, 1)])
+
     def test_missing_device_is_an_infrastructure_failure(self):
         """Scenario "An emulator fails to boot"."""
         (self.tmp / "bin" / "adb").write_text("#!/bin/sh\nexit 1\n")

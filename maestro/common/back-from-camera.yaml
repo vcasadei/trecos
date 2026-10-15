@@ -1,0 +1,22 @@
+# Returns from the camera to the item form. On the Android 10 emulator image the
+# Camera app finds no camera and crashes on start, and Android then finishes
+# Trecos's screen too, so the form is opened again. The photo source choice is a
+# saved setting, so it survives.
+appId: app.trecos
+---
+- runFlow:
+    when:
+      notVisible:
+        id: add_photo
+    commands:
+      - back
+- runFlow:
+    when:
+      notVisible:
+        id: add_photo
+    commands:
+      - launchApp:
+          stopApp: false
+      - tapOn:
+          id: add_button
+      - tapOn: Item

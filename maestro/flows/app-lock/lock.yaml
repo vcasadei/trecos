@@ -65,11 +65,13 @@ tags:
 # After a restart it is locked; cancelling the prompt leaves only Unlock.
 - stopApp
 - launchApp
-# The prompt is a secure window Maestro can't see, so wait for it before cancelling.
+# The prompt is a secure window Maestro can't see (on Android 9 and 10 a full-screen
+# Settings PIN page), so wait for it before cancelling: a slow emulator can take a
+# few seconds to start the app, and Back before the prompt would close the app.
 - runScript:
     file: ../../common/wait.js
     env:
-      SECONDS: "3"
+      SECONDS: "6"
 - pressKey: Back
 - assertVisible: Trecos is locked
 - assertVisible: Unlock

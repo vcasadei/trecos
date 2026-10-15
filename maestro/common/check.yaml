@@ -1,0 +1,13 @@
+# Taps the checkbox row with test tag ID until it reports checked. A tap right
+# after a swipe can land while the list is still moving and only stop it.
+appId: app.trecos
+---
+- repeat:
+    while:
+      notVisible:
+        id: ${ID}
+        checked: true
+    times: 3
+    commands:
+      - tapOn:
+          id: ${ID}
