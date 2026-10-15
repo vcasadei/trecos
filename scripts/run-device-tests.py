@@ -370,17 +370,29 @@ def drop_screens(out_dir):
     return dropped
 
 
-def instrumented(device):
+def instrumented(device, out):
     """Runs the app's instrumented tests (app/src/androidTest) on the device.
+
+    Keeps their JUnit results in ``out/instrumented``, which the cell's artifact
+    uploads, and prints the failed tests.
 
     Args:
         device (str): the device serial.
+        out (pathlib.Path): the cell's results folder.
 
     Returns:
         str: "passed" or "failed".
     """
     done = subprocess.run(["./gradlew", "--no-daemon", "-q", "connectedDebugAndroidTest"], cwd=REPO,
                           env={**os.environ, "ANDROID_SERIAL": device})
+    results = REPO / "app" / "build" / "outputs" / "androidTest-results" / "connected"
+    keep = out / "instrumented"
+    for xml in results.rglob("*.xml"):
+        keep.mkdir(parents=True, exist_ok=True)
+        shutil.copy(xml, keep / xml.name)
+        text = xml.read_text(encoding="utf-8", errors="replace")
+        for case in re.finditer(r'<testcase name="([^"]+)" classname="([^"]+)"[^>]*>\s*<failure', text):
+            print(f"  instrumented test failed: {case.group(2)}.{case.group(1)}")
     return "passed" if done.returncode == 0 else "failed"
 
 
@@ -423,7 +435,7 @@ def main(argv):
     prepare(args.device)
     # The instrumented tests uninstall the app when they finish, so they run before the install.
     if args.instrumented:
-        result["instrumented"] = instrumented(args.device)
+        result["instrumented"] = instrumented(args.device, out)
     if args.apk:
         adb(args.device, "install", "-r", args.apk, timeout=300).check_returncode()
 
