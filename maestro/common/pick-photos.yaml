@@ -1,8 +1,10 @@
 # Picks gallery photos at positions FIRST and, when set, SECOND, then confirms
 # when the picker asks for it. Android 11+ shows the system photo picker: with
-# one slot left it returns on the first tap, otherwise it needs "Done".
+# one slot left it may return on the first tap, otherwise it needs "Done", or
+# "Add (N)" on the Android 11 to 15 picker.
 # Android 9 and 10 show the Files app, in Downloads, where photos are picked by
-# name (photo-N.png, N = position + 1): one tap returns a single photo, and
+# name (photo-N.png, N = position + 1; Android 10's grid view adds the size and
+# time after a comma): one tap returns a single photo, and
 # several need a long press, another tap and "Select". The app keeps
 # each image once, so pick different positions each time.
 appId: app.trecos
@@ -20,21 +22,21 @@ appId: app.trecos
           below: Recent
       - scrollUntilVisible:
           element:
-            text: photo-${Number(FIRST) + 1}.png
+            text: photo-${Number(FIRST) + 1}\.png(,.*)?
       - runFlow:
           when:
             true: ${typeof SECOND === 'undefined' || SECOND === ''}
           commands:
-            - tapOn: photo-${Number(FIRST) + 1}.png
+            - tapOn: photo-${Number(FIRST) + 1}\.png(,.*)?
       - runFlow:
           when:
             true: ${typeof SECOND !== 'undefined' && SECOND !== ''}
           commands:
-            - longPressOn: photo-${Number(FIRST) + 1}.png
+            - longPressOn: photo-${Number(FIRST) + 1}\.png(,.*)?
             - scrollUntilVisible:
                 element:
-                  text: photo-${Number(SECOND) + 1}.png
-            - tapOn: photo-${Number(SECOND) + 1}.png
+                  text: photo-${Number(SECOND) + 1}\.png(,.*)?
+            - tapOn: photo-${Number(SECOND) + 1}\.png(,.*)?
             - tapOn: (?i)select|open
 - runFlow:
     when:
@@ -55,5 +57,5 @@ appId: app.trecos
                       text: Photo taken on.*
                       index: ${SECOND}
             - tapOn:
-                text: (?i)done|add
+                text: (?i)(done|add)( \(\d+\))?
                 optional: true

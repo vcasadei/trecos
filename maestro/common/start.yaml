@@ -2,6 +2,13 @@
 # (one-house, two-houses, photos, 1000-items; anything else starts empty).
 appId: app.trecos
 ---
+# A slow emulator's launcher or System UI can stop responding; its dialog then
+# covers the app for every later flow unless someone answers it.
+- runFlow:
+    when:
+      visible: .*isn.t responding
+    commands:
+      - tapOn: Wait
 - launchApp:
     clearState: true
     stopApp: true

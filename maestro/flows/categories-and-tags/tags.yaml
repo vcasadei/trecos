@@ -26,8 +26,17 @@ tags:
     env:
       NAME: Ladder
 - inputText: Borr
-- tapOn:
-    id: complete_borrowed
+# The category suggestions for the name can still push the form down, and then
+# the tap misses the offer, so tap until the tag is on the item.
+- repeat:
+    while:
+      notVisible:
+        id: tag_borrowed
+    times: 3
+    commands:
+      - tapOn:
+          id: complete_borrowed
+          optional: true
 - assertVisible:
     id: tag_borrowed
 - runFlow:
