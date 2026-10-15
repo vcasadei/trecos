@@ -221,6 +221,25 @@ def reset_phone(device):
     adb(device, "shell", "svc", "power", "stayon", "true")
     adb(device, "shell", "input", "keyevent", "KEYCODE_WAKEUP")
     adb(device, "shell", "wm", "dismiss-keyguard")
+    close_app(device)
+
+
+def close_app(device):
+    """Stops the app and waits until its screen is gone.
+
+    A slow Android 14 removed the previous flow's screen only after the flow's
+    own launch, and its timeout then killed the new process; the app showed
+    nothing for about 20 seconds and most flows of the cell failed.
+
+    Args:
+        device (str): the device serial.
+    """
+    adb(device, "shell", "am", "force-stop", PACKAGE)
+    screen = re.compile(r"ActivityRecord\{[^}]*" + re.escape(PACKAGE) + "/")
+    for _ in range(30):
+        if not screen.search(adb(device, "shell", "dumpsys", "activity", "activities").stdout):
+            return
+        time.sleep(0.5)
 
 
 def run_flow(device, flow, out_dir, env):
