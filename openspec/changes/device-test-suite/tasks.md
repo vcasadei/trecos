@@ -77,6 +77,9 @@ Each task writes the area's flows with `# covers:` and `# screens:` headers, tag
 - [x] 7.8 Write the `drive` flows (connect, sync, photos uploaded, disconnect, deleted houses and their restore) and the `roundtrip` flow "Sync round trip on a fresh phone" across two app installs; verify on the Android 16 local cell with the test account (Android 9's Play services can't authorize, see design)
 - [ ] 7.9 Wire the Drive jobs into `device-tests.yml` (nightly on API 36 / 4 GB, weekly and release on API 36 / 2 GB and 4 GB) using the `google-test` environment and the CI keystore; verify one nightly run and that pull request runs never receive the secrets
 - [x] 7.10 Update `docs/dev/device-tests.md` with the test account setup, the secrets by name, and what "sign-in-blocked" means
+- [x] 7.11 Turn the CI Drive job off (`DRIVE_IN_CI` in `scripts/device-matrix.py`), because Google refuses the test account's sign-ins from shared runners (ADR 0030); test scenario "No sign-ins from CI": every tier lists no Drive cells
+- [ ] 7.12 Run the Drive flows in CI without Google's sign-in screens: a debug-build-only hook gives the app an access token for the test account, and a test fails if the hook is in a release build; then turn `DRIVE_IN_CI` back on and verify one nightly run (design to be agreed with the user first)
+- [ ] 7.13 Script running the `drive` tier from the developer's machine before each release (Android 16 emulator, the test account from `maestro/.env`), and add it to the release checklist in `docs/dev/release.md`
 
 ## 8. Reference emulator and release gate
 
