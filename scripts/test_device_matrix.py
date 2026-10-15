@@ -5,6 +5,7 @@ import pathlib
 import subprocess
 import sys
 import unittest
+from unittest import mock
 
 HERE = pathlib.Path(__file__).resolve().parent
 _spec = importlib.util.spec_from_file_location("device_matrix", HERE / "device-matrix.py")
@@ -47,9 +48,15 @@ class DeviceMatrixTest(unittest.TestCase):
         self.assertEqual(device_matrix.drive_matrix("pr"), [])
 
     def test_drive_job_runs_android_16_and_adds_2_gb_weekly(self):
-        self.assertEqual([c["name"] for c in device_matrix.drive_matrix("nightly")], ["drive-android16-4g"])
-        for tier in ("weekly", "release"):
-            self.assertEqual([c["name"] for c in device_matrix.drive_matrix(tier)], ["drive-android16-2g", "drive-android16-4g"])
+        with mock.patch.object(device_matrix, "DRIVE_IN_CI", True):
+            self.assertEqual([c["name"] for c in device_matrix.drive_matrix("nightly")], ["drive-android16-4g"])
+            for tier in ("weekly", "release"):
+                self.assertEqual([c["name"] for c in device_matrix.drive_matrix(tier)], ["drive-android16-2g", "drive-android16-4g"])
+
+    def test_drive_job_is_off_in_ci_for_now(self):
+        """ADR 0030: Google refuses the test account's sign-ins from shared runners."""
+        for tier in device_matrix.TIERS:
+            self.assertEqual(device_matrix.drive_matrix(tier), [])
 
     def test_unknown_tier_is_refused(self):
         with self.assertRaises(ValueError):

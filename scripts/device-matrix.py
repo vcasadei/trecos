@@ -12,7 +12,8 @@ memory (spec device-testing, "Device matrix" and "Run tiers"):
 With ``--drive`` it prints the cells of the Drive job instead, which signs in
 with the Google test account (spec "Google test account"): none for ``pr``,
 Android 16 / 4 GB nightly, and Android 16 / 2 GB as well weekly and for a
-release. Only Android 16: the older emulator images ship a 2020 Google Play
+release. While ``DRIVE_IN_CI`` is off it prints none for any tier: Google
+refuses the test account's sign-ins from shared runners (ADR 0030). Only Android 16: the older emulator images ship a 2020 Google Play
 services that can't update and predates the Authorization API Trecos signs in
 with.
 
@@ -28,6 +29,8 @@ APIS = list(range(28, 37))
 MEMORY_MB = [2048, 3072, 4096, 6144]
 ANDROID = {28: "9", 29: "10", 30: "11", 31: "12", 32: "12L", 33: "13", 34: "14", 35: "15", 36: "16"}
 TIERS = ("pr", "nightly", "weekly", "release")
+# Off until the Drive flows can run in CI without Google's sign-in screens (ADR 0030).
+DRIVE_IN_CI = False
 
 
 def cell(api, memory_mb):
@@ -77,14 +80,15 @@ def drive_matrix(tier):
         tier (str): one of ``pr``, ``nightly``, ``weekly`` or ``release``.
 
     Returns:
-        list[dict]: the cells; empty for pull requests, which never get the secrets.
+        list[dict]: the cells; empty for pull requests, which never get the
+        secrets, and for every tier while ``DRIVE_IN_CI`` is off.
 
     Raises:
         ValueError: when the tier is unknown.
     """
     if tier not in TIERS:
         raise ValueError(f"unknown tier: {tier}")
-    if tier == "pr":
+    if tier == "pr" or not DRIVE_IN_CI:
         return []
     cells = [cell(36, 4096)]
     if tier in ("weekly", "release"):
