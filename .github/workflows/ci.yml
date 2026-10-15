@@ -38,14 +38,12 @@ jobs:
       - name: Lint
         run: ./gradlew lintDebug
 
-      - name: Unit tests
-        run: ./gradlew testDebugUnitTest
-
-      - name: Coverage threshold
-        run: ./gradlew jacocoCoverageVerification
-
-      - name: Screenshot verification
-        run: ./gradlew verifyRoborazziDebug
+      # One Gradle run, so the unit tests run once: verifyRoborazziDebug runs them
+      # with the screenshot check on, and the coverage check reads that run. Run
+      # separately, the screenshot step ran all of them a second time, and only
+      # that second run timed out now and then.
+      - name: Unit tests, screenshots and coverage
+        run: ./gradlew verifyRoborazziDebug jacocoCoverageVerification
 
       - name: Release build
         run: ./gradlew assembleRelease

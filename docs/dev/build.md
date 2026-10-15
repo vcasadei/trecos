@@ -28,6 +28,7 @@ A new library needs the maintainer's approval first (see `CONTRIBUTING.md`).
 | Unit, Robolectric and screenshot tests | `./gradlew testDebugUnitTest` | `app/build/reports/tests/testDebugUnitTest/` |
 | Screenshot verification | `./gradlew verifyRoborazziDebug` | fails on any change from `app/src/test/screenshots/` |
 | Coverage threshold | `./gradlew jacocoCoverageVerification` | fails below 80% of lines in non-UI code |
+| All three as CI runs them, with the tests run once | `./gradlew verifyRoborazziDebug jacocoCoverageVerification` | as above |
 | No debug logs in release | `scripts/check-release-logs.sh` (after `assembleRelease`) | fails on any `Log.d` or `Log.v` call |
 
 Testing in more depth, including screenshots, Baseline Profiles and
