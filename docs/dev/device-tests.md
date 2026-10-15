@@ -110,7 +110,11 @@ adb shell am broadcast -n app.trecos/.TestSeedReceiver --es fixture two-houses
 | `release` | Called by `release.yml` for a `v*` tag | All 36 | tagged `full` |
 | `drive` | With `nightly`, `weekly` and `release`, never on pull requests | Nightly: Android 16 / 4 GB. Weekly and release: also Android 16 / 2 GB | tagged `drive`, which includes every `roundtrip` flow |
 
-`scripts/device-matrix.py <tier> --drive` lists the Drive job's cells. The
+`scripts/device-matrix.py <tier> --drive` lists the Drive job's cells.
+**The Drive job is off for now** (`DRIVE_IN_CI`, ADR 0030): Google refuses the
+test account's sign-ins when they come from a different GitHub runner each
+time, so the Drive and round-trip flows run from the developer's machine
+before each release ("Running Drive flows locally", below). The
 Drive job runs only on Android 16. The Android 9 to 15 emulator images ship
 a Google Play services from 2020 that can't update without the Play Store,
 and it refuses Trecos's sign-in ("Caller not whitelisted to call

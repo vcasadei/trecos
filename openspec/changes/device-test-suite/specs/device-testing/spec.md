@@ -149,7 +149,9 @@ janky frames.
 The suite SHALL include round-trip flows that turn encryption on and off and
 sync on and off, checking that every house, item and photo is unchanged after
 each switch. They MUST run on Android 16, with 2 GB and with 4 GB of memory,
-in the weekly run and for every release tag. These results are the D19
+in the weekly run and for every release tag. While Google refuses the test
+account's sign-ins from CI (ADR 0030), they MUST instead run from the
+developer's machine before every release tag. These results are the D19
 removal criterion for `FEATURE_ENCRYPTION`. Older emulator images can't run
 them: their Google Play services is too old to authorize Drive access and
 can't update.
@@ -172,10 +174,22 @@ data. These flows MUST NOT block pull requests: when Google blocks or
 challenges the sign-in, the run reports "sign-in blocked" instead of a test
 failure.
 
+Google refuses sign-ins that come from a different shared runner each time,
+even with the right password and recovery address. Until the Drive flows can
+run in CI without Google's sign-in screens, CI MUST NOT sign in with the test
+account, and the Drive and round-trip flows MUST run from one fixed machine,
+the developer's, before every release tag (ADR 0030).
+
 #### Scenario: Clean Drive before a run
 - **AS A** the Drive flows
 - **WHEN** a scheduled run starts
 - **THEN** the test account's Trecos folder is deleted before the first flow
+
+#### Scenario: No sign-ins from CI
+- **AS A** a nightly, weekly or release run
+- **WHEN** the CI Drive job is off (ADR 0030)
+- **THEN** it lists no Drive cells and signs in to nothing
+- **AND** the release continues without them
 
 #### Scenario: Google challenges the sign-in
 - **AS A** the Drive flows

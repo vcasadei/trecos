@@ -6,6 +6,8 @@
 # Outside pull requests a Drive job also signs in with the Google test account
 # (nightly on Android 16 / 4 GB; weekly and for a release on Android 16 / 2 GB
 # too), using the google-test environment's secrets. Pull requests never reach it.
+# It is off for now: Google refuses those sign-ins from shared runners
+# (DRIVE_IN_CI in scripts/device-matrix.py, ADR 0030).
 # scripts/device-matrix.py defines the cells for each tier.
 name: Device tests
 
