@@ -32,4 +32,5 @@ One record per decision taken while exploring the product (sessions of 2026-09-2
 | 0026 | [Nice-to-haves after 1.0](0026-nice-to-haves-after-1-0.md) | 2026-09-28 |
 | 0027 | [Release plan](0027-release-plan.md) | 2026-09-28 |
 | 0028 | [Reference emulator and the performance gate](0028-reference-emulator-and-the-performance-gate.md) | 2026-10-13 |
+| 0029 | [A warning before the performance gate](0029-a-warning-before-the-performance-gate.md) | 2026-10-15 |
 | 0030 | [No Google sign-ins from CI](0030-no-google-sign-ins-from-ci.md) | 2026-10-15 |

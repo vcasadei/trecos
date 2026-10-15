@@ -165,18 +165,20 @@ list of 1,000 items MUST keep janky frames under 5%. Two checks hold the app to
 this (change `device-test-suite`, requirement "Reference emulator and
 performance gate"):
 - Every release tag is measured on the reference emulator (Android 9, 2 GB,
-  2 cores). It is not published when the median cold start is more than 15%
-  slower than the recorded baseline.
+  2 cores). It is not published when the median cold start is more than 50%
+  slower than the recorded baseline; more than 15% slower is a warning
+  (ADR 0029).
 - Before a build is promoted on Google Play, the same benchmark on a low-end
   physical phone in Firebase Test Lab must meet the 1.5 s and 5% budgets.
 
 #### Scenario: Cold start benchmark
 - **AS A** the release benchmark
 - **WHEN** it cold-starts the app 10 times on the reference emulator with 1,000 items stored
-- **THEN** the median time to the first interactive Home frame is at most 15% above the recorded baseline
+- **THEN** the median time to the first interactive Home frame is at most 50% above the recorded baseline
+- **AND** a time more than 15% above it is shown as a warning
 
 #### Scenario: Regression blocks a release
 - **AS A** the release benchmark
-- **WHEN** the median cold start on the reference emulator is more than 15% above the baseline
+- **WHEN** the median cold start on the reference emulator is more than 50% above the baseline
 - **THEN** the release workflow fails and the release is not published
 

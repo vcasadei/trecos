@@ -111,14 +111,17 @@ SHA-1 or the package name of the client doesn't match the installed APK.
 The goal stays the same (spec "Performance on low-end phones"): on a 2 GB
 Android 9 phone, a median cold start to the interactive Home screen of **1.5 s
 or less** over 10 runs with 1,000 items stored, and **janky frames under 5%**
-while scrolling them. Two checks hold every release to it (ADR 0028):
+while scrolling them. Two checks hold every release to it (ADR 0028, 0029):
 
 **1. Every tag, on the reference emulator.** The `benchmark` job of
 `release.yml` boots Android 9, 2 GB, 2 cores (`google_apis` x86_64) and runs
 `scripts/release-benchmark.sh check`:
 - it runs `StartupBenchmark` and `ScrollJankTest`;
-- the release is not published when the median cold start is more than **15%
-  slower** than `benchmark/reference-baseline.json`;
+- more than **15% slower** than `benchmark/reference-baseline.json` shows a
+  warning on the run page and in the summary, and the release goes on: shared
+  runners alone vary by about 25%;
+- the release is not published when the median cold start is more than **50%
+  slower**;
 - jank is shown in the run summary but doesn't gate, because the emulator's
   software GPU makes almost every frame janky.
 

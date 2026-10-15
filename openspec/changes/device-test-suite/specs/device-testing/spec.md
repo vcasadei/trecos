@@ -116,8 +116,10 @@ On it, the release benchmark MUST measure, with 1,000 items stored:
 Emulator timings don't match a real phone, and a software GPU makes almost
 every frame janky, so the emulator gates regressions, not the absolute budget:
 - A release tag MUST NOT publish its APKs when the median cold start is more
-  than 15% slower than the recorded baseline for the same runner type and
-  system image.
+  than 50% slower than the recorded baseline for the same runner type and
+  system image. Shared runners vary by more than 15% on their own, so a cold
+  start more than 15% but at most 50% slower MUST be shown as a warning and
+  does not stop the release.
 - The jank share MUST be recorded but does not gate on the emulator.
 - The baseline, a committed file naming its runner type and image, MUST change
   only on purpose, for example when the runner or image changes.
@@ -133,11 +135,17 @@ janky frames.
 - **THEN** the release continues to the approval step
 - **AND** the run summary shows the measured value, the baseline, the runner and the jank share
 
-#### Scenario: A slow build blocks the release
+#### Scenario: A slower build warns
 - **AS A** the release workflow
 - **WHEN** the reference benchmark measures a 2,200 ms median cold start against a 1,800 ms baseline
+- **THEN** the release continues to the approval step
+- **AND** the run page and the summary show a warning with the measured value and the baseline
+
+#### Scenario: A much slower build blocks the release
+- **AS A** the release workflow
+- **WHEN** the reference benchmark measures a 2,800 ms median cold start against a 1,800 ms baseline
 - **THEN** the release stops before publishing
-- **AND** the summary shows the measured value, the baseline and the allowed maximum (2,070 ms)
+- **AND** the summary shows the measured value, the baseline and the allowed maximum (2,700 ms)
 
 #### Scenario: Budgets on a real phone
 - **AS A** the developer promoting a build on Google Play

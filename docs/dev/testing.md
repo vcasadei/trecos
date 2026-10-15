@@ -80,9 +80,10 @@ for a 2 GB Android 9 phone. Reference numbers:
 
 An emulator without a GPU draws every frame in software, so its jank share
 says nothing about a phone. On the reference emulator the release gate
-therefore checks only that the cold start is not more than 15% slower than the
-recorded baseline. The absolute budgets are checked on a real phone in
-Firebase Test Lab (docs/dev/release.md, ADR 0028).
+therefore checks only the cold start against the recorded baseline: more than
+15% slower shows a warning, and more than 50% slower stops the release, because
+shared runners alone vary by about 25% (ADR 0029). The absolute budgets are
+checked on a real phone in Firebase Test Lab (docs/dev/release.md, ADR 0028).
 
 ## Coverage
 

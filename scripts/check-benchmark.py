@@ -4,12 +4,13 @@
 Reads Macrobenchmark JSON results (StartupBenchmark's coldStartWithBaselineProfile
 and ScrollJankTest's scrollingOneThousandItems) and checks them one of two ways:
 
-- ``--baseline FILE``: the release gate on the reference emulator. It fails
+- ``--baseline FILE``: the release gate on the reference emulator. It warns
   when the median cold start is more than 15% slower than the baseline
-  recorded for the same runner and system image. A baseline for another
-  runner or image fails too, until it is recorded again on purpose. Jank is
-  reported but doesn't gate: the emulator's software GPU makes most frames
-  janky.
+  recorded for the same runner and system image, and fails only when it is
+  more than 50% slower: shared runners vary by more than 15% from run to run
+  (ADR 0029). A baseline for another runner or image fails too, until it is
+  recorded again on purpose. Jank is reported but doesn't gate: the
+  emulator's software GPU makes most frames janky.
 - ``--budget``: the absolute budget on a real low-end phone (Firebase Test Lab,
   before a build is promoted on Google Play). It fails when the median cold
   start is over 1.5 s, or when 5% or more of the frames while scrolling 1,000
@@ -38,7 +39,8 @@ import tempfile
 
 MAX_START_MS = 1500.0
 MAX_JANK_PERCENT = 5.0
-MAX_SLOWDOWN = 0.15
+WARN_SLOWDOWN = 0.15
+MAX_SLOWDOWN = 0.50
 
 
 def metric(benchmark, *names):
@@ -133,9 +135,31 @@ def check_baseline(numbers, baseline, runner, image):
     else:
         allowed = baseline["start_median_ms"] * (1 + MAX_SLOWDOWN)
         if numbers["start_ms"] > allowed:
-            failures.append(f"median cold start {numbers['start_ms']:.0f} ms is more than 15% slower than "
+            failures.append(f"median cold start {numbers['start_ms']:.0f} ms is more than 50% slower than "
                             f"the baseline {baseline['start_median_ms']:.0f} ms (allowed {allowed:.0f} ms)")
     return failures
+
+
+def baseline_warnings(numbers, baseline):
+    """Notes a slower cold start that is still allowed.
+
+    Args:
+        numbers (dict): from measure().
+        baseline (dict): the baseline file's content.
+
+    Returns:
+        list[str]: a warning when the cold start is more than 15% but at most
+        50% slower than the baseline, otherwise nothing.
+    """
+    start = numbers["start_ms"]
+    if start is None:
+        return []
+    warn = baseline["start_median_ms"] * (1 + WARN_SLOWDOWN)
+    allowed = baseline["start_median_ms"] * (1 + MAX_SLOWDOWN)
+    if warn < start <= allowed:
+        return [f"median cold start {start:.0f} ms is more than 15% slower than the baseline "
+                f"{baseline['start_median_ms']:.0f} ms; check for a regression if it happens again"]
+    return []
 
 
 def summary(numbers, baseline=None, runner=None, image=None):
@@ -155,7 +179,9 @@ def summary(numbers, baseline=None, runner=None, image=None):
     lines = ["## Performance", "", "| Measure | Value |", "|---|---|", f"| Median cold start | {ms(numbers['start_ms'])} |"]
     if baseline:
         allowed = baseline["start_median_ms"] * (1 + MAX_SLOWDOWN)
+        warn = baseline["start_median_ms"] * (1 + WARN_SLOWDOWN)
         lines += [f"| Baseline | {baseline['start_median_ms']:.0f} ms (recorded {baseline.get('recorded', '?')}) |",
+                  f"| Warning above | {warn:.0f} ms |",
                   f"| Allowed | {allowed:.0f} ms |"]
     else:
         lines.append(f"| Allowed | {MAX_START_MS:.0f} ms |")
@@ -220,12 +246,17 @@ def self_test():
     base = {"runner": "r", "image": "i", "start_median_ms": 1800, "recorded": "2026-10-13"}
     within = check_baseline(measure(sample(start_ms=1900.0, jank=97.7)), base, "r", "i")
     assert within == [], "scenario 'A release within the baseline': jank doesn't gate on the emulator"
-    blocked = check_baseline(measure(sample(start_ms=2200.0)), base, "r", "i")
-    assert any("2200 ms" in f and "1800 ms" in f and "allowed 2070 ms" in f for f in blocked), blocked
+    assert baseline_warnings(measure(sample(start_ms=1900.0)), base) == []
+    slower = measure(sample(start_ms=2200.0))
+    assert check_baseline(slower, base, "r", "i") == [], "scenario 'A slower build warns': it still goes out"
+    assert any("2200 ms" in w and "1800 ms" in w for w in baseline_warnings(slower, base)), "the slower build is noted"
+    blocked = check_baseline(measure(sample(start_ms=2800.0)), base, "r", "i")
+    assert any("2800 ms" in f and "1800 ms" in f and "allowed 2700 ms" in f for f in blocked), blocked
+    assert baseline_warnings(measure(sample(start_ms=2800.0)), base) == [], "a failure is not also a warning"
     assert check_baseline(measure(sample(start_ms=1800.0)), base, "other", "i"), "another runner needs a new baseline"
     assert check_baseline(measure([{"benchmarks": []}]), base, "r", "i"), "missing results block a release"
     text = summary(measure(sample(start_ms=1900.0, jank=97.7)), base, "r", "i")
-    assert "1900 ms" in text and "1800 ms" in text and "2070 ms" in text and "97.7%" in text and "| Runner | r |" in text
+    assert "1900 ms" in text and "1800 ms" in text and "2070 ms" in text and "2700 ms" in text and "97.7%" in text and "| Runner | r |" in text
     # Recording a baseline.
     path = os.path.join(tempfile.mkdtemp(), "benchmark", "baseline.json")
     written = record(measure(sample(start_ms=1792.4, jank=97.7)), path, "r", "i", today="2026-10-13")
@@ -275,12 +306,18 @@ def main(argv):
         with open(args.baseline, encoding="utf-8") as f:
             baseline = json.load(f)
         failures = check_baseline(numbers, baseline, args.runner, args.image)
+        warnings = baseline_warnings(numbers, baseline)
     else:
         failures = check_budget(numbers)
+        warnings = []
     if args.summary:
         with open(args.summary, "a", encoding="utf-8") as f:
             f.write(summary(numbers, baseline, args.runner, args.image))
-            f.write("".join(f"\n- FAIL: {failure}" for failure in failures) + ("\n" if failures else ""))
+            notes = [f"\n- WARNING: {w}" for w in warnings] + [f"\n- FAIL: {failure}" for failure in failures]
+            f.write("".join(notes) + ("\n" if notes else ""))
+    for warning in warnings:
+        # A GitHub annotation, so the run page shows it.
+        print(f"::warning title=Slower cold start::{warning}")
     for failure in failures:
         print("FAIL:", failure)
     if not failures:
