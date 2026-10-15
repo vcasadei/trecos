@@ -42,22 +42,28 @@ tags:
 - tapOn:
     id: tab_Search
 - runFlow: ../../common/open-filters.yaml
-- tapOn:
-    id: filter_category_computers.sbcs
+- runFlow:
+    file: ../../common/check.yaml
+    env:
+      ID: filter_category_computers.sbcs
 - runFlow:
     file: ../../common/swipe-to.yaml
     env:
       ID: filter_category_cables.usb_c
       LIST: filters_list
-- tapOn:
-    id: filter_category_cables.usb_c
+- runFlow:
+    file: ../../common/check.yaml
+    env:
+      ID: filter_category_cables.usb_c
 - runFlow:
     file: ../../common/swipe-to.yaml
     env:
       ID: filter_tag_borrowed
       LIST: filters_list
-- tapOn:
-    id: filter_tag_borrowed
+- runFlow:
+    file: ../../common/check.yaml
+    env:
+      ID: filter_tag_borrowed
 - tapOn:
     id: filters_done
 - assertVisible:
@@ -74,8 +80,10 @@ tags:
     env:
       ID: filter_category_cables
       LIST: filters_list
-- tapOn:
-    id: filter_category_cables
+- runFlow:
+    file: ../../common/check.yaml
+    env:
+      ID: filter_category_cables
 - tapOn:
     id: filters_done
 - assertVisible:

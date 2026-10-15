@@ -80,8 +80,10 @@ tags:
           from:
             id: filters_list
           direction: UP
-- tapOn:
-    id: filter_tag_borrowed
+- runFlow:
+    file: ../../common/check.yaml
+    env:
+      ID: filter_tag_borrowed
 - tapOn:
     id: filters_done
 - assertVisible:
