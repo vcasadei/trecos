@@ -195,6 +195,10 @@ def prepare(device):
 def reset_phone(device):
     """Undoes what flows can change: the PIN, disabled e-mail apps and airplane mode.
 
+    It also wakes the screen and leaves the lock screen, which can come back
+    in a long run: a cell whose screen went to sleep failed every later flow
+    on the lock screen (Android 10 and 14 in CI).
+
     Args:
         device (str): the device serial.
     """
@@ -213,6 +217,10 @@ def reset_phone(device):
         adb(device, "shell", "cmd", "connectivity", "airplane-mode", "disable")
         adb(device, "shell", "settings", "put", "global", "airplane_mode_on", "0")
         adb(device, "shell", "am", "broadcast", "-a", "android.intent.action.AIRPLANE_MODE", "--ez", "state", "false")
+    # After the PIN is gone, so the lock screen can be dismissed without it.
+    adb(device, "shell", "svc", "power", "stayon", "true")
+    adb(device, "shell", "input", "keyevent", "KEYCODE_WAKEUP")
+    adb(device, "shell", "wm", "dismiss-keyguard")
 
 
 def run_flow(device, flow, out_dir, env):
