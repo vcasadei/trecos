@@ -102,6 +102,12 @@ class AppContainer(
     /** Google Play's in-app review; tests replace it. */
     var review: app.trecos.help.ReviewPrompter = app.trecos.help.PlayReviewPrompter
 
+    /**
+     * Set when the rating prompt is shown, before "shown" is saved: Home can be
+     * reached twice while that write is still on its way.
+     */
+    val reviewRequested = java.util.concurrent.atomic.AtomicBoolean(false)
+
     /** The tip jar; tests replace it. */
     var tips: app.trecos.help.TipJar = app.trecos.help.PlayTipJar()
 
