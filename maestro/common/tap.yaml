@@ -1,12 +1,29 @@
 # Scrolls until the control with test tag ID is on screen, then taps it.
 # Forms are taller than small screens, so their buttons can start below the fold.
+# A form control is centred first: Maestro counts it as visible even when the
+# floating Save bar covers it, and its centre can then be under the bar. Save and
+# Save + new are in that bar and never scroll.
 # For rows of a list under the floating bottom bar, use tap-row.yaml instead.
 appId: app.trecos
 ---
-- scrollUntilVisible:
-    element:
-      id: ${ID}
-    direction: DOWN
-    timeout: 10000
+- runFlow:
+    when:
+      true: ${ID == 'save' || ID == 'save_new'}
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: ${ID}
+          direction: DOWN
+          timeout: 10000
+- runFlow:
+    when:
+      true: ${ID != 'save' && ID != 'save_new'}
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: ${ID}
+          direction: DOWN
+          timeout: 10000
+          centerElement: true
 - tapOn:
     id: ${ID}
