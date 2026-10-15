@@ -11,8 +11,10 @@ appId: app.trecos
     file: tap.yaml
     env:
       ID: more_fields
-# The form can still be moving while the keyboard opens, and then the tap misses
-# and the name field keeps the focus, so tap until the tag field has it.
+# Maestro counts the field as visible even when the floating Save bar covers
+# its lower half, and its centre is then under the bar: centre it on screen.
+# A tap can still miss while the form moves (category suggestions load after
+# the name), and the name field keeps the focus, so tap until the tag field has it.
 - repeat:
     while:
       notVisible:
@@ -23,5 +25,6 @@ appId: app.trecos
       - scrollUntilVisible:
           element:
             id: field_tag
+          centerElement: true
       - tapOn:
           id: field_tag
