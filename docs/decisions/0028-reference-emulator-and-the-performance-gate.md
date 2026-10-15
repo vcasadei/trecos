@@ -1,6 +1,6 @@
 # 0028. Reference emulator and the performance gate
 
-- **Status:** Accepted
+- **Status:** Accepted; the 15% limit is superseded by [0029](0029-a-warning-before-the-performance-gate.md)
 - **Date:** 2026-10-13
 - **Change:** `device-test-suite` (design decisions 7 to 9; spec device-testing, "Reference emulator and performance gate")
 

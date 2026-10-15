@@ -173,8 +173,10 @@ existing `scripts/check-benchmark.py`.
   `androidx.benchmark.suppressErrors=EMULATOR`, because Macrobenchmark refuses
   emulators otherwise.
 - `scripts/release-benchmark.sh` then runs `scripts/check-benchmark.py
-  --baseline`: the median cold start may be at most 15% slower than
-  `benchmark/reference-baseline.json`. That file names the runner type and the
+  --baseline`: a median cold start more than 15% slower than
+  `benchmark/reference-baseline.json` is a warning, and more than 50% slower
+  fails (ADR 0029; it was 15% until a run on a slower shared runner measured
+  23% more with no startup change). That file names the runner type and the
   image's build fingerprint, and a run on anything else fails until the
   baseline is recorded again on purpose. Running `release.yml` by hand with
   "Record a new performance baseline" uploads a new file to commit.
@@ -280,8 +282,9 @@ image revision.
 ## Risks / Trade-offs
 
 - [Emulator timings differ from real 2 GB phones, and a software GPU makes
-  almost every frame janky] → The emulator gates only regressions: at most 15%
-  slower than a baseline recorded for the same runner and image. Jank is
+  almost every frame janky] → The emulator gates only large regressions: more
+  than 50% slower than a baseline recorded for the same runner and image fails,
+  more than 15% warns (ADR 0029). Jank is
   recorded, not gated. The absolute 1.5 s and 5% budgets are checked with
   `check-benchmark.py --budget` on a low-end phone in Firebase Test Lab before a
   Play promotion (ADR 0028).

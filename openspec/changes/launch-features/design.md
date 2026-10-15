@@ -10,7 +10,7 @@ See proposal.md for the why. The facts that shape the approach:
 - Photos are content-addressed WebP files (`files/photos/<sha256>.webp`), up to 3 per owner, from the camera app or the Photo Picker, with no permissions (ADR 0012, 0022).
 - QR scanning uses Google's code scanner from Play services.
 - JaCoCo gates 80% of lines with `app/trecos/ui/**` excluded; there is no HTML report task.
-- Release gate: cold start within 15% of the reference-emulator baseline (ADR 0028). Release arm64 APK at 0.14.0: 7.7 MB; universal 13.1 MB.
+- Release gate: cold start within 50% of the reference-emulator baseline, with a warning above 15% (ADR 0028, 0029). Release arm64 APK at 0.14.0: 7.7 MB; universal 13.1 MB.
 
 ## Goals / Non-Goals
 
