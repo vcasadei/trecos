@@ -49,6 +49,8 @@ const PAGES = [
   { out: "pt/licenca-comercial/index.html", lang: "pt-BR", twin: "commercial/index.html", kind: "doc", body: () => doc(read(join(SITE, "content/licenca-comercial.md"))) },
   { out: "delete-data/index.html", lang: "en", twin: "pt/excluir-dados/index.html", kind: "doc", body: () => doc(read(join(SITE, "content/delete-data.md"))) },
   { out: "pt/excluir-dados/index.html", lang: "pt-BR", twin: "delete-data/index.html", kind: "doc", body: () => doc(read(join(SITE, "content/excluir-dados.md"))) },
+  { out: "testers/index.html", lang: "en", twin: "pt/testar/index.html", kind: "doc", body: () => doc(read(join(SITE, "content/testers.md"))) },
+  { out: "pt/testar/index.html", lang: "pt-BR", twin: "testers/index.html", kind: "doc", body: () => doc(read(join(SITE, "content/testar.md"))) },
   { out: "404.html", lang: "en", twin: "pt/index.html", kind: "doc", body: () => doc(read(join(SITE, "content/404.md"))) },
 ];
 
