@@ -1,8 +1,8 @@
 # Release
 
-Until 1.0 every release is a signed APK on GitHub Releases, for sideloading.
-1.0 goes to Google Play signed with the same key, so sideloaded installs keep
-updating (design D22). Local builds are debug builds and need no secret.
+Every release is a signed APK on GitHub Releases, for sideloading, and an App
+Bundle for the Google Play closed test; 1.0 goes to Play production. Play signs
+with the same key, so sideloaded installs keep updating (design D22). Local builds are debug builds and need no secret.
 
 > **Status:** set up on 2026-10-09. The age key is backed up offline (printed
 > and on a NAS), the encrypted file is in `vcasadei/trecos-signing` and in Google
@@ -73,6 +73,48 @@ the new recipient to `.sops.yaml`.
 
 On compromise only. Android 9+ supports APK Signature Scheme v3 key rotation
 (`apksigner rotate`), so a leaked key can be replaced without breaking updates.
+
+## Google Play signing
+
+Set up on 2026-10-16 (trecos-v1 task 8.7). Play App Signing holds the **same
+release key** as GitHub Releases, uploaded with PEPK instead of a key Google
+generates, so sideloaded installs can update from Play. The Play Console shows
+the app signing key's SHA-256 as `2F:CE:99:…:DD:78:65`, as above.
+
+Builds for Play are signed with a separate **upload key** (RSA 4096, alias
+`upload`). It is stored like the release key: as the `upload_*` fields of
+`release-signing.sops.yaml` and as four secrets in the `release` Environment.
+
+| Secret | Contents |
+|---|---|
+| `TRECOS_UPLOAD_KEYSTORE_BASE64` | The PKCS12 upload keystore, base64 |
+| `TRECOS_UPLOAD_KEYSTORE_PASSWORD` | Its store password |
+| `TRECOS_UPLOAD_KEY_ALIAS` | `upload` |
+| `TRECOS_UPLOAD_KEY_PASSWORD` | Its key password |
+
+Each release run builds `trecos-<version>.aab` with `-Ptrecos.bundle` (which
+turns off the per-ABI APK splits that bundles can't use), signs it with the
+upload key and keeps it as the `play-bundle` workflow artifact for 90 days, with
+`upload-fingerprint.txt`. Download it from the run's page and upload it in the
+Play Console.
+
+If the upload key leaks or is lost, ask for an upload key reset in the Play
+Console (App signing, "Request upload key reset"); the release key is not
+affected.
+
+How it was set up, for the record:
+
+1. `~/play-upload-key.sh` on the dev machine created the upload key, added the
+   `upload_*` fields to the encrypted file and set the four secrets, and wrote
+   the public `~/upload_certificate.pem`.
+2. In Play Console, App signing, "Change key", "Export and upload a key from
+   Java keystore", the developer downloaded `encryption_public_key.pem` and
+   copied it to the dev machine with `scp`.
+3. `~/play-pepk.sh` checked the keystore's fingerprint against the one above
+   and ran PEPK (`--rsa-aes-encryption --include-cert`), writing a zip only
+   Google can decrypt.
+4. The zip and `upload_certificate.pem` were uploaded in the same dialog, and
+   the Console then showed the release key's SHA-256.
 
 ## Google Drive sign-in (OAuth client)
 
