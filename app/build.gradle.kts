@@ -64,7 +64,9 @@ android {
 
     splits {
         abi {
-            isEnable = true
+            // Per-ABI APKs for GitHub Releases; an App Bundle (Play splits by ABI itself)
+            // can't be built with them, so the release workflow passes -Ptrecos.bundle.
+            isEnable = !providers.gradleProperty("trecos.bundle").isPresent
             reset()
             include("arm64-v8a", "armeabi-v7a", "x86_64")
             isUniversalApk = true
