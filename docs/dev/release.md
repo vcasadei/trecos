@@ -116,6 +116,9 @@ How it was set up, for the record:
 4. The zip and `upload_certificate.pem` were uploaded in the same dialog, and
    the Console then showed the release key's SHA-256.
 
+Verified on 2026-10-16: a phone with the GitHub `trecos-0.15.4-universal.apk`
+updated to 0.15.5 from the Play internal test, and its data was kept.
+
 ## Google Play closed test
 
 Started on 2026-10-16 with 0.15.5 (launch-features task 1.2, trecos-v1 8.8).
