@@ -10,6 +10,7 @@ every push to `master` that touches it.
 | `/pt/privacidade/` | `content/privacidade.md`, a translation kept in step with `PRIVACY.md` |
 | `/commercial/` | The repository's `COMMERCIAL.md` |
 | `/pt/licenca-comercial/` | `content/licenca-comercial.md`, a translation kept in step with `COMMERCIAL.md` |
+| `/delete-data/` and `/pt/excluir-dados/` | `content/delete-data.md` and `content/excluir-dados.md`: how to delete your data, linked from the Play listing |
 | Logo and icon | `docs/brand/` |
 | Screenshots | The Roborazzi screenshots in `app/src/test/screenshots/`, named in `config.json` |
 
