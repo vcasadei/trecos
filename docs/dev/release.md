@@ -116,6 +116,88 @@ How it was set up, for the record:
 4. The zip and `upload_certificate.pem` were uploaded in the same dialog, and
    the Console then showed the release key's SHA-256.
 
+## Google Play closed test
+
+Started on 2026-10-16 with 0.15.5 (launch-features task 1.2, trecos-v1 8.8).
+Production is 1.0; until then Play has two tracks:
+
+| Track | Who | Review | Use |
+|---|---|---|---|
+| Internal testing | The developer's own e-mail list (up to 100) | None; live in minutes | First check of every build |
+| Closed testing | The `trecos-testers@googlegroups.com` Google Group | Full review; days the first time | Real testers, and the production-access requirement |
+
+**Play's requirement** (checked 2026-10-16, Play Console Help answer 14151465):
+personal developer accounts created after 2023-11-13 need **at least 12
+testers opted in continuously for 14 days** on a closed test before they can
+apply for production. Someone who leaves and rejoins starts their 14 days over,
+so recruit 15 to 20.
+
+### Each release
+
+1. Push the `v*` tag and approve "Review deployments" (see Publishing a release).
+2. Download the `play-bundle` artifact from the run (`trecos-<version>.aab`).
+3. Play Console, Test and release, Testing, **Internal testing**, Create new
+   release: upload the bundle; App integrity must say it uses our key; add
+   release notes in `en-US` and `pt-BR`; Start rollout. Install it on a phone
+   from the internal test link.
+4. Promote the same release to **Closed testing** (Promote release).
+
+The bundle has third-party native code (SQLCipher) without debug symbols;
+Play's warning about missing native symbols can be ignored.
+
+### Testers
+
+Testers join through **<https://trecos.app/testers/>** (English) or
+**<https://trecos.app/pt/testar/>** (Portuguese), built from
+`site/content/testers.md` and `testar.md`. The pages give three steps: join the
+`trecos-testers` Google Group (anyone can join, members are hidden), become a
+tester at <https://play.google.com/apps/testing/app.trecos>, and install from the
+Play Store. The closed track's Testers tab lists that group, so no e-mail
+addresses are typed into the Console.
+
+The invitation sent to testers (WhatsApp or e-mail):
+
+> Oi! Estou lançando o Trecos, um app gratuito para Android que guarda o que
+> você tem em casa e onde cada coisa está guardada: caixas, prateleiras,
+> cômodos, com etiquetas QR. Funciona sem internet, sem conta e sem anúncios.
+> Preciso de pessoas para testar antes do lançamento. Os passos estão aqui (leva
+> 2 minutos): https://trecos.app/pt/testar/ — É só usar a conta Google do seu
+> celular Android e ficar no teste por pelo menos 14 dias (não precisa usar todo
+> dia, só não sair). Se algo der errado ou ficar confuso, me conte. Obrigado!
+
+> Hi! I'm launching Trecos, a free Android app that keeps track of what you own
+> and where it's stored: boxes, shelves, rooms, with QR labels. It works
+> offline, with no account and no ads. I need testers before launch. The steps
+> are here (takes 2 minutes): https://trecos.app/testers/ — Use the Google
+> account on your Android phone and stay in the test for at least 14 days (no
+> need to use it every day, just don't leave). If anything breaks or is
+> confusing, tell me. Thank you!
+
+**What to try** (also on the testers pages):
+
+- Create a home, a few rooms and boxes, and put boxes inside boxes.
+- Add items with a photo, a price and a category.
+- Search for something, and use the filters.
+- Make a QR label for a box, print or share it, and scan it back.
+- Try the dark theme, and switch between Portuguese and English in Settings.
+
+### Store listing and declarations
+
+The listing (English, and a Portuguese translation), graphics and declarations
+were filled in on 2026-10-16:
+
+- Name "Trecos: Home Inventory" / "Trecos: Inventário da Casa"; category
+  Productivity; website <https://trecos.app>.
+- Icon 512×512, feature graphic 1024×500 and six 1080×1920 phone screenshots
+  per language, taken on the Android 9 emulator with demo data.
+- Privacy policy <https://trecos.app/privacy/>; no ads; no advertising ID; all
+  functionality without special access; target audience 18 and over.
+- Data safety: data is collected only through the optional Drive sync to the
+  user's own Drive, never shared, encrypted in transit, optional, for app
+  functionality: name, e-mail, address, photos, other user-generated content
+  and an app-generated device id. Delete-data URL
+  <https://trecos.app/delete-data/>. It must stay in step with `PRIVACY.md`.
+
 ## Google Drive sign-in (OAuth client)
 
 Sync (release 0.11, `FEATURE_DRIVE_SYNC`, on by default) signs in with Google Identity's
