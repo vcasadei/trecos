@@ -4,7 +4,7 @@
 
 - [ ] 1.1 Release 0.15.0 from master (sync fixes, device tests); verify the release workflow publishes the APKs and the device-test release tier passes
 - [ ] 1.2 **(owner)** Create the Play developer account, app and closed test, and upload 0.15.0 (trecos-v1 8.7, 8.8, with the agent's scripts); verify the closed-test opt-in link installs the app
-- [ ] 1.3 Write the tester invitation (Portuguese and English) and a "what to try" checklist in `docs/dev/release.md`; verify both are linked from the closed-test section
+- [x] 1.3 Write the tester invitation (Portuguese and English) and a "what to try" checklist in `docs/dev/release.md`; verify both are linked from the closed-test section
 - [ ] 1.4 Update docs/product/roadmap.md, vision.md, ADR 0026 (superseded by a new ADR for this plan) and the trecos-v1 non-goals for the new order; verify `openspec validate --all` passes and the roadmap lists 0.16–0.22 before 1.0
 
 ## 2. Foundations (0.16)
