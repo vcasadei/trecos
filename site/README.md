@@ -11,6 +11,7 @@ every push to `master` that touches it.
 | `/commercial/` | The repository's `COMMERCIAL.md` |
 | `/pt/licenca-comercial/` | `content/licenca-comercial.md`, a translation kept in step with `COMMERCIAL.md` |
 | `/delete-data/` and `/pt/excluir-dados/` | `content/delete-data.md` and `content/excluir-dados.md`: how to delete your data, linked from the Play listing |
+| `/testers/` and `/pt/testar/` | `content/testers.md` and `content/testar.md`: how to join the Play closed test |
 | Logo and icon | `docs/brand/` |
 | Screenshots | The Roborazzi screenshots in `app/src/test/screenshots/`, named in `config.json` |
 
